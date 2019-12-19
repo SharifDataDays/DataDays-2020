@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'apps.homepage',
     'apps.contest',
     'apps.question',
+    'apps.participation',
 ]
 
 MIDDLEWARE = [

@@ -13,19 +13,19 @@ class ChoiceSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = question_models.Question
-        fields = ['id', 'topic', 'priority', 'body', 'type']
+        fields = ['id', 'topic', 'max_score', 'body', 'type']
 
 
 class SingleAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = question_models.SingleAnswer
-        fields = ['id', 'topic', 'priority', 'body', 'type', 'answer_type']
+        fields = ['id', 'topic', 'max_score', 'body', 'type', 'answer_type']
 
 
 class MultiAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = question_models.MultiAnswer
-        fields = ['id', 'topic', 'priority', 'body', 'type', 'answer_count_limit', 'answer_type']
+        fields = ['id', 'topic', 'max_score', 'body', 'type', 'answer_count_limit', 'answer_type']
 
 
 class SingleSelectSerializers(serializers.ModelSerializer):
@@ -33,7 +33,7 @@ class SingleSelectSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = question_models.SingleSelect
-        fields = ['id', 'topic', 'priority', 'body', 'type', 'choices']
+        fields = ['id', 'topic', 'max_score', 'body', 'type', 'choices']
 
 
 class MultiSelectSerializer(serializers.ModelSerializer):
@@ -41,25 +41,25 @@ class MultiSelectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = question_models.MultiSelect
-        fields = ['id', 'topic', 'priority', 'body', 'type', 'choices']
+        fields = ['id', 'topic', 'max_score', 'body', 'type', 'choices']
 
 
 class FileUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = question_models.FileUpload
-        fields = ['id', 'topic', 'priority', 'body', 'type', 'file_size_limit', 'file_format']
+        fields = ['id', 'topic', 'max_score', 'body', 'type', 'file_size_limit', 'file_format']
 
 
 class ManualJudgmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = question_models.ManualJudgment
-        fields = ['id', 'topic', 'priority', 'body', 'type']
+        fields = ['id', 'topic', 'max_score', 'body', 'type']
 
 
 class NumericRangeSerializer(serializers.ModelSerializer):
     class Meta:
         model = question_models.NumericRange
-        fields = ['id', 'topic', 'priority', 'body', 'type']
+        fields = ['id', 'topic', 'max_score', 'body', 'type']
 
 
 class QuestionPolymorphismSerializer(PolymorphicSerializer):
