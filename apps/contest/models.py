@@ -10,14 +10,14 @@ from ..question.models import QuestionTypes, Question
 
 
 class Contest(models.Model):
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
     title = models.CharField(max_length=100)
 
 
 class Milestone(models.Model):
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
     contest = models.ForeignKey(Contest, related_name='milestones', on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     team_size = models.PositiveSmallIntegerField()
@@ -29,6 +29,7 @@ class Task(models.Model):
     milestone = models.ForeignKey(Milestone, related_name='tasks', on_delete=models.CASCADE)
     topic = models.CharField(max_length=200, unique=True)
     content = models.ForeignKey(Document, related_name='tasks', on_delete=models.CASCADE)
+    max_trials_count = models.PositiveSmallIntegerField(default=3)
     trial_cooldown = models.PositiveSmallIntegerField()
 
 
@@ -36,7 +37,6 @@ class TeamTask(models.Model):
     task = models.ForeignKey(Task, related_name='team_tasks', on_delete=models.CASCADE)
     team = models.ForeignKey(Team, related_name='tasks', on_delete=models.CASCADE)
     content_finished = models.BooleanField(default=False)
-    max_trials_count = models.PositiveSmallIntegerField(default=3)
     last_trial_time = models.DateTimeField(null=True, blank=True)
 
 
