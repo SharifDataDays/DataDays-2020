@@ -37,12 +37,13 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'martor',
     'django_extensions',
-
     'apps.accounts',
     'apps.blog',
     'apps.resources.apps.ResourcesConfig',
     'apps.translation',
     'apps.homepage',
+    'apps.contest',
+    'apps.question',
 ]
 
 MIDDLEWARE = [
