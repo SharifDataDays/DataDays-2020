@@ -1,13 +1,16 @@
 from rest_framework.serializers import ModelSerializer
 
+from apps.participation.serializers import TeamSerializer
 from apps.question.serializers import QuestionSerializer
+from apps.resources.serializers import DocumentSerializer
+
 from . import models as contest_models
 
 
 class MilestoneSerializer(ModelSerializer):
     class Meta:
         model = contest_models.Milestone
-        fields = ['title']
+        fields = ['title', 'team_size', 'start_time', 'end_time']
 
 
 class ContestSerializer(ModelSerializer):
@@ -15,19 +18,19 @@ class ContestSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.Contest
-        fields = ['title', 'milestones']
+        fields = ['title', 'start_time', 'end_time', 'milestones']
 
 
-class TrialQuestionSerializer(ModelSerializer):
+class QuestionSubmissionSerializer(ModelSerializer):
     question = QuestionSerializer()
 
     class Meta:
-        model = contest_models.TrialQuestion
-        fields = ['question']
+        model = contest_models.QuestionSubmission
+        fields = ['question', 'answer', 'score']
 
 
 class TrialSerializer(ModelSerializer):
-    questions = TrialQuestionSerializer(many=True, read_only=True)
+    questions = QuestionSubmissionSerializer(many=True, read_only=True)
 
     class Meta:
         model = contest_models.Trial
@@ -36,15 +39,17 @@ class TrialSerializer(ModelSerializer):
 
 class TaskSerializer(ModelSerializer):
     milestone = MilestoneSerializer()
+    content = DocumentSerializer()
 
     class Meta:
         model = contest_models.Task
-        fields = ['milestone', 'topic', 'content_finished', 'trails_count', 'last_trial_time', 'content']
+        fields = ['milestone', 'topic', 'trial_cooldown', 'content']
 
 
-class UserAnswerSerializer(ModelSerializer):
-    question = QuestionSerializer()
+class TeamTaskSerializer(ModelSerializer):
+    task = TaskSerializer()
+    team = TeamSerializer()
 
     class Meta:
-        model = contest_models.UserAnswer
-        fields = ['question', 'selections', 'text']
+        model = contest_models.TeamTask
+        fields = ['contest_finished', 'max_trials_count', 'last_trial_time', 'team', 'task']

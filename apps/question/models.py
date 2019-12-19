@@ -49,7 +49,6 @@ class QuestionTypes:
 
 class Question(PolymorphicModel):
     topic = models.CharField(max_length=100)
-    priority = models.PositiveSmallIntegerField(choices=QuestionPriorities.PRIORITY)
     body = models.TextField()
     type = models.CharField(max_length=50, choices=QuestionTypes.TYPES)
     max_score = models.PositiveSmallIntegerField()
