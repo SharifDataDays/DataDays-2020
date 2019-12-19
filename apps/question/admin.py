@@ -21,10 +21,10 @@ class CommonAdminFeatures(admin.ModelAdmin):
         models.TextField: {'widget': AdminMartorWidget},
     }
     readonly_fields = ['type']
-    list_display = ['id', '__str__', 'topic', 'priority', 'type']
+    list_display = ['id', '__str__', 'topic', 'type']
     list_display_links = ['__str__', 'id']
-    list_editable = ['topic', 'priority']
-    sortable_by = ['id', 'topic', 'priority']
+    list_editable = ['topic']
+    sortable_by = ['id', 'topic']
     search_fields = ['topic']
 
 
@@ -37,7 +37,7 @@ class QuestionAdmin(PolymorphicParentModelAdmin, CommonAdminFeatures):
                     question_models.FileUpload, question_models.ManualJudgment,
                     question_models.NumericRange
                     ]
-    list_filter = ['type', 'priority']
+    list_filter = ['type']
 
     def has_add_permission(self, request):
         return False
