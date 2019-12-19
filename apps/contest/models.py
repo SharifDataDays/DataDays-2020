@@ -24,10 +24,12 @@ class Milestone(models.Model):
 
 
 class Task(models.Model):
-    user = models.ForeignKey(User, related_name='trials', on_delete=models.CASCADE)
+    """ trial_cooldown: Should be in hours
+    """
     milestone = models.ForeignKey(Milestone, related_name='tasks', on_delete=models.CASCADE)
     topic = models.CharField(max_length=200, unique=True)
     content = models.ForeignKey(Document, related_name='tasks', on_delete=models.CASCADE)
+    trial_cooldown = models.PositiveSmallIntegerField()
 
 
 class TeamTask(models.Model):
@@ -59,6 +61,6 @@ class QuestionRecipe(models.Model):
 
 class QuestionSubmission(models.Model):
     trial = models.ForeignKey(Trial, related_name='question_submissions', on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, related_name='question_submission', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name='question_submissions', on_delete=models.CASCADE)
     answer = models.TextField()
     score = models.FloatField(default=0)

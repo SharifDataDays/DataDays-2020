@@ -12,3 +12,8 @@ class Team(models.Model):
 class Participant(models.Model):
     user = models.OneToOneField(User, related_name='participant', on_delete=models.CASCADE)
     team = models.ForeignKey(Team, related_name='participants', on_delete=models.CASCADE)
+
+
+class Invitation(models.Model):
+    host = models.ForeignKey(User, related_name='invitations', on_delete=models.CASCADE)
+    gust = models.ForeignKey(User, related_name='invitations', on_delete=models.CASCADE)
