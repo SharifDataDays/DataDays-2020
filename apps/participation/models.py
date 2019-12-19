@@ -16,4 +16,4 @@ class Participant(models.Model):
 
 class Invitation(models.Model):
     host = models.ForeignKey(User, related_name='invitations', on_delete=models.CASCADE)
-    gust = models.ForeignKey(User, related_name='invitations', on_delete=models.CASCADE)
+    guest = models.ForeignKey(User, related_name='invitations', on_delete=models.CASCADE)
