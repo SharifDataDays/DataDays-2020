@@ -21,11 +21,11 @@ class CommonAdminFeatures(admin.ModelAdmin):
         models.TextField: {'widget': AdminMartorWidget},
     }
     readonly_fields = ['type']
-    list_display = ['id', '__str__', 'topic', 'type']
+    list_display = ['id', '__str__', 'max_score', 'topic', 'type']
     list_display_links = ['__str__', 'id']
-    list_editable = ['topic']
-    sortable_by = ['id', 'topic']
-    search_fields = ['topic']
+    list_editable = ['topic', 'max_score']
+    sortable_by = ['id', 'max_score', 'topic']
+    search_fields = ['topic', 'max_score']
 
 
 @admin.register(question_models.Question)
@@ -37,7 +37,7 @@ class QuestionAdmin(PolymorphicParentModelAdmin, CommonAdminFeatures):
                     question_models.FileUpload, question_models.ManualJudgment,
                     question_models.NumericRange
                     ]
-    list_filter = ['type']
+    list_filter = ['type', 'max_score']
 
     def has_add_permission(self, request):
         return False
