@@ -6,7 +6,7 @@ from django.db import models
 
 
 class Team(models.Model):
-    milestone = models.ForeignKey('contest.Milestone', related_name='teams', on_delete=models.CASCADE)
+    contest = models.ForeignKey('contest.Contest', related_name='teams', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.id
