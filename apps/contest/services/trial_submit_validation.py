@@ -16,7 +16,8 @@ class TrialSubmitValidation:
         pass
 
     def validate(self):
-        pass
+        self._check_different_question_types()
+        return self.valid, self.errors
 
     def _check_different_question_types(self):
         for submission in self.question_submissions:
@@ -50,7 +51,7 @@ class TrialSubmitValidation:
 
     def _validate_single_answer(self, submission):
         try:
-            answer = literal_eval(submission)
+            answer = literal_eval(submission.answer)
         except ValueError:
             self.errors += trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST
             self.valid = False
@@ -77,7 +78,7 @@ class TrialSubmitValidation:
 
     def _validate_multi_answer(self, submission):
         try:
-            answers = literal_eval(submission)
+            answers = literal_eval(submission.answer)
         except ValueError:
             self.errors += trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST
             self.valid = False
@@ -107,14 +108,24 @@ class TrialSubmitValidation:
                 pass
 
     def _validate_single_select(self, submission):
-        label = literal_eval(submission)
+        try:
+            label = literal_eval(submission.answer)
+        except ValueError:
+            self.errors += trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST
+            self.valid = False
+            return
         if len(label) >= 2:
             self.errors += trial_submit_exception.ErrorMessages.SINGLE_SELECT_ERROR
             self.valid = False
             return
 
     def _validate_multi_select(self, submission):
-        labels = literal_eval(submission)
+        try:
+            labels = literal_eval(submission.answer)
+        except ValueError:
+            self.errors += trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST
+            self.valid = False
+            return
         answer_count = submission.question.answer_count_limit
 
         if len(labels) > answer_count:
@@ -123,12 +134,32 @@ class TrialSubmitValidation:
             return
 
     def _validate_file_upload(self, submission):
-        answer = literal_eval(submission)
+        answer = submission.answer
         file_format = submission.question.file_format
         file_size_limit = submission.question.file_size_limit
+
+        answer_file_format = os.path.splitext(answer)[1]
+        if file_format != answer_file_format:
+            self.errors += trial_submit_exception.ErrorMessages.INVALID_FILE_FORMAT.format(file_format)
+            self.valid = False
+            return
+        answer_file_size = os.path.getsize(answer)
+        if answer_file_size > file_size_limit:
+            self.errors += trial_submit_exception.ErrorMessages.FILE_SIZE_LIMIT_EXCEEDED.format(file_size_limit)
+            self.valid = False
+            return
 
     def _validate_manual_judgment(self, submission):
         pass
 
     def _validate_numeric_range(self, submission):
-        pass
+        try:
+            answer = eval(submission.answer)
+        except ValueError:
+            self.errors += trial_submit_exception.ErrorMessages.INVALID_LITERALS_FOR_NUMERIC_RANGE
+            self.valid = False
+            return
+        if answer[0] > answer[1]:
+            self.errors += trial_submit_exception.ErrorMessages.INVALID_NUMERIC_RANGE
+            self.valid = False
+            return
