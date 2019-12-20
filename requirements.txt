@@ -2,6 +2,7 @@ certifi==2019.11.28
 chardet==3.0.4
 Django==2.2.8
 django-extensions==2.2.5
+django-polymorphic==2.1.2
 django-reverse-admin==2.7.3
 djangorestframework==3.10.3
 djangorestframework-simplejwt==4.4.0
