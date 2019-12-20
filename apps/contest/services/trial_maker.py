@@ -1,13 +1,15 @@
 import enum
+import random
+
 from random import randint
 
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 
-from datadays.apps.contest.Exceptions import trial_validation_exception
-from datadays.apps.contest.Exceptions.trial_validation_exception import TrialNotAllowed
-from datadays.apps.contest.models import Task, Trial, TrialQuestion
+from apps.contest.Exceptions import trial_validation_exception
+from apps.contest.models import Trial, TeamTask, QuestionSubmission
 
-from datadays.apps.question.models import Question
+from apps.question.models import Question
 
 
 class Constants(enum.Enum):
@@ -18,73 +20,109 @@ class Constants(enum.Enum):
 
 class TrialMaker:
 
-    def __init__(self, task):
-        self.task = task
-        self.trial = None
+    def __init__(self, request):
+        self.request = request
+        self.team_task = self._set_team_task()
+        self.task = ''
+        self.trial_recipe = ''
+        self.previous_trials = ''
+        self.before_selected_questions_ids = ''
+        self.trial_questions = ''
+        self.trial = ''
+        self.question_submissions = ''
+        self.errors = []
 
-    def __call__(self):
-        try:
-            TrialValidation(self.task).validate()
-        except TrialNotAllowed as e:
-            raise e
-        if self.task.has_unsubmitted_trial:
-            self._get_existing_trial()
-        else:
-            self._create_new_trial()
-        return self.trial
+    def make_trial(self):
 
-    def _get_existing_trial(self):
-        if self.task.has_unsubmitted_trial:
-            self.trial = self.task.trials[-1]
+        validator = TrialValidation(self.team_task)
+        valid, errors = validator.validate()
+        if not valid:
+            return None, errors
 
-    def _create_new_trial(self):
-        trial_recipe = self.task.trial_recipe
-        question_recipes = trial_recipe.question_recipes
-        due_time = timezone.now() + timezone.timedelta(hours=Constants.TRIAL_TIME_LIMIT.value)
-        trial = Trial(due_time=due_time)
-        self._create_trial_questions(question_recipes, trial)
-        self._update_task_after_trial_created()
+        self.task = self.team_task.task
+        self.trial_recipe = self.task.trial_recipe
+        self.previous_trials = self.team_task.trials
+        self.before_selected_questions_ids = self._set_before_selected_questions_ids()
+        self.trial_questions = self._set_trial_questions()
+        self.trial = self._create_trial()
+        self.question_submissions = self._create_trial_question_submissions()
+        return self.trial, errors
+
+    def _set_team_task(self):
+        team = self.request.user.participant.team
+        return TeamTask.objects.filter(team=team)
+
+    def _set_before_selected_questions_ids(self):
+        questions = []
+        for trial in self.previous_trials:
+            questions += QuestionSubmission.objects.filter(trial=trial).values_list('question_id', flat=True)
+        return questions
+
+    def _set_trial_questions(self):
+        questions = []
+        for question_recipe in self.trial_recipe.question_recipes:
+            questions_available = Question.objects.filter(task=self.task).exlclude(
+                id__in=self.before_selected_questions_ids).filter(type=question_recipe.question_type)
+            random.shuffle(question_recipe)
+            questions += [(question, question_recipe.priority) for question in
+                          questions_available[:question_recipe.count]]
+        return sorted(questions, key=lambda x: x[1])
+
+    def _create_trial_question_submissions(self):
+        question_submissions = []
+        for question, priority in self.trial_questions:
+            question_submissions += QuestionSubmission(trial=self.trial,
+                                                       question=question,
+                                                       question_priority=priority)
+
+        QuestionSubmission.objects.bulk_create(question_submissions)
+
+        return question_submissions
+
+    def _create_trial(self):
+        due_time = timezone.now() + timezone.timedelta(hours=self.task.trial_time)
+        trial = Trial(team_task=self.team_task, due_time=due_time)
         trial.save()
-        self.trial = trial
-
-    def _update_task_after_trial_created(self):
-        self.task.trials_count += 1
-        self.task.has_unsubmitted_trial = True
-        self.task.save()
-
-    def _create_trial_questions(self, question_recipes, trial):
-        questions_ids = []
-        for recipe in question_recipes:
-            questions_ids.append(self._get_n_random_question_ids(recipe.question_type, recipe.count))
-        TrialQuestion.objects.bulk_create([TrialQuestion(
-            question=Question.objects.get(id=question_id),
-            trial=trial
-        ) for question_id in questions_ids])
-        self.task.trial_questions_ids += ','.join(str(question_id) for question_id in questions_ids)
-
-    def _get_n_random_question_ids(self, question_type, n):
-        questions_count = Question.objects.filter(type=question_type).count()
-        previous_ids = [int(question_id) for question_id in self.task.trial_questions_ids]
-        ids = []
-        while len(ids) < n:
-            random_id = randint(1, questions_count)
-            while random_id in ids or random_id in previous_ids:
-                random_id = randint(1, questions_count)
-            ids.append(random_id)
-
-        return ids
+        return trial
 
 
 class TrialValidation:
 
-    def __init__(self, task: Task):
-        self.task = task
+    def __init__(self, team_task: TeamTask):
+        self.team_task = team_task
+        self.task = team_task.task
+        self.valid = True
+        self.errors = []
 
     def validate(self):
-        if not self.task.content_finished:
-            raise TrialNotAllowed(trial_validation_exception.ErrorMessages.CONTENT_NOT_FINISHED)
-        if self.task.trials_count != 0 and (
-                timezone.now() - self.task.last_trial_time).total_seconds() // Constants.HOUR.value < Constants.TRIAL_COOL_DOWN.value:
-            raise TrialNotAllowed(trial_validation_exception.ErrorMessages.COOLING_DOWN)
-        if self.task.trials_count >= 3:
-            raise TrialNotAllowed(trial_validation_exception.ErrorMessages.TRIAL_COUNT_LIMIT_REACHED)
+        self._content_finished_check()
+        self._trial_cooldown_check()
+        self._trial_count_limit_check()
+        self._milestone_date_range_check()
+        return self.valid, self.errors
+
+    def _content_finished_check(self):
+        if not self.team_task.content_finished:
+            self.errors += _(trial_validation_exception.ErrorMessages.CONTENT_NOT_FINISHED)
+            self.valid = False
+
+    def _trial_cooldown_check(self):
+        trials_count = len(self.team_task.trials)
+        if trials_count != 0:
+            last_trial_time = self.team_task.trials[-1].submit_time
+            if (
+                    timezone.now() - last_trial_time).total_seconds() // Constants.HOUR.value <= self.task.trial_cooldown:
+                self.errors += _(trial_validation_exception.ErrorMessages.COOLING_DOWN)
+                self.valid = False
+
+    def _trial_count_limit_check(self):
+        trials_count = len(self.team_task.trials)
+        if trials_count >= self.task.max_trials_count:
+            self.errors += _(trial_validation_exception.ErrorMessages.TRIAL_COUNT_LIMIT_REACHED)
+
+    def _milestone_date_range_check(self):
+        now = timezone.now()
+        milestone_start = self.task.milestone.start_date
+        milestone_end = self.task.milestone.end_date
+        if now < milestone_start or now > milestone_end:
+            self.errors += _(trial_validation_exception.ErrorMessages.OUT_OF_DATE_RANGE)

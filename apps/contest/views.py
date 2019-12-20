@@ -17,12 +17,10 @@ class CreateTrialAPIView(GenericAPIView):
     serializer_class = serializers.TrialSerializer
 
     def get(self, request):
-        data = json.loads(request.body)
-        task = get_object_or_404(contest_models.Trial, topic=data.get('topic'), user__username=data.get('username'))
-        try:
-            trial = trial_maker.TrialMaker(task)()
-        except TrialNotAllowed as e:
-            return Response(data={'error': str(e)}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        maker = trial_maker.TrialMaker(request)
+        trial, errors = maker.make_trial()
+        if trial is None:
+            return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
         data = self.get_serializer(trial).data
         return Response(data={'trial': data}, status=status.HTTP_200_OK)
 
