@@ -7,6 +7,7 @@ class Intro(models.Model):
     text_en = models.TextField()
     text_fa = models.TextField()
 
+
 class TimelineEvent(models.Model):
     date = models.DateTimeField()
     title_en = models.CharField(max_length=100)
@@ -27,4 +28,3 @@ class Stat(models.Model):
     title_fa = models.CharField(max_length=100)
     stat_en = models.CharField(max_length=100)
     stat_fa = models.CharField(max_length=100)
-

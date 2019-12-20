@@ -7,7 +7,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from datadays.apps.contest.Exceptions.trial_validation_exception import TrialNotAllowed
+from apps.contest.Exceptions.trial_validation_exception import TrialNotAllowed
 from . import models as contest_models, serializers
 from .services import trial_maker
 

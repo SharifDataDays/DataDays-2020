@@ -41,6 +41,7 @@ class SingleSelectSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = question_models.SingleSelect
+
         fields = ['id', 'task', 'max_score', 'body', 'type', 'choices']
 
 
@@ -50,6 +51,7 @@ class MultiSelectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = question_models.MultiSelect
+
         fields = ['id', 'task', 'max_score', 'body', 'type', 'choices']
 
 
@@ -58,6 +60,7 @@ class FileUploadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = question_models.FileUpload
+
         fields = ['id', 'task', 'max_score', 'body', 'type', 'file_size_limit', 'file_format']
 
 
@@ -66,6 +69,7 @@ class ManualJudgmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = question_models.ManualJudgment
+
         fields = ['id', 'task', 'max_score', 'body', 'type']
 
 
@@ -74,6 +78,7 @@ class NumericRangeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = question_models.NumericRange
+
         fields = ['id', 'task', 'max_score', 'body', 'type']
 
 
