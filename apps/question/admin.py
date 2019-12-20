@@ -21,11 +21,11 @@ class CommonAdminFeatures(admin.ModelAdmin):
         models.TextField: {'widget': AdminMartorWidget},
     }
     readonly_fields = ['type']
-    list_display = ['id', '__str__', 'max_score', 'topic', 'type']
+    list_display = ['id', '__str__', 'max_score', 'type']
     list_display_links = ['__str__', 'id']
-    list_editable = ['topic', 'max_score']
-    sortable_by = ['id', 'max_score', 'topic']
-    search_fields = ['topic', 'max_score']
+    list_editable = ['max_score']
+    sortable_by = ['id', 'max_score']
+    search_fields = ['max_score']
 
 
 @admin.register(question_models.Question)

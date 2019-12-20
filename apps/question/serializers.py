@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_polymorphic.serializers import PolymorphicSerializer
 
+from apps.contest.serializers import TaskSerializer
 from . import models as question_models
 
 
@@ -11,55 +12,69 @@ class ChoiceSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
+    task = TaskSerializer()
+
     class Meta:
         model = question_models.Question
-        fields = ['id', 'topic', 'max_score', 'body', 'type']
+        fields = ['id', 'task', 'max_score', 'body', 'type']
 
 
 class SingleAnswerSerializer(serializers.ModelSerializer):
+    task = TaskSerializer()
+
     class Meta:
         model = question_models.SingleAnswer
-        fields = ['id', 'topic', 'max_score', 'body', 'type', 'answer_type']
+        fields = ['id', 'task', 'max_score', 'body', 'type', 'answer_type']
 
 
 class MultiAnswerSerializer(serializers.ModelSerializer):
+    task = TaskSerializer()
+
     class Meta:
         model = question_models.MultiAnswer
-        fields = ['id', 'topic', 'max_score', 'body', 'type', 'answer_count_limit', 'answer_type']
+        fields = ['id', 'task', 'max_score', 'body', 'type', 'answer_count_limit', 'answer_type']
 
 
 class SingleSelectSerializers(serializers.ModelSerializer):
     choices = ChoiceSerializer(many=True, read_only=True)
+    task = TaskSerializer()
 
     class Meta:
         model = question_models.SingleSelect
-        fields = ['id', 'topic', 'max_score', 'body', 'type', 'choices']
+        fields = ['id', 'task', 'max_score', 'body', 'type', 'choices']
 
 
 class MultiSelectSerializer(serializers.ModelSerializer):
     choices = ChoiceSerializer(many=True, read_only=True)
+    task = TaskSerializer()
 
     class Meta:
         model = question_models.MultiSelect
-        fields = ['id', 'topic', 'max_score', 'body', 'type', 'choices']
+        fields = ['id', 'task', 'max_score', 'body', 'type', 'choices']
 
 
 class FileUploadSerializer(serializers.ModelSerializer):
+    task = TaskSerializer()
+
     class Meta:
         model = question_models.FileUpload
-        fields = ['id', 'topic', 'max_score', 'body', 'type', 'file_size_limit', 'file_format']
+        fields = ['id', 'task', 'max_score', 'body', 'type', 'file_size_limit', 'file_format']
 
 
 class ManualJudgmentSerializer(serializers.ModelSerializer):
+    task = TaskSerializer()
+
     class Meta:
         model = question_models.ManualJudgment
-        fields = ['id', 'topic', 'max_score', 'body', 'type']
+        fields = ['id', 'task', 'max_score', 'body', 'type']
 
 
 class NumericRangeSerializer(serializers.ModelSerializer):
+    task = TaskSerializer()
+
     class Meta:
         model = question_models.NumericRange
-        fields = ['id', 'topic', 'max_score', 'body', 'type']
+        fields = ['id', 'task', 'max_score', 'body', 'type']
 
 
 class QuestionPolymorphismSerializer(PolymorphicSerializer):
