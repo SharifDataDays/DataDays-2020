@@ -16,18 +16,6 @@ class AnswerDataTypes:
     )
 
 
-class QuestionPriorities:
-    HIGH_PRIORITY = 1
-    MEDIUM_PRIORITY = 2
-    LOW_PRIORITY = 3
-
-    PRIORITY = (
-        (HIGH_PRIORITY, 'High Priority'),
-        (MEDIUM_PRIORITY, 'Medium Priority'),
-        (LOW_PRIORITY, 'Low Priority')
-    )
-
-
 class QuestionTypes:
     SINGLE_ANSWER = 'single_answer'
     MULTI_ANSWER = 'multi_answer'
@@ -95,6 +83,8 @@ class SingleSelect(Selective):
 
 
 class MultiSelect(Selective):
+    answer_count_limit = models.IntegerField()
+
     def pre_save(self):
         self.type = QuestionTypes.MULTI_SELECT
 
