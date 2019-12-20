@@ -11,13 +11,14 @@ class ParticipantInline(admin.StackedInline):
     model = participation_models.Participant
 
 
-class InvitationInline(admin.StackedInline):
+class InvitationInline(admin.TabularInline):
     model = participation_models.Invitation
+    fk_name = 'host'
 
 
 @admin.register(participation_models.Participant)
 class ParticipantAdmin(admin.ModelAdmin):
-    list_display = ['get_username', 'get_fullname']
+    list_display = ['id', 'get_username', 'get_fullname']
     list_display_links = ['id', 'get_username', 'get_fullname']
     search_fields = ['get_username', 'get_fullname']
     sortable_by = ['get_username', 'get_fullname']
