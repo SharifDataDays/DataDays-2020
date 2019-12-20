@@ -7,9 +7,10 @@ from django.db import models
 
 class Team(models.Model):
     contest = models.ForeignKey('contest.Contest', related_name='teams', on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.id
+        return self.name
 
 
 class Participant(models.Model):
