@@ -33,6 +33,7 @@ class Task(models.Model):
     content = models.ForeignKey(Document, related_name='tasks', on_delete=models.CASCADE)
     max_trials_count = models.PositiveSmallIntegerField(default=3)
     trial_cooldown = models.PositiveSmallIntegerField()
+    trial_time = models.PositiveSmallIntegerField()
 
 
 class TeamTask(models.Model):
@@ -63,5 +64,6 @@ class QuestionRecipe(models.Model):
 class QuestionSubmission(models.Model):
     trial = models.ForeignKey(Trial, related_name='question_submissions', on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name='question_submissions', on_delete=models.CASCADE)
-    answer = models.TextField()
+    question_priority = models.PositiveSmallIntegerField()
+    answer = models.TextField(blank=True, null=False)
     score = models.FloatField(default=0)
