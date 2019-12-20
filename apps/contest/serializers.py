@@ -8,6 +8,8 @@ from . import models as contest_models
 
 
 class MilestoneSerializer(ModelSerializer):
+    tasks = TaskSerializer(many=True, read_only=True)
+
     class Meta:
         model = contest_models.Milestone
         fields = ['title', 'team_size', 'start_time', 'end_time']
