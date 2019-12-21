@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'martor',
     'django_extensions',
+    'djcelery',
+
     'apps.accounts',
     'apps.blog',
     'apps.resources.apps.ResourcesConfig',
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     'apps.contest',
     'apps.question',
     'apps.participation',
+    'apps.notification'
 ]
 
 MIDDLEWARE = [
@@ -55,7 +58,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.translation.middlewares.TranslationMiddleware',
 #    'apps.translation.middlewares.TranslationMiddleware',
 ]
 
@@ -146,7 +148,5 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
     'PAGE_SIZE': 100,
 }
-
-
 
 from .martor import *

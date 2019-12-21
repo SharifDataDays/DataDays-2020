@@ -59,12 +59,3 @@ class CreateTrialAPIView(GenericAPIView):
 class SubmitTrialAPIView(GenericAPIView):
     pass
 
-
-class UserTasksListAPIView(GenericAPIView):
-    queryset = contest_models.Task.objects.all()
-    serializer_class = serializers.TaskSerializer
-
-    def get(self, request, username):
-        tasks = self.get_queryset().filter(user__username=username)
-        data = self.get_serializer(tasks, many=True).data
-        return Response(data={'user': username, 'tasks': data}, status=status.HTTP_200_OK)
