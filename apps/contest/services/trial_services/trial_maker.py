@@ -2,19 +2,18 @@ import enum
 import random
 
 from random import randint
+from typing import Union, List, Tuple
 
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from apps.contest.Exceptions import trial_validation_exception
-from apps.contest.models import Trial, TeamTask, QuestionSubmission
+from apps.contest.models import Trial, TeamTask, QuestionSubmission, Task, TrialRecipe
 
 from apps.question.models import Question
 
 
 class Constants(enum.Enum):
-    TRIAL_TIME_LIMIT = 24
-    TRIAL_COOL_DOWN = 2
     HOUR = 3600  # Seconds
 
 
@@ -23,13 +22,13 @@ class TrialMaker:
     def __init__(self, request):
         self.request = request
         self.team_task = self._set_team_task()
-        self.task = ''
-        self.trial_recipe = ''
-        self.previous_trials = ''
-        self.before_selected_questions_ids = ''
-        self.trial_questions = ''
-        self.trial = ''
-        self.question_submissions = ''
+        self.task: Union[Task, None] = None
+        self.trial_recipe: Union[TrialRecipe, None] = None
+        self.previous_trials: Union[List[Trial], None] = None
+        self.before_selected_questions_ids: Union[List[int], None] = None
+        self.trial_questions: Union[List[Tuple[Question, int]], None] = None
+        self.trial: Union[Trial, None] = None
+        self.question_submissions: Union[List[QuestionSubmission], None] = None
         self.errors = []
 
     def make_trial(self):

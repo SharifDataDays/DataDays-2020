@@ -10,3 +10,4 @@ class ErrorMessages:
     FILE_SIZE_LIMIT_EXCEEDED = "File size is too much, maximum file size is {0}"
     INVALID_LITERALS_FOR_NUMERIC_RANGE = "Entered range should contain numbers only"
     INVALID_NUMERIC_RANGE = "Entered range isn't a valid numeric range"
+    TRIAL_NOT_FOUNT = 'Trial with given id not found!'
