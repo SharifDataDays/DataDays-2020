@@ -34,9 +34,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'rest_auth',
     'rest_framework.authtoken',
     'martor',
     'django_extensions',
+    'djcelery',
     'apps.accounts',
     'apps.blog',
     'apps.resources.apps.ResourcesConfig',
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     'apps.contest',
     'apps.question',
     'apps.participation',
+    'apps.notification'
 ]
 
 MIDDLEWARE = [
@@ -55,7 +58,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.translation.middlewares.TranslationMiddleware',
 #    'apps.translation.middlewares.TranslationMiddleware',
 ]
 
@@ -147,6 +149,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100,
 }
 
-
-
 from .martor import *
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
