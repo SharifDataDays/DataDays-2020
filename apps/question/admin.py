@@ -9,6 +9,20 @@ from . import models as question_models
 
 # Register your models here.
 
+# class QuestionAdminForm(forms.ModelForm):
+#     model = question_models.Question
+#
+#     class Meta:
+#         fields = '__all__'
+#         widgets = {
+#             'judge_function': PythonEditor(attrs={'style': 'width: 90%; height: 100%'})
+#         }
+#
+#
+# @admin.register(question_models.Question)
+# class QuestionAdmin(admin.ModelAdmin):
+#     form = QuestionAdminForm
+
 class Choices(admin.StackedInline):
     model = question_models.Choices
     formfield_overrides = {
