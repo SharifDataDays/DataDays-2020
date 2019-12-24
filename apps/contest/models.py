@@ -7,6 +7,19 @@ from ..question.models import QuestionTypes, Question
 
 
 # Create your models here.
+class ScoreStatusTypes:
+    SCORED = 'scored'
+    QUEUED = 'queued'
+    JUDGING = 'judging'
+    FAILED = 'failed'
+    ERROR = 'error'
+    TYPES = (
+        (SCORED, 'scored'),
+        (QUEUED, 'queued'),
+        (JUDGING, 'judging'),
+        (FAILED, 'failed'),
+        (ERROR, 'error'),
+    )
 
 
 class Contest(models.Model):
@@ -65,3 +78,9 @@ class QuestionSubmission(models.Model):
     question = models.ForeignKey(Question, related_name='question_submissions', on_delete=models.CASCADE)
     answer = models.TextField()
     score = models.FloatField(default=0)
+
+
+class Score(models.Model):
+    number_score = models.FloatField(default=0)
+    status = models.CharField(choices=ScoreStatusTypes.TYPES, max_length=10)
+    info = models.CharField(max_length=1000, blank=True, null=False)

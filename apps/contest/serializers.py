@@ -53,3 +53,9 @@ class TeamTaskSerializer(ModelSerializer):
     class Meta:
         model = contest_models.TeamTask
         fields = ['contest_finished', 'max_trials_count', 'last_trial_time', 'team', 'task']
+
+
+class ScoringSerializer(ModelSerializer):
+    class Meta:
+        model = contest_models.Score
+        fields = ['number_score', 'status', 'info']
