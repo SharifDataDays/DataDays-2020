@@ -7,6 +7,7 @@ from django.db import models
 
 class Team(models.Model):
     contest = models.ForeignKey('contest.Contest', related_name='teams', on_delete=models.CASCADE)
+    badges = models.ManyToManyField('participation.Badge', related_name='teams')
 
     def __str__(self):
         return str(self.id)
@@ -26,3 +27,9 @@ class Invitation(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+
+class Badge(models.Model):
+    image = models.ImageField()
+    milestone = models.ForeignKey('contest.Milestone', related_name='badges', on_delete=models.CASCADE)
+    text = models.TextField()

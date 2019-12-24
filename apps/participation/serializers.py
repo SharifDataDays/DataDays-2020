@@ -37,3 +37,12 @@ class InvitationSerializer(ModelSerializer):
     class Meta:
         model = participant_models.Invitation
         fields = ['host', 'guest']
+
+
+class BadgeSerializer(ModelSerializer):
+    milestone = MilestoneSerializer()
+    teams = TeamSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = participant_models.Badge
+        fields = ['image', 'milestone', 'teams']
