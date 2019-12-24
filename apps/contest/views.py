@@ -39,6 +39,11 @@ class MilestoneAPIView(GenericAPIView):
         if milestone.contest != contest:
             return Response({'detail': 'milestone is unrelated to contest'},
                     status=status.HTTP_400_BAD_REQUEST)
+        team = request.user.participant.team
+        team_tasks = TeamTask.objects.filter(team=team)
+        for task in milestone.tasks:
+            if team_tasks.filter(task=task).count() == 0:
+                TeamTask.objects.create(task=task, team=team)
         data = self.get_serializer(milestone).data
         return Response(data)
 
