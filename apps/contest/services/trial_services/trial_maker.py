@@ -37,19 +37,27 @@ class TrialMaker:
         valid, errors = validator.validate()
         if not valid:
             return None, errors
-
-        self.task = self.team_task.task
-        self.trial_recipe = self.task.trial_recipe
-        self.previous_trials = self.team_task.trials
-        self.before_selected_questions_ids = self._set_before_selected_questions_ids()
-        self.trial_questions = self._set_trial_questions()
-        self.trial = self._create_trial()
-        self.question_submissions = self._create_trial_question_submissions()
+        if not self._has_uncompleted_trial():
+            self.task = self.team_task.task
+            self.trial_recipe = self.task.trial_recipe
+            self.previous_trials = self.team_task.trials
+            self.before_selected_questions_ids = self._set_before_selected_questions_ids()
+            self.trial_questions = self._set_trial_questions()
+            self.trial = self._create_trial()
+            self.question_submissions = self._create_trial_question_submissions()
         return self.trial, errors
 
     def _set_team_task(self):
         team = self.request.user.participant.team
         return TeamTask.objects.filter(team=team)
+
+    def _has_uncompleted_trial(self):
+        try:
+            existing_trial = Trial.objects.get(submit_time__isnull=True)
+            self.trial = existing_trial
+        except (Trial.DoesNotExist, Trial.MultipleObjectsReturned):
+            return False
+        return True
 
     def _set_before_selected_questions_ids(self):
         questions = []

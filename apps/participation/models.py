@@ -9,7 +9,7 @@ class Team(models.Model):
     contest = models.ForeignKey('contest.Contest', related_name='teams', on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
 
 class Participant(models.Model):
@@ -25,4 +25,4 @@ class Invitation(models.Model):
     guest = models.ForeignKey(Participant, related_name='invitations_as_gust', on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
