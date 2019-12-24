@@ -4,7 +4,14 @@ from apps.contest.models import ScoreStatusTypes
 from apps.question.models import QuestionTypes
 
 
-class Score:
+class JudgeException(Exception):
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args)
+
+    pass
+
+
+class JudgeService:
 
     def get_score(self, question_submission):
         question = question_submission.question
@@ -14,6 +21,7 @@ class Score:
         def get_path():
             return question.dir_path
 
+        score = 0
         try:
             exec(question.judge_function)
             function_name = question.judge_function_name
