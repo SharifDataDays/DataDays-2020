@@ -47,6 +47,11 @@ class Question(PolymorphicModel):
         return "id: " + str(self.id) + "  Topic: " + str(self.topic) + " "
 
 
+class NeededFilesForQuestionJudgment(models.Model):
+    question = models.ForeignKey(Question, related_name='judgment_files', on_delete=models.CASCADE)
+    file = models.FileField()
+
+
 class SingleAnswer(Question):
     answer_type = models.CharField(max_length=30, choices=AnswerDataTypes.TYPES)
 
