@@ -1,15 +1,11 @@
-import json
-
-from django.http import Http404
-from django.shortcuts import get_object_or_404
-
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from apps.contest.Exceptions.trial_validation_exception import TrialNotAllowed
+from apps.contest.services.trial_services.trial_corrector import TrialCorrector
+from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
 from . import models as contest_models, serializers
-from .services import trial_maker
+from apps.contest.services.trial_services import trial_maker
 
 
 class CreateTrialAPIView(GenericAPIView):
@@ -17,18 +13,24 @@ class CreateTrialAPIView(GenericAPIView):
     serializer_class = serializers.TrialSerializer
 
     def get(self, request):
-        data = json.loads(request.body)
-        task = get_object_or_404(contest_models.Trial, topic=data.get('topic'), user__username=data.get('username'))
-        try:
-            trial = trial_maker.TrialMaker(task)()
-        except TrialNotAllowed as e:
-            return Response(data={'error': str(e)}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        maker = trial_maker.TrialMaker(request)
+        trial, errors = maker.make_trial()
+        if trial is None:
+            return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
         data = self.get_serializer(trial).data
         return Response(data={'trial': data}, status=status.HTTP_200_OK)
 
 
 class SubmitTrialAPIView(GenericAPIView):
-    pass
+
+    def post(self, request):
+        trial_submitter = TrialSubmitValidation(request=request)
+        trial, valid, errors = trial_submitter.validate()
+        if not valid:
+            return Response(data={'errors', errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        trial_corrector = TrialCorrector(trial=trial)
+        score = trial_corrector()
+        return Response(data={'trial': trial, 'score': score}, status=status.HTTP_200_OK)
 
 
 class UserTasksListAPIView(GenericAPIView):

@@ -16,18 +16,6 @@ class AnswerDataTypes:
     )
 
 
-class QuestionPriorities:
-    HIGH_PRIORITY = 1
-    MEDIUM_PRIORITY = 2
-    LOW_PRIORITY = 3
-
-    PRIORITY = (
-        (HIGH_PRIORITY, 'High Priority'),
-        (MEDIUM_PRIORITY, 'Medium Priority'),
-        (LOW_PRIORITY, 'Low Priority')
-    )
-
-
 class QuestionTypes:
     SINGLE_ANSWER = 'single_answer'
     MULTI_ANSWER = 'multi_answer'
@@ -50,12 +38,18 @@ class QuestionTypes:
 class Question(PolymorphicModel):
     task = models.ForeignKey('contest.Task', related_name='questions', on_delete=None)
 
+    judge_function = models.TextField()
     body = models.TextField()
     type = models.CharField(max_length=50, choices=QuestionTypes.TYPES)
     max_score = models.PositiveSmallIntegerField()
 
     def __str__(self):
         return "id: " + str(self.id) + "  Topic: " + str(self.topic) + " "
+
+
+class NeededFilesForQuestionJudgment(models.Model):
+    question = models.ForeignKey(Question, related_name='judgment_files', on_delete=models.CASCADE)
+    file = models.FileField()
 
 
 class SingleAnswer(Question):
@@ -95,6 +89,8 @@ class SingleSelect(Selective):
 
 
 class MultiSelect(Selective):
+    answer_count_limit = models.IntegerField()
+
     def pre_save(self):
         self.type = QuestionTypes.MULTI_SELECT
 
