@@ -7,6 +7,14 @@ from apps.resources.serializers import DocumentSerializer
 from . import models as contest_models
 
 
+class TaskSerializer(ModelSerializer):
+    content = DocumentSerializer()
+
+    class Meta:
+        model = contest_models.Task
+        fields = ['topic', 'trial_cooldown', 'content']
+
+
 class MilestoneSerializer(ModelSerializer):
     tasks = TaskSerializer(many=True, read_only=True)
 
@@ -37,15 +45,6 @@ class TrialSerializer(ModelSerializer):
     class Meta:
         model = contest_models.Trial
         fields = ['score', 'questions', 'due_time', 'start_time', 'submit_time']
-
-
-class TaskSerializer(ModelSerializer):
-    milestone = MilestoneSerializer()
-    content = DocumentSerializer()
-
-    class Meta:
-        model = contest_models.Task
-        fields = ['milestone', 'topic', 'trial_cooldown', 'content']
 
 
 class TeamTaskSerializer(ModelSerializer):
