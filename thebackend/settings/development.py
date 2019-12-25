@@ -37,17 +37,20 @@ INSTALLED_APPS = [
     'rest_auth',
     'rest_framework.authtoken',
     'martor',
+    'django_rest_passwordreset',
     'django_extensions',
-    'djcelery',
+    # 'djcelery',
+
     'apps.accounts',
     'apps.blog',
     'apps.resources.apps.ResourcesConfig',
-    'apps.translation',
     'apps.homepage',
     'apps.contest',
     'apps.question',
     'apps.participation',
     'apps.notification'
+    'apps.notification',
+    'apps.go',
 ]
 
 MIDDLEWARE = [
@@ -58,7 +61,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-#    'apps.translation.middlewares.TranslationMiddleware',
+    #    'thebackend.middlewares.TranslationMiddleware',
+    'thebackend.middlewares.Always200Middleware',
 ]
 
 ROOT_URLCONF = 'thebackend.urls'
