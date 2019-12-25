@@ -8,9 +8,11 @@ from . import models as contest_models
 
 
 class MilestoneSerializer(ModelSerializer):
+    tasks = TaskSerializer(many=True, read_only=True)
+
     class Meta:
         model = contest_models.Milestone
-        fields = ['title', 'team_size', 'start_time', 'end_time']
+        fields = ['id', 'title', 'team_size', 'start_time', 'end_time']
 
 
 class ContestSerializer(ModelSerializer):
@@ -18,7 +20,7 @@ class ContestSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.Contest
-        fields = ['title', 'start_time', 'end_time', 'milestones']
+        fields = ['id', 'title', 'start_time', 'end_time', 'milestones']
 
 
 class QuestionSubmissionSerializer(ModelSerializer):

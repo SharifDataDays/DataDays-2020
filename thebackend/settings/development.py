@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'martor',
     'django_rest_passwordreset',
     'django_extensions',
-    # 'djcelery',
+    'djcelery',
 
     'apps.accounts',
     'apps.blog',
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'apps.notification'
     'apps.notification',
     'apps.go',
+
 ]
 
 MIDDLEWARE = [

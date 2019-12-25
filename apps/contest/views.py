@@ -1,11 +1,51 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
+from apps.contest.models import TeamTask
 from apps.contest.services.trial_services.trial_corrector import TrialCorrector
 from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
+
+from apps.participation.models import Team, Participant
+
 from . import models as contest_models, serializers
 from apps.contest.services.trial_services import trial_maker
+
+
+class ContestAPIView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.ContestSerializer
+
+    def get(self, request, contest_id):
+        contest = get_object_or_404(contest_models.Contest, pk=contest_id)
+        if request.user.participant is None:
+            new_team = Team(contest=contest, name=request.user.username)
+            new_team.save()
+            new_participant = Participant(user=request.user, team=new_team)
+            new_participant.save()
+        data = self.get_serializer(contest).data
+        return Response(data)
+
+
+class MilestoneAPIView(GenericAPIView):
+    queryset = contest_models.Milestone.objcets.all()
+    serializer_class = serializers.MilestoneSerializers
+
+    def get(self, request, contest_id, milestone_id):
+        contest = get_object_or_404(contest_models.Contest, pk=contest_id)
+        milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
+        if milestone.contest != contest:
+            return Response({'detail': 'milestone is unrelated to contest'},
+                    status=status.HTTP_400_BAD_REQUEST)
+        team = request.user.participant.team
+        team_tasks = TeamTask.objects.filter(team=team)
+        for task in milestone.tasks:
+            if team_tasks.filter(task=task).count() == 0:
+                TeamTask.objects.create(task=task, team=team)
+        data = self.get_serializer(milestone).data
+        return Response(data)
 
 
 class CreateTrialAPIView(GenericAPIView):
@@ -32,12 +72,3 @@ class SubmitTrialAPIView(GenericAPIView):
         score = trial_corrector()
         return Response(data={'trial': trial, 'score': score}, status=status.HTTP_200_OK)
 
-
-class UserTasksListAPIView(GenericAPIView):
-    queryset = contest_models.Task.objects.all()
-    serializer_class = serializers.TaskSerializer
-
-    def get(self, request, username):
-        tasks = self.get_queryset().filter(user__username=username)
-        data = self.get_serializer(tasks, many=True).data
-        return Response(data={'user': username, 'tasks': data}, status=status.HTTP_200_OK)
