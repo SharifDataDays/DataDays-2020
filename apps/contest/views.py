@@ -30,8 +30,8 @@ class ContestAPIView(GenericAPIView):
 
 
 class MilestoneAPIView(GenericAPIView):
-    queryset = contest_models.Milestone.objcets.all()
-    serializer_class = serializers.MilestoneSerializers
+    queryset = contest_models.Milestone.objects.all()
+    serializer_class = serializers.MilestoneSerializer
 
     def get(self, request, contest_id, milestone_id):
         contest = get_object_or_404(contest_models.Contest, pk=contest_id)
