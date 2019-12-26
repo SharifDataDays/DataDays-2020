@@ -30,6 +30,7 @@ class ContestAPIView(GenericAPIView):
 
 
 class MilestoneAPIView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = contest_models.Milestone.objects.all()
     serializer_class = serializers.MilestoneSerializer
 
@@ -47,6 +48,7 @@ class MilestoneAPIView(GenericAPIView):
 
 
 class CreateTrialAPIView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = contest_models.Task.objects.all()
     serializer_class = serializers.TrialSerializer
 
@@ -60,6 +62,7 @@ class CreateTrialAPIView(GenericAPIView):
 
 
 class SubmitTrialAPIView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):
         trial_submitter = TrialSubmitValidation(request, contest_id, milestone_id, task_id, trial_id)

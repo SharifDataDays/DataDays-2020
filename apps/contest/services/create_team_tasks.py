@@ -18,7 +18,7 @@ class GetOrCreateTeamTasks:
 
     def _create_team_tasks(self):
         team_tasks = []
-        for task in self.milestone.tasks:
+        for task in self.milestone.tasks.all():
             team_tasks.append(TeamTask(task=task, team=self.team, content_finished=0))
         TeamTask.objects.bulk_create(team_tasks)
         self.team_tasks = team_tasks
