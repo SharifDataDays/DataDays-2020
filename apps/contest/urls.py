@@ -11,5 +11,4 @@ urlpatterns = [
     path('<contest_title>/<int:milestone_id>/<int:task_id>/', views.CreateTrialAPIView.as_view, name='create_trial'),
     path('<contest_title>/<int:milestone_id>/<ind:task_id>/<int:trial_id>/', views.SubmitTrialAPIView.as_view,
          name='submit_trial')
-
 ]

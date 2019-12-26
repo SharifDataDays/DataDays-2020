@@ -4,6 +4,7 @@ import json
 from typing import List, Union
 
 from apps.contest.models import Trial, QuestionSubmission
+from apps.contest.serializers import TrialSerializer
 from apps.question.models import QuestionTypes, AnswerDataTypes
 from apps.contest.Exceptions import trial_submit_exception
 
@@ -31,7 +32,9 @@ class TrialSubmitValidation:
 
     def get_trial(self):
         try:
-            trial = Trial.objects.get(id=self.trial_id)
+            trial = TrialSerializer(data=self._request.data)
+            if trial.is_valid():
+                trial.save()
         except Trial.DoesNotExist:
             self._valid = False
             self._errors += trial_submit_exception.ErrorMessages.TRIAL_NOT_FOUNT
