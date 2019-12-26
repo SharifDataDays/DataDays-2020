@@ -20,7 +20,7 @@ class ContestAPIView(GenericAPIView):
 
     def get(self, request, contest_id):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
-        if request.user.participant is None:
+        if not hasattr(request.user, 'participant'):
             new_team = Team(contest=contest, name=request.user.username)
             new_team.save()
             new_participant = Participant(user=request.user, team=new_team)

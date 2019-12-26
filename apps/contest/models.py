@@ -22,15 +22,15 @@ class ScoreStatusTypes:
 
 
 class Contest(models.Model):
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
     team_size = models.PositiveSmallIntegerField()
     title = models.CharField(max_length=100, unique=True)
 
 
 class Milestone(models.Model):
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
     contest = models.ForeignKey('contest.Contest', related_name='milestones', on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
 

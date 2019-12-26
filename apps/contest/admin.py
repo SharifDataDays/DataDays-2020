@@ -37,19 +37,19 @@ class TrialInline(admin.StackedInline):
 
 @admin.register(contest_models.Contest)
 class ContestAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'start_date', 'end_date', 'team_size']
-    list_editable = ['title', 'start_date', 'end_date', 'team_size']
-    sortable_by = ['title', 'start_date', 'end_date', 'team_size']
-    list_filter = ['start_date', 'end_date']
+    list_display = ['id', 'title', 'start_time', 'end_time', 'team_size']
+    list_editable = ['title', 'start_time', 'end_time', 'team_size']
+    sortable_by = ['title', 'start_time', 'end_time', 'team_size']
+    list_filter = ['start_time', 'end_time']
     inlines = [MilestoneInline]
 
 
 @admin.register(contest_models.Milestone)
 class MilestoneAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'start_date', 'end_date']
-    list_editable = ['title', 'start_date', 'end_date']
-    sortable_by = ['title', 'start_date', 'end_date']
-    list_filter = ['start_date', 'end_date']
+    list_display = ['id', 'title', 'start_time', 'end_time']
+    list_editable = ['title', 'start_time', 'end_time']
+    sortable_by = ['title', 'start_time', 'end_time']
+    list_filter = ['start_time', 'end_time']
     inlines = [TaskInline]
 
 
