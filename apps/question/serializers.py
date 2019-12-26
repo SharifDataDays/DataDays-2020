@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_polymorphic.serializers import PolymorphicSerializer
 
-from apps.contest.serializers import TaskSerializer
 from . import models as question_models
 
 
@@ -12,7 +11,6 @@ class ChoiceSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    task = TaskSerializer()
 
     class Meta:
         model = question_models.Question
@@ -20,7 +18,6 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class SingleAnswerSerializer(serializers.ModelSerializer):
-    task = TaskSerializer()
 
     class Meta:
         model = question_models.SingleAnswer
@@ -28,7 +25,6 @@ class SingleAnswerSerializer(serializers.ModelSerializer):
 
 
 class MultiAnswerSerializer(serializers.ModelSerializer):
-    task = TaskSerializer()
 
     class Meta:
         model = question_models.MultiAnswer
@@ -37,7 +33,6 @@ class MultiAnswerSerializer(serializers.ModelSerializer):
 
 class SingleSelectSerializers(serializers.ModelSerializer):
     choices = ChoiceSerializer(many=True, read_only=True)
-    task = TaskSerializer()
 
     class Meta:
         model = question_models.SingleSelect
@@ -47,7 +42,6 @@ class SingleSelectSerializers(serializers.ModelSerializer):
 
 class MultiSelectSerializer(serializers.ModelSerializer):
     choices = ChoiceSerializer(many=True, read_only=True)
-    task = TaskSerializer()
 
     class Meta:
         model = question_models.MultiSelect
@@ -56,7 +50,6 @@ class MultiSelectSerializer(serializers.ModelSerializer):
 
 
 class FileUploadSerializer(serializers.ModelSerializer):
-    task = TaskSerializer()
 
     class Meta:
         model = question_models.FileUpload
@@ -65,7 +58,6 @@ class FileUploadSerializer(serializers.ModelSerializer):
 
 
 class ManualJudgmentSerializer(serializers.ModelSerializer):
-    task = TaskSerializer()
 
     class Meta:
         model = question_models.ManualJudgment
@@ -74,7 +66,6 @@ class ManualJudgmentSerializer(serializers.ModelSerializer):
 
 
 class NumericRangeSerializer(serializers.ModelSerializer):
-    task = TaskSerializer()
 
     class Meta:
         model = question_models.NumericRange

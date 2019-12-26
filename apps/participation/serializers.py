@@ -2,8 +2,6 @@ from django.contrib.auth.models import User
 
 from rest_framework.serializers import ModelSerializer
 
-from apps.contest.serializers import MilestoneSerializer
-
 from . import models as participant_models
 
 
@@ -22,7 +20,6 @@ class ParticipantSerializer(ModelSerializer):
 
 
 class TeamSerializer(ModelSerializer):
-    milestone = MilestoneSerializer()
     participants = ParticipantSerializer(many=True, read_only=True)
 
     class Meta:
@@ -40,7 +37,6 @@ class InvitationSerializer(ModelSerializer):
 
 
 class BadgeSerializer(ModelSerializer):
-    milestone = MilestoneSerializer()
     teams = TeamSerializer(many=True, read_only=True)
 
     class Meta:

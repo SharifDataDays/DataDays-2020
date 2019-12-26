@@ -18,8 +18,8 @@ class ContestAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.ContestSerializer
 
-    def get(self, request, contest_title):
-        contest = get_object_or_404(contest_models.Contest, title=contest_title)
+    def get(self, request, contest_id):
+        contest = get_object_or_404(contest_models.Contest, id=contest_id)
         if request.user.participant is None:
             new_team = Team(contest=contest, name=request.user.username)
             new_team.save()
@@ -33,8 +33,8 @@ class MilestoneAPIView(GenericAPIView):
     queryset = contest_models.Milestone.objects.all()
     serializer_class = serializers.MilestoneSerializer
 
-    def get(self, request, contest_title, milestone_id):
-        contest = get_object_or_404(contest_models.Contest, title=contest_title)
+    def get(self, request, contest_id, milestone_id):
+        contest = get_object_or_404(contest_models.Contest, id=contest_id)
         milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
         if milestone.contest != contest:
             return Response(data={'detail': 'milestone is unrelated to contest'},
@@ -50,8 +50,8 @@ class CreateTrialAPIView(GenericAPIView):
     queryset = contest_models.Task.objects.all()
     serializer_class = serializers.TrialSerializer
 
-    def get(self, request, contest_title, milestone_id, task_id):
-        maker = trial_maker.TrialMaker(request, contest_title, milestone_id, task_id)
+    def get(self, request, contest_id, milestone_id, task_id):
+        maker = trial_maker.TrialMaker(request, contest_id, milestone_id, task_id)
         trial, errors = maker.make_trial()
         if trial is None:
             return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -61,8 +61,8 @@ class CreateTrialAPIView(GenericAPIView):
 
 class SubmitTrialAPIView(GenericAPIView):
 
-    def post(self, request, contest_title, milestone_id, task_id, trial_id):
-        trial_submitter = TrialSubmitValidation(request, contest_title, milestone_id, task_id, trial_id)
+    def post(self, request, contest_id, milestone_id, task_id, trial_id):
+        trial_submitter = TrialSubmitValidation(request, contest_id, milestone_id, task_id, trial_id)
         trial, valid, errors = trial_submitter.validate()
         if not valid:
             return Response(data={'errors', errors}, status=status.HTTP_406_NOT_ACCEPTABLE)

@@ -19,9 +19,9 @@ class Constants(enum.Enum):
 
 class TrialMaker:
 
-    def __init__(self, request, contest_title, milestone_id, task_id):
+    def __init__(self, request, contest_id, milestone_id, task_id):
         self.request = request
-        self.contest_title = contest_title
+        self.contest_id = contest_id
         self.milestone_id = milestone_id
         self.task_id = task_id
         self.team_task: Union[TeamTask, None] = None

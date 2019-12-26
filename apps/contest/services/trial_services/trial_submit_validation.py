@@ -10,9 +10,9 @@ from apps.contest.Exceptions import trial_submit_exception
 
 class TrialSubmitValidation:
 
-    def __init__(self, request, contest_title, milestone_id, task_id, trial_id):
+    def __init__(self, request, contest_id, milestone_id, task_id, trial_id):
         self._request = request
-        self.contest_title = contest_title
+        self.contest_id = contest_id
         self.milestone_id = milestone_id
         self.task_id = task_id
         self.trial_id = trial_id
