@@ -75,7 +75,7 @@ class QuestionRecipe(models.Model):
 
 class QuestionSubmission(models.Model):
     trial = models.ForeignKey('contest.Trial', related_name='question_submissions', on_delete=models.CASCADE)
-    question = models.ForeignKey('contest.Question', related_name='question_submissions', on_delete=models.CASCADE)
+    question = models.ForeignKey('question.Question', related_name='question_submissions', on_delete=models.CASCADE)
     question_priority = models.PositiveSmallIntegerField()
     answer = models.TextField(blank=True, null=False)
     score = models.FloatField(default=0)

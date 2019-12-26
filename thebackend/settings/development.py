@@ -48,10 +48,9 @@ INSTALLED_APPS = [
     'apps.contest',
     'apps.question',
     'apps.participation',
-    'apps.notification'
     'apps.notification',
     'apps.go',
-
+    'django_ace',
 ]
 
 MIDDLEWARE = [

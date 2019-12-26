@@ -4,27 +4,10 @@ from django import forms
 
 from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 from martor.widgets import AdminMartorWidget
-
-from thebackend.widgets import PythonEditor
+from django_ace import AceWidget
 
 from . import models as question_models
 
-
-# Register your models here.
-
-# class QuestionAdminForm(forms.ModelForm):
-#     model = question_models.Question
-#
-#     class Meta:
-#         fields = '__all__'
-#         widgets = {
-#             'judge_function': PythonEditor(attrs={'style': 'width: 90%; height: 100%'})
-#         }
-#
-#
-# @admin.register(question_models.Question)
-# class QuestionAdmin(admin.ModelAdmin):
-#     form = QuestionAdminForm
 
 class Choices(admin.StackedInline):
     model = question_models.Choices
@@ -36,6 +19,7 @@ class Choices(admin.StackedInline):
 class CommonAdminFeatures(admin.ModelAdmin):
     formfield_overrides = {
         models.TextField: {'widget': AdminMartorWidget},
+        models.CharField: {'widget': AceWidget(mode='python')}
     }
     readonly_fields = ['type']
     list_display = ['id', '__str__', 'max_score', 'type']

@@ -38,7 +38,7 @@ class QuestionTypes:
 class Question(PolymorphicModel):
     task = models.ForeignKey('contest.Task', related_name='questions', on_delete=None)
 
-    judge_function = models.TextField()
+    judge_function = models.CharField(max_length=8000)
     body = models.TextField()
     type = models.CharField(max_length=50, choices=QuestionTypes.TYPES)
     max_score = models.PositiveSmallIntegerField()
