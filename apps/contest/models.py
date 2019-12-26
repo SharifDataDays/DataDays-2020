@@ -6,6 +6,20 @@ from ..question.models import QuestionTypes
 
 # Create your models here.
 
+class ScoreStatusTypes:
+    SCORED = 'scored'
+    QUEUED = 'queued'
+    JUDGING = 'judging'
+    FAILED = 'failed'
+    ERROR = 'error'
+    TYPES = (
+        (SCORED, 'scored'),
+        (QUEUED, 'queued'),
+        (JUDGING, 'judging'),
+        (FAILED, 'failed'),
+        (ERROR, 'error'),
+    )
+
 
 class Contest(models.Model):
     start_date = models.DateTimeField()
@@ -65,3 +79,9 @@ class QuestionSubmission(models.Model):
     question_priority = models.PositiveSmallIntegerField()
     answer = models.TextField(blank=True, null=False)
     score = models.FloatField(default=0)
+
+
+class Score(models.Model):
+    number_score = models.FloatField(default=0)
+    status = models.CharField(choices=ScoreStatusTypes.TYPES, max_length=10)
+    info = models.CharField(max_length=1000, blank=True, null=False)
