@@ -10,8 +10,12 @@ from apps.contest.Exceptions import trial_submit_exception
 
 class TrialSubmitValidation:
 
-    def __init__(self, request):
+    def __init__(self, request, contest_title, milestone_id, task_id, trial_id):
         self._request = request
+        self.contest_title = contest_title
+        self.milestone_id = milestone_id
+        self.task_id = task_id
+        self.trial_id = trial_id
         self._trial: Union[Trial, None] = None
         self._question_submissions: Union[List[QuestionSubmission], None] = None
         self._valid = True
@@ -26,11 +30,8 @@ class TrialSubmitValidation:
         return self._trial, self._valid, self._errors
 
     def get_trial(self):
-        data = json.loads(self._request.data)
-        trial_id = data.get('trial_id', '')
-
         try:
-            trial = Trial.objects.get(id=trial_id)
+            trial = Trial.objects.get(id=self.trial_id)
         except Trial.DoesNotExist:
             self._valid = False
             self._errors += trial_submit_exception.ErrorMessages.TRIAL_NOT_FOUNT

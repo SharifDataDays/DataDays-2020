@@ -18,7 +18,7 @@ class ParticipantSerializer(ModelSerializer):
 
     class Meta:
         model = participant_models.Participant
-        fields = ['user']
+        fields = ['id', 'user']
 
 
 class TeamSerializer(ModelSerializer):
@@ -27,7 +27,7 @@ class TeamSerializer(ModelSerializer):
 
     class Meta:
         model = participant_models.Team
-        fields = ['milestone', 'participants']
+        fields = ['id', 'milestone', 'participants']
 
 
 class InvitationSerializer(ModelSerializer):
@@ -36,7 +36,7 @@ class InvitationSerializer(ModelSerializer):
 
     class Meta:
         model = participant_models.Invitation
-        fields = ['host', 'guest']
+        fields = ['id', 'host', 'guest']
 
 
 class BadgeSerializer(ModelSerializer):
@@ -45,4 +45,4 @@ class BadgeSerializer(ModelSerializer):
 
     class Meta:
         model = participant_models.Badge
-        fields = ['image', 'milestone', 'teams']
+        fields = ['id', 'image', 'milestone', 'teams']

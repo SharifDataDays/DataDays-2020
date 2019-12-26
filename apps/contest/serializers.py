@@ -12,7 +12,7 @@ class TaskSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.Task
-        fields = ['topic', 'trial_cooldown', 'content']
+        fields = ['id', 'topic', 'trial_cooldown', 'content']
 
 
 class MilestoneSerializer(ModelSerializer):
@@ -36,7 +36,7 @@ class QuestionSubmissionSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.QuestionSubmission
-        fields = ['question', 'answer', 'score']
+        fields = ['id', 'question', 'answer', 'score']
 
 
 class TrialSerializer(ModelSerializer):
@@ -44,7 +44,7 @@ class TrialSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.Trial
-        fields = ['score', 'questions', 'due_time', 'start_time', 'submit_time']
+        fields = ['id', 'score', 'questions', 'due_time', 'start_time', 'submit_time']
 
 
 class TeamTaskSerializer(ModelSerializer):
@@ -53,4 +53,4 @@ class TeamTaskSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.TeamTask
-        fields = ['contest_finished', 'max_trials_count', 'last_trial_time', 'team', 'task']
+        fields = ['id', 'contest_finished', 'max_trials_count', 'last_trial_time', 'team', 'task']

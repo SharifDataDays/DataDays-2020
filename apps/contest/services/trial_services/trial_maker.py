@@ -19,9 +19,12 @@ class Constants(enum.Enum):
 
 class TrialMaker:
 
-    def __init__(self, request):
+    def __init__(self, request, contest_title, milestone_id, task_id):
         self.request = request
-        self.team_task = self._set_team_task()
+        self.contest_title = contest_title
+        self.milestone_id = milestone_id
+        self.task_id = task_id
+        self.team_task: Union[TeamTask, None] = None
         self.task: Union[Task, None] = None
         self.trial_recipe: Union[TrialRecipe, None] = None
         self.previous_trials: Union[List[Trial], None] = None
@@ -33,6 +36,9 @@ class TrialMaker:
 
     def make_trial(self):
 
+        self._set_team_task()
+        if self.errors:
+            return None, self.errors
         validator = TrialValidation(self.team_task)
         valid, errors = validator.validate()
         if not valid:
@@ -49,7 +55,12 @@ class TrialMaker:
 
     def _set_team_task(self):
         team = self.request.user.participant.team
-        return TeamTask.objects.filter(team=team)
+        try:
+            team_task = TeamTask.objects.get(team=team, task_id=self.task_id)
+        except (TeamTask.DoesNotExist, TeamTask.MultipleObjectsReturned) as e:
+            self.errors.append(str(e))
+            return
+        self.team_task = team_task
 
     def _has_uncompleted_trial(self):
         try:
@@ -130,6 +141,5 @@ class TrialValidation:
     def _milestone_date_range_check(self):
         now = timezone.now()
         milestone_start = self.task.milestone.start_date
-        milestone_end = self.task.milestone.end_date
-        if now < milestone_start or now > milestone_end:
+        if now < milestone_start:
             self.errors += _(trial_validation_exception.ErrorMessages.OUT_OF_DATE_RANGE)

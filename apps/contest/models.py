@@ -25,7 +25,7 @@ class Contest(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     team_size = models.PositiveSmallIntegerField()
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=100, unique=True)
 
 
 class Milestone(models.Model):
@@ -52,6 +52,7 @@ class TeamTask(models.Model):
     task = models.ForeignKey('contest.Task', related_name='team_tasks', on_delete=models.CASCADE)
     team = models.ForeignKey('participation.Team', related_name='tasks', on_delete=models.CASCADE)
     content_finished = models.BooleanField(default=False)
+    final_score = models.FloatField(blank=True, null=True)
 
 
 class Trial(models.Model):
@@ -78,7 +79,7 @@ class QuestionSubmission(models.Model):
     question = models.ForeignKey('question.Question', related_name='question_submissions', on_delete=models.CASCADE)
     question_priority = models.PositiveSmallIntegerField()
     answer = models.TextField(blank=True, null=False)
-    score = models.FloatField(default=0)
+    score = models.OneToOneField('contest.Score', related_name='question_submission', on_delete=models.CASCADE)
 
 
 class Score(models.Model):
