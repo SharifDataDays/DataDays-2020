@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from apps.contest.models import TeamTask
+from apps.contest.services.create_team_tasks import GetOrCreateTeamTasks
 from apps.contest.services.trial_services.trial_corrector import TrialCorrector
 from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
 
@@ -26,7 +27,7 @@ class ContestAPIView(GenericAPIView):
             new_participant = Participant(user=request.user, team=new_team)
             new_participant.save()
         data = self.get_serializer(contest).data
-        return Response(data)
+        return Response(data={'contest': data})
 
 
 class MilestoneAPIView(GenericAPIView):
@@ -38,14 +39,12 @@ class MilestoneAPIView(GenericAPIView):
         milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
         if milestone.contest != contest:
             return Response({'detail': 'milestone is unrelated to contest'},
-                    status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_400_BAD_REQUEST)
         team = request.user.participant.team
-        team_tasks = TeamTask.objects.filter(team=team)
-        for task in milestone.tasks:
-            if team_tasks.filter(task=task).count() == 0:
-                TeamTask.objects.create(task=task, team=team)
+        team_task_creator = GetOrCreateTeamTasks(team=team, milestone=milestone)
+        team_tasks = team_task_creator.get_team_tasks()
         data = self.get_serializer(milestone).data
-        return Response(data)
+        return Response(data={'milestone': milestone})
 
 
 class CreateTrialAPIView(GenericAPIView):
@@ -71,4 +70,3 @@ class SubmitTrialAPIView(GenericAPIView):
         trial_corrector = TrialCorrector(trial=trial)
         score = trial_corrector()
         return Response(data={'trial': trial, 'score': score}, status=status.HTTP_200_OK)
-
