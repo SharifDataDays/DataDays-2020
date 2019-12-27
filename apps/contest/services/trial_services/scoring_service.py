@@ -51,7 +51,7 @@ class JudgeService:
         try:
             exec(question.judge_function)
             function_name = question.judge_function_name
-            answer_name, answer = self.get_parameters(question.type, answer)
+            answer_name, answer = self.get_parameters(question.type, answer, question_submission.file_answer)
             call_function = f'{function_name}({answer_name}={answer})'
             if question.type == QuestionTypes.SINGLE_SELECT:
                 call_function = f'{function_name}({answer_name}=\'{answer}\')'
@@ -71,10 +71,10 @@ class JudgeService:
 
         return score.number
 
-    def get_parameters(self, question_type, answer):
+    def get_parameters(self, question_type, answer, file_answer):
         if question_type in [QuestionTypes.SINGLE_ANSWER, QuestionTypes.SINGLE_SELECT]:
             return 'answer', answer[0]
         elif question_type in [QuestionTypes.NUMERIC_RANGE, QuestionTypes.MULTI_ANSWER, QuestionTypes.MULTI_SELECT]:
             return 'answers', answer
         elif question_type == QuestionTypes.FILE_UPLOAD:
-            return 'file_path', answer[0]
+            return 'file_path', file_answer
