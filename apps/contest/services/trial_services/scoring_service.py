@@ -25,9 +25,10 @@ class JudgeService:
         return sum([self.get_score(question) for question in self.trial.question_submissions])
 
     def get_score(self, question_submission):
+        score = Score()
+        score.question_submission = question_submission
         for id, error in self.errors:
             if question_submission.question_id == id:
-                score = Score()
                 score.number = 0
                 score.status = ScoreStatusTypes.ERROR
                 score.status = error
@@ -40,7 +41,6 @@ class JudgeService:
         def get_path():
             return question.dir_path()
 
-        score = Score()
         try:
             exec(question.judge_function)
             function_name = question.judge_function_name
