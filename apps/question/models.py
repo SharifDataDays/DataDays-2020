@@ -48,7 +48,7 @@ class Question(PolymorphicModel):
     max_score = models.PositiveSmallIntegerField()
 
     def dir_path(self):
-        return settings.MEDIA_ROOT + '/private/'
+        return settings.MEDIA_ROOT + 'private/' + str(self.id)
 
     def __str__(self):
         return "id: " + str(self.id) + " task: " + str(self.task.topic)
@@ -56,13 +56,8 @@ class Question(PolymorphicModel):
 
 class NeededFilesForQuestionJudgment(models.Model):
     def upload_path(instance, filename):
-        if not os.path.exists('private/'):
-            os.mkdir('private/')
-        if not os.path.exists('private/' + str(instance.question_id)):
-            os.mkdir('private/' + str(instance.question_id))
-        if not os.path.exists('private/' + str(instance.question_id) + '/' + filename):
-            os.mkdir('private/' + str(instance.question_id)) + '/' + filename
         return os.path.join('private/', str(instance.question_id), filename)
+
     question = models.ForeignKey(Question, related_name='files', on_delete=models.CASCADE)
     file = models.FileField(upload_to=upload_path, unique=True)
 
