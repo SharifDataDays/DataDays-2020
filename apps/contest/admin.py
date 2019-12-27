@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.db import models
 from martor.widgets import AdminMartorWidget
 
+from apps.contest.models import QuestionSubmission
 from . import models as contest_models
 
 
@@ -94,6 +95,10 @@ class QuestionRecipeAdmin(admin.ModelAdmin):
 
 @admin.register(contest_models.QuestionSubmission)
 class QuestionSubmissionAdmin(admin.ModelAdmin):
-    list_display = ['answer', 'score']
-    list_editable = ['score']
-    sortable_by = ['score']
+    list_display = ['question_id', 'question_priority', 'get_submission_score']
+
+    def get_submission_score(self, q: QuestionSubmission):
+        return q.score.number
+
+    get_submission_score.short_description = 'Question Submission Score'
+    get_submission_score.admin_order_field = 'question_submission_score'

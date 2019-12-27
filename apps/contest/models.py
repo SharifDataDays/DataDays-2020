@@ -81,10 +81,11 @@ class QuestionSubmission(models.Model):
     question = models.ForeignKey('question.Question', related_name='question_submissions', on_delete=models.CASCADE)
     question_priority = models.PositiveSmallIntegerField()
     answer = models.TextField(blank=True, null=False)
-    score = models.OneToOneField('contest.Score', related_name='question_submission', on_delete=models.CASCADE)
 
 
 class Score(models.Model):
     number = models.FloatField(default=0)
+    question_submission = models.OneToOneField('contest.QuestionSubmission', related_name='score',
+                                               on_delete=models.CASCADE)
     status = models.CharField(choices=ScoreStatusTypes.TYPES, max_length=10, default=ScoreStatusTypes.UNDEF)
     info = models.CharField(max_length=1000, blank=True, null=False, default='')

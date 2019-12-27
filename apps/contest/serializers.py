@@ -33,14 +33,14 @@ class ContestSerializer(ModelSerializer):
 
 
 class ScoreSerializer(ModelSerializer):
-
     class Meta:
         model = contest_models.Score
-        fields = '__all__'
+        fields = ['question_submission_id', 'number', 'status', 'info']
 
 
 class QuestionSubmissionSerializer(ModelSerializer):
     question = QuestionPolymorphismSerializer()
+    score = ScoreSerializer()
 
     class Meta:
         model = contest_models.QuestionSubmission
@@ -48,7 +48,6 @@ class QuestionSubmissionSerializer(ModelSerializer):
 
 
 class QuestionSubmissionPostSerializer(ModelSerializer):
-
     id = serializers.ModelField(model_field=contest_models.QuestionSubmission()._meta.get_field('id'))
 
     class Meta:
@@ -66,7 +65,6 @@ class TrialSerializer(ModelSerializer):
 
 
 class TrialPostSerializer(ModelSerializer):
-
     id = serializers.ModelField(model_field=contest_models.Trial()._meta.get_field('id'))
     question_submissions = QuestionSubmissionPostSerializer(many=True)
     final_submit = serializers.BooleanField(default=False)
@@ -97,5 +95,3 @@ class TeamTaskSerializer(ModelSerializer):
     class Meta:
         model = contest_models.TeamTask
         fields = ['id', 'contest_finished', 'max_trials_count', 'last_trial_time', 'team', 'task']
-
-
