@@ -38,10 +38,11 @@ class TrialInline(admin.StackedInline):
 
 @admin.register(contest_models.Contest)
 class ContestAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'start_time', 'end_time', 'team_size']
-    list_editable = ['title', 'start_time', 'end_time', 'team_size']
+    list_display = ['id', 'title', 'start_time', 'end_time', 'team_size', 'scoreboard_freeze',
+                    'scoreboard_order_freeze']
+    list_editable = ['title', 'start_time', 'end_time', 'team_size', 'scoreboard_freeze', 'scoreboard_order_freeze']
     sortable_by = ['title', 'start_time', 'end_time', 'team_size']
-    list_filter = ['start_time', 'end_time']
+    list_filter = ['start_time', 'end_time', 'scoreboard_freeze', 'scoreboard_order_freeze']
     inlines = [MilestoneInline]
 
 

@@ -30,6 +30,8 @@ class Contest(models.Model):
     end_time = models.DateTimeField()
     team_size = models.PositiveSmallIntegerField()
     title = models.CharField(max_length=100, unique=True)
+    scoreboard_freeze = models.BooleanField(default=False)
+    scoreboard_order_freeze = models.BooleanField(default=False)
 
 
 class Milestone(models.Model):
