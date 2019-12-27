@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from apps.contest.services.create_team_tasks import GetOrCreateTeamTasks
+from apps.contest.services.trial_services.scoring_service import JudgeService
 from apps.contest.services.trial_services.trial_corrector import TrialCorrector
 from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
 
@@ -56,7 +57,7 @@ class CreateTrialAPIView(GenericAPIView):
         maker = trial_maker.TrialMaker(request, contest_id, milestone_id, task_id)
         trial, errors = maker.make_trial()
         if trial is None:
-            team_task = get_object_or_404(contest_models.TeamTask, team=request.user.participant.team,task__id=task_id)
+            team_task = get_object_or_404(contest_models.TeamTask, team=request.user.participant.team, task__id=task_id)
             trials = contest_models.Trial.objects.filter(team_task=team_task, submit_time__isnull=True)
             if trials.count() == 1:
                 data = self.get_serializer(trials.get()).data
@@ -76,6 +77,7 @@ class SubmitTrialAPIView(GenericAPIView):
         trial, valid, errors = trial_submitter.validate()
         if not valid:
             return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
-        trial_corrector = TrialCorrector(trial=trial)
-        score = trial_corrector()
+
+        judge_trial = JudgeService(trial, errors)
+        score = judge_trial()
         return Response(data={'trial': self.get_serializer(trial).data, 'score': score}, status=status.HTTP_200_OK)
