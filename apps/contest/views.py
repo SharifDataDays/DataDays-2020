@@ -73,10 +73,9 @@ class SubmitTrialAPIView(GenericAPIView):
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):
         trial_submitter = TrialSubmitValidation(request, contest_id, milestone_id, task_id, trial_id)
-        print(request.data)
         trial, valid, errors = trial_submitter.validate()
         if not valid:
-            return Response(data={'errors', errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
         trial_corrector = TrialCorrector(trial=trial)
         score = trial_corrector()
         return Response(data={'trial': self.get_serializer(trial).data, 'score': score}, status=status.HTTP_200_OK)

@@ -4,7 +4,7 @@ import json
 from typing import List, Union
 
 from apps.contest.models import Trial, QuestionSubmission
-from apps.contest.serializers import TrialSerializer
+from apps.contest.serializers import TrialPostSerializer
 from apps.question.models import QuestionTypes, AnswerDataTypes
 from apps.contest.Exceptions import trial_submit_exception
 
@@ -32,14 +32,16 @@ class TrialSubmitValidation:
 
     def get_trial(self):
         try:
-            trial = TrialSerializer(data=self._request.data)
+            trial = TrialPostSerializer(data=self._request.data)
             if trial.is_valid():
                 trial.save()
-        except Trial.DoesNotExist:
+                return Trial.objects.get(id=self.trial_id)
+            else:
+                return None
+        except Exception:
             self._valid = False
             self._errors += trial_submit_exception.ErrorMessages.TRIAL_NOT_FOUNT
             return None
-        return trial
 
     def _check_different_question_types(self):
         for submission in self._question_submissions.all():
@@ -65,7 +67,7 @@ class TrialSubmitValidation:
                     self._validate_numeric_range(submission)
 
     def _common_validations(self, submission):
-        if not isinstance(submission.question.answer, str):
+        if not isinstance(submission.answer, str):
             self._errors += trial_submit_exception.ErrorMessages.ANSWER_NOT_STRING
             self._valid = False
             return False

@@ -49,9 +49,11 @@ class QuestionSubmissionSerializer(ModelSerializer):
 
 class QuestionSubmissionPostSerializer(ModelSerializer):
 
+    id = serializers.ModelField(model_field=contest_models.QuestionSubmission()._meta.get_field('id'))
+
     class Meta:
         model = contest_models.QuestionSubmission
-        fields = ['question', 'answer']
+        fields = ['id', 'answer']
 
 
 class TrialSerializer(ModelSerializer):
@@ -65,12 +67,28 @@ class TrialSerializer(ModelSerializer):
 
 class TrialPostSerializer(ModelSerializer):
 
+    id = serializers.ModelField(model_field=contest_models.Trial()._meta.get_field('id'))
     question_submissions = QuestionSubmissionPostSerializer(many=True)
     final_submit = serializers.BooleanField(default=False)
 
     class Meta:
         model = contest_models.Trial
-        fields = ['question_submissions', 'final_submit']
+        fields = ['id', 'question_submissions', 'final_submit']
+
+    def save(self):
+        tf = contest_models.Trial.objects.filter(id=self.validated_data['id'])
+        if tf.count() != 1:
+            raise Exception
+        trial = tf.get()
+        qss = trial.question_submissions.all()
+        for qs in self.validated_data['question_submissions']:
+            qsf = qss.filter(id=qs['id'])
+            if qsf.count() != 1:
+                raise Exception
+            q = qsf.get()
+            q.answer = qs['answer']
+            q.save()
+
 
 class TeamTaskSerializer(ModelSerializer):
     task = TaskSerializer()
