@@ -1,4 +1,5 @@
 from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 
 from apps.participation.serializers import TeamSerializer
 from apps.question.serializers import QuestionSerializer
@@ -31,6 +32,13 @@ class ContestSerializer(ModelSerializer):
         fields = ['id', 'title', 'team_size', 'start_time', 'end_time', 'milestones']
 
 
+class ScoreSerializer(ModelSerializer):
+
+    class Meta:
+        model = contest_models.Score
+        fields = '__all__'
+
+
 class QuestionSubmissionSerializer(ModelSerializer):
     question = QuestionSerializer()
 
@@ -39,13 +47,30 @@ class QuestionSubmissionSerializer(ModelSerializer):
         fields = ['id', 'question', 'answer', 'score']
 
 
+class QuestionSubmissionPostSerializer(ModelSerializer):
+
+    class Meta:
+        model = contest_models.QuestionSubmission
+        fields = ['question', 'answer']
+
+
 class TrialSerializer(ModelSerializer):
-    questions = QuestionSubmissionSerializer(many=True, read_only=True)
+    question_submissions = QuestionSubmissionSerializer(many=True, read_only=True)
+    score = ScoreSerializer()
 
     class Meta:
         model = contest_models.Trial
-        fields = ['id', 'score', 'questions', 'due_time', 'start_time', 'submit_time']
+        fields = ['id', 'score', 'question_submissions', 'due_time', 'start_time', 'submit_time']
 
+
+class TrialPostSerializer(ModelSerializer):
+
+    question_submissions = QuestionSubmissionPostSerializer(many=True)
+    final_submit = serializers.BooleanField(default=False)
+
+    class Meta:
+        model = contest_models.Trial
+        fields = ['question_submissions', 'final_submit']
 
 class TeamTaskSerializer(ModelSerializer):
     task = TaskSerializer()
@@ -54,3 +79,5 @@ class TeamTaskSerializer(ModelSerializer):
     class Meta:
         model = contest_models.TeamTask
         fields = ['id', 'contest_finished', 'max_trials_count', 'last_trial_time', 'team', 'task']
+
+

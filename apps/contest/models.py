@@ -7,12 +7,14 @@ from ..question.models import QuestionTypes
 # Create your models here.
 
 class ScoreStatusTypes:
+    UNDEF = 'undefined'
     SCORED = 'scored'
     QUEUED = 'queued'
     JUDGING = 'judging'
     FAILED = 'failed'
     ERROR = 'error'
     TYPES = (
+        (UNDEF, 'undefined'),
         (SCORED, 'scored'),
         (QUEUED, 'queued'),
         (JUDGING, 'judging'),
@@ -57,7 +59,7 @@ class TeamTask(models.Model):
 
 class Trial(models.Model):
     team_task = models.ForeignKey('contest.TeamTask', related_name='trials', on_delete=models.CASCADE)
-    score = models.PositiveSmallIntegerField(default=0)
+    score = models.OneToOneField('contest.Score', related_name='trial', on_delete=models.CASCADE, null=True)
     due_time = models.DateTimeField()
     start_time = models.DateTimeField(auto_now_add=True)
     submit_time = models.DateTimeField(null=True, blank=True)
@@ -83,6 +85,6 @@ class QuestionSubmission(models.Model):
 
 
 class Score(models.Model):
-    number_score = models.FloatField(default=0)
-    status = models.CharField(choices=ScoreStatusTypes.TYPES, max_length=10)
-    info = models.CharField(max_length=1000, blank=True, null=False)
+    number = models.FloatField(default=0)
+    status = models.CharField(choices=ScoreStatusTypes.TYPES, max_length=10, default=ScoreStatusTypes.UNDEF)
+    info = models.CharField(max_length=1000, blank=True, null=False, default='')

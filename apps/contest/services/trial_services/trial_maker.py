@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from apps.contest.Exceptions import trial_validation_exception
-from apps.contest.models import Trial, TeamTask, QuestionSubmission, Task, TrialRecipe
+from apps.contest.models import Trial, TeamTask, QuestionSubmission, Task, TrialRecipe, Score
 
 from apps.question.models import Question
 
@@ -43,14 +43,21 @@ class TrialMaker:
         valid, errors = validator.validate()
         if not valid:
             return None, errors
-        if not self._has_uncompleted_trial():
-            self.task = self.team_task.task
-            self.trial_recipe = self.task.trial_recipe
-            self.previous_trials = self.team_task.trials
-            self.before_selected_questions_ids = self._set_before_selected_questions_ids()
-            self.trial_questions = self._set_trial_questions()
-            self.trial = self._create_trial()
-            self.question_submissions = self._create_trial_question_submissions()
+        print(self._has_uncompleted_trial())
+        if self._has_uncompleted_trial():
+            try:
+                self.task = self.team_task.task
+                self.trial_recipe = self.task.trial_recipe
+                self.previous_trials = self.team_task.trials
+                self.before_selected_questions_ids = self._set_before_selected_questions_ids()
+                self.trial_questions = self._set_trial_questions()
+                self.trial = self._create_trial()
+                self.question_submissions = self._create_trial_question_submissions()
+            except Exception:
+                if self.trial is not None:
+                    self.trial.delete()
+                if self.question_submissions is not None:
+                    [qs.delete() for qs in self.question_submissions]
         return self.trial, errors
 
     def _set_team_task(self):
@@ -64,7 +71,10 @@ class TrialMaker:
 
     def _has_uncompleted_trial(self):
         try:
-            existing_trial = Trial.objects.get(submit_time__isnull=True)
+            existing_trial = Trial.objects.filter(
+                    team_task=self.team_task,
+                    submit_time__isnull=True
+                )
             self.trial = existing_trial
         except (Trial.DoesNotExist, Trial.MultipleObjectsReturned):
             return False
@@ -72,28 +82,40 @@ class TrialMaker:
 
     def _set_before_selected_questions_ids(self):
         questions = []
-        for trial in self.previous_trials:
+        for trial in self.previous_trials.all():
             questions += QuestionSubmission.objects.filter(trial=trial).values_list('question_id', flat=True)
         return questions
 
     def _set_trial_questions(self):
         questions = []
-        for question_recipe in self.trial_recipe.question_recipes:
-            questions_available = Question.objects.filter(task=self.task).exlclude(
-                id__in=self.before_selected_questions_ids).filter(type=question_recipe.question_type)
-            random.shuffle(question_recipe)
-            questions += [(question, question_recipe.priority) for question in
-                          questions_available[:question_recipe.count]]
+        for question_recipe in self.trial_recipe.question_recipes.all():
+            questions_available = Question.objects.filter(task=self.task, type=question_recipe.question_type)
+            repeated_questions = list(questions_available.filter(id__in=self.before_selected_questions_ids))
+            questions_available = list(questions_available)
+            while len(repeated_questions) > 0 and len(questions_available) > question_recipe.count:
+                removed = repeated_questions[0]
+                questions_available.remove(removed)
+                repeated_questions.remove(removed)
+            random.shuffle(questions_available)
+            final_count = min(len(questions_available), question_recipe.count)
+            questions += [(question, question_recipe.priority)
+                    for question in questions_available[:final_count]]
         return sorted(questions, key=lambda x: x[1])
 
     def _create_trial_question_submissions(self):
         question_submissions = []
         for question, priority in self.trial_questions:
-            question_submissions += QuestionSubmission(trial=self.trial,
-                                                       question=question,
-                                                       question_priority=priority)
-
-        QuestionSubmission.objects.bulk_create(question_submissions)
+            sc = Score()
+            sc.save()
+            qs = QuestionSubmission(
+                    trial=self.trial,
+                    question=question,
+                    question_priority=priority,
+                    answer=[],
+                    score=sc
+                )
+            qs.save()
+            question_submissions.append(qs)
 
         return question_submissions
 
@@ -121,25 +143,27 @@ class TrialValidation:
 
     def _content_finished_check(self):
         if not self.team_task.content_finished:
-            self.errors += _(trial_validation_exception.ErrorMessages.CONTENT_NOT_FINISHED)
+            self.errors.append(_(trial_validation_exception.ErrorMessages.CONTENT_NOT_FINISHED))
             self.valid = False
 
     def _trial_cooldown_check(self):
-        trials_count = len(self.team_task.trials)
+        trials_count = self.team_task.trials.count()
         if trials_count != 0:
-            last_trial_time = self.team_task.trials[-1].submit_time
-            if (
-                    timezone.now() - last_trial_time).total_seconds() // Constants.HOUR.value <= self.task.trial_cooldown:
-                self.errors += _(trial_validation_exception.ErrorMessages.COOLING_DOWN)
+            last_trial_time = self.team_task.trials.last().submit_time
+            if last_trial_time is None:
+                self.errors.append(_(trial_validation_exception.ErrorMessages.ACTIVE_TRIAL))
+                self.valid = False
+            elif (timezone.now() - last_trial_time).total_seconds() // Constants.HOUR.value <= self.task.trial_cooldown:
+                self.errors.append(_(trial_validation_exception.ErrorMessages.COOLING_DOWN))
                 self.valid = False
 
     def _trial_count_limit_check(self):
-        trials_count = len(self.team_task.trials)
+        trials_count = self.team_task.trials.count()
         if trials_count >= self.task.max_trials_count:
-            self.errors += _(trial_validation_exception.ErrorMessages.TRIAL_COUNT_LIMIT_REACHED)
+            self.errors.append(_(trial_validation_exception.ErrorMessages.TRIAL_COUNT_LIMIT_REACHED))
 
     def _milestone_date_range_check(self):
         now = timezone.now()
-        milestone_start = self.task.milestone.start_date
+        milestone_start = self.task.milestone.start_time
         if now < milestone_start:
-            self.errors += _(trial_validation_exception.ErrorMessages.OUT_OF_DATE_RANGE)
+            self.errors.append(_(trial_validation_exception.ErrorMessages.OUT_OF_DATE_RANGE))

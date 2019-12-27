@@ -44,7 +44,7 @@ class Question(PolymorphicModel):
     max_score = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        return "id: " + str(self.id) + "  Topic: " + str(self.topic) + " "
+        return "id: " + str(self.id) + " task: " + str(self.task.topic)
 
 
 class NeededFilesForQuestionJudgment(models.Model):
@@ -137,4 +137,4 @@ class Choices(models.Model):
     def __str__(self):
         return "Label: " + str(self.label) + " Question_id: " + str(
             self.selective_question.id) + " Question_Topic: " + str(
-            self.selective_question.topic) + " "
+            self.selective_question.task.topic) + " "

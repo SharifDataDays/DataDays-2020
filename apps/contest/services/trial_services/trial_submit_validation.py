@@ -31,7 +31,10 @@ class TrialSubmitValidation:
 
     def get_trial(self):
         try:
-            trial = Trial.objects.get(id=self.trial_id)
+#            trial = Trial.objects.get(id=self.trial_id)
+            from apps.contest.serializers import TrialPostSerializer
+            trial = TrialPostSerializer(self._request.data)
+            print(trial.__dict__)
         except Trial.DoesNotExist:
             self._valid = False
             self._errors += trial_submit_exception.ErrorMessages.TRIAL_NOT_FOUNT
@@ -39,7 +42,7 @@ class TrialSubmitValidation:
         return trial
 
     def _check_different_question_types(self):
-        for submission in self._question_submissions:
+        for submission in self._question_submissions.all():
             if not literal_eval(submission.answer):
                 pass
             else:
