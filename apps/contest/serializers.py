@@ -30,7 +30,7 @@ class ContestSerializer(ModelSerializer):
     class Meta:
         model = contest_models.Contest
         fields = ['id', 'title', 'team_size', 'start_time', 'end_time', 'milestones', 'scoreboard_freeze',
-                  'scoreboard_order_freeze']
+                  'scoreboard_order_freeze', 'scoring_type']
 
 
 class ScoreSerializer(ModelSerializer):
@@ -51,7 +51,6 @@ class QuestionSubmissionSerializer(ModelSerializer):
 class QuestionSubmissionPostSerializer(ModelSerializer):
     id = serializers.ModelField(model_field=contest_models.QuestionSubmission()._meta.get_field('id'))
     score = ScoreSerializer(read_only=True)
-
 
     class Meta:
         model = contest_models.QuestionSubmission

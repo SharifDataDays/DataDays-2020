@@ -23,6 +23,15 @@ class ScoreStatusTypes:
     )
 
 
+class TaskScoringType:
+    FINAL_TRIAL = 'final_trial'
+    WEIGHTED_AVERAGE = 'weighted_average'
+    TYPES = (
+        (FINAL_TRIAL, 'final_trial'),
+        (WEIGHTED_AVERAGE, 'weighted_average'),
+    )
+
+
 class Contest(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
@@ -50,6 +59,8 @@ class Task(models.Model):
     max_trials_count = models.PositiveSmallIntegerField(default=3)
     trial_cooldown = models.PositiveSmallIntegerField()
     trial_time = models.PositiveSmallIntegerField()
+    scoring_type = models.CharField(choices=TaskScoringType.TYPES, max_length=10,
+                                    default=TaskScoringType.WEIGHTED_AVERAGE)
 
 
 class TeamTask(models.Model):
