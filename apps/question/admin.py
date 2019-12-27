@@ -89,3 +89,10 @@ class NumericRangeAdmin(PolymorphicChildModelAdmin, CommonAdminFeatures):
     inlines = [FilesInline]
     base_model = question_models.Question
     show_in_index = True
+
+
+@admin.register(question_models.ManualJudgment)
+class ManualJudgmentAdmin(PolymorphicChildModelAdmin, CommonAdminFeatures):
+    inlines = [FilesInline]
+    base_model = question_models.Question
+    show_in_index = True

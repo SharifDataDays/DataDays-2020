@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -77,7 +78,8 @@ class SubmitTrialAPIView(GenericAPIView):
         trial, valid, errors = trial_submitter.validate()
         if not valid:
             return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
-
+        trial.submit_time = timezone.now()
+        trial.save()
         judge_trial = JudgeService(trial, errors)
         score = judge_trial()
         return Response(data={'trial': self.get_serializer(trial).data, 'score': score}, status=status.HTTP_200_OK)

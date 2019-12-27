@@ -22,18 +22,23 @@ class JudgeService:
         return self.judge_trial()
 
     def judge_trial(self):
-        self.trial.score = sum([self.get_score(question) for question in self.trial.question_submissions])
+        self.trial.score = sum([self.get_score(question) for question in self.trial.question_submissions.all()])
         self.trial.save()
         return self.trial.score
 
     def get_score(self, question_submission):
-        score = Score()
+        if not hasattr(question_submission, 'score'):
+            score = Score()
+        else:
+            score = question_submission.score
+        print(question_submission.question_id)
         score.question_submission = question_submission
         for id, error in self.errors:
             if question_submission.question_id == id:
                 score.number = 0
                 score.status = ScoreStatusTypes.ERROR
                 score.status = error
+                score.save()
                 return 0
 
         question = question_submission.question
@@ -48,13 +53,18 @@ class JudgeService:
             function_name = question.judge_function_name
             answer_name, answer = self.get_parameters(question.type, answer)
             call_function = f'{function_name}({answer_name}={answer})'
-            score.number = exec(call_function)
+            if question.type == QuestionTypes.SINGLE_SELECT:
+                call_function = f'{function_name}({answer_name}=\'{answer}\')'
+            print(call_function)
+            score.number = eval(call_function) * question.max_score
             score.status = ScoreStatusTypes.SCORED
+            score.info = "Judged Successfully"
         except JudgeException as e:
             score.status = ScoreStatusTypes.FAILED
             score.info = str(e.ERROR_MESSAGE)
-        except Exception:
+        except Exception as e:
             score.status = ScoreStatusTypes.ERROR
+            print(e)
             score.info = 'judge function runtime error'
 
         score.save()
