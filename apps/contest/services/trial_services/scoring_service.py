@@ -22,7 +22,9 @@ class JudgeService:
         return self.judge_trial()
 
     def judge_trial(self):
-        return sum([self.get_score(question) for question in self.trial.question_submissions])
+        self.trial.score = sum([self.get_score(question) for question in self.trial.question_submissions])
+        self.trial.save()
+        return self.trial.score
 
     def get_score(self, question_submission):
         score = Score()
