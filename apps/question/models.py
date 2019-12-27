@@ -1,4 +1,7 @@
 import enum
+import os
+
+from django.conf import settings
 from django.db import models
 from polymorphic.models import PolymorphicModel
 
@@ -39,17 +42,29 @@ class Question(PolymorphicModel):
     task = models.ForeignKey('contest.Task', related_name='questions', on_delete=None)
 
     judge_function = models.CharField(max_length=8000)
+    judge_function_name = models.CharField(max_length=150, default='function')
     body = models.TextField()
     type = models.CharField(max_length=50, choices=QuestionTypes.TYPES)
     max_score = models.PositiveSmallIntegerField()
+
+    def dir_path(self):
+        return settings.MEDIA_ROOT + '/private/'
 
     def __str__(self):
         return "id: " + str(self.id) + " task: " + str(self.task.topic)
 
 
 class NeededFilesForQuestionJudgment(models.Model):
+    def upload_path(instance, filename):
+        if not os.path.exists('private/'):
+            os.mkdir('private/')
+        if not os.path.exists('private/' + str(instance.question_id)):
+            os.mkdir('private/' + str(instance.question_id))
+        if not os.path.exists('private/' + str(instance.question_id) + '/' + filename):
+            os.mkdir('private/' + str(instance.question_id)) + '/' + filename
+        return os.path.join('private/', str(instance.question_id), filename)
     question = models.ForeignKey(Question, related_name='files', on_delete=models.CASCADE)
-    file = models.FileField()
+    file = models.FileField(upload_to=upload_path, unique=True)
 
 
 class SingleAnswer(Question):

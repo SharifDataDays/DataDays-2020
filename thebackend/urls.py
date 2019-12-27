@@ -30,7 +30,7 @@ urlpatterns = [
     path('api/subscribe/', include('apps.notification.urls')),
     path('api/go/', include('apps.go.urls')),
     path('api/contest/', include('apps.contest.urls')),
-
+    path('api/question/', include('apps.question.urls')),
 ]
 
 if settings.DEBUG:
