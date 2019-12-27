@@ -1,6 +1,6 @@
 import ast
 
-from apps.contest.models import ScoreStatusTypes, Score
+from apps.contest.models import ScoreStatusTypes, Score, TaskScoringType
 from apps.question.models import QuestionTypes
 
 
@@ -24,6 +24,7 @@ class JudgeService:
     def judge_trial(self):
         self.trial.score = sum([self.get_score(question) for question in self.trial.question_submissions.all()])
         self.trial.save()
+        set_task_score(self.trial)
         return self.trial.score
 
     def get_score(self, question_submission):
@@ -78,3 +79,22 @@ class JudgeService:
             return 'answers', answer
         elif question_type == QuestionTypes.FILE_UPLOAD:
             return 'file_path', file_answer
+
+
+def set_task_score(trial):
+    task = trial.team_task.task
+    if task.scoring_type == TaskScoringType.FINAL_TRIAL:
+        if trial.team_task.final_trial is not None:
+            trial.team_task.final_score = trial.score.number
+            trial.team_task.save()
+    else:
+        trials = trial.team_task.trials.all()
+        if len(trials) == 0:
+            return
+        trials.sort(key=lambda x: x.id)
+        team_task_score = 0
+        factors = [1, 0.9, 0.7, 0.5]
+        for i in range(len(trials)):
+            team_task_score += factors[i] * trials[i]
+        trial.team_task.final_score = team_task_score / len(trials)
+        trial.team_task.save()

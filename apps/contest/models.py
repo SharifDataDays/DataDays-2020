@@ -70,6 +70,7 @@ class TeamTask(models.Model):
     team = models.ForeignKey('participation.Team', related_name='tasks', on_delete=models.CASCADE)
     content_finished = models.BooleanField(default=False)
     final_score = models.FloatField(blank=True, null=True)
+    final_trial = models.OneToOneField('contest.Trial', null=True, blank=True, on_delete=models.CASCADE)
 
 
 class Trial(models.Model):
