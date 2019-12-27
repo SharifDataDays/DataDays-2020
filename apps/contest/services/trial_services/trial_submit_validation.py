@@ -38,7 +38,7 @@ class TrialSubmitValidation:
                 return Trial.objects.get(id=self.trial_id)
             else:
                 return None
-        except Exception:
+        except Trial.DoesNotExist as e:
             self._valid = False
             self._errors += trial_submit_exception.ErrorMessages.TRIAL_NOT_FOUNT
             return None

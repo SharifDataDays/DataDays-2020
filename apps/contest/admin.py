@@ -103,3 +103,8 @@ class QuestionSubmissionAdmin(admin.ModelAdmin):
 
     get_submission_score.short_description = 'Question Submission Score'
     get_submission_score.admin_order_field = 'question_submission_score'
+
+
+@admin.register(contest_models.Score)
+class ScoreAdmin(admin.ModelAdmin):
+    pass

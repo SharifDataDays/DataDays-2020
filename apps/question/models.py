@@ -55,7 +55,7 @@ class Question(PolymorphicModel):
         while function[name_start] == " ":
             name_start += 1
         name_end = function.find("(")
-        function_new_name = uuid.uuid4().hex[:16]
+        function_new_name = 'q_' + uuid.uuid4().hex[:16]
         return function[:name_start] + function_new_name + function[name_end:], function_new_name
 
     def dir_path(self):
