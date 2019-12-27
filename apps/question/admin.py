@@ -25,7 +25,7 @@ class CommonAdminFeatures(admin.ModelAdmin):
         models.TextField: {'widget': AdminMartorWidget},
         models.CharField: {'widget': AceWidget(mode='python')}
     }
-    readonly_fields = ['type']
+    readonly_fields = ['type', 'judge_function_name']
     list_display = ['id', '__str__', 'max_score', 'type']
     list_display_links = ['__str__', 'id']
     list_editable = ['max_score']

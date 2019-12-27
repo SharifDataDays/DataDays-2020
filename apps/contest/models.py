@@ -59,7 +59,7 @@ class TeamTask(models.Model):
 
 class Trial(models.Model):
     team_task = models.ForeignKey('contest.TeamTask', related_name='trials', on_delete=models.CASCADE)
-    score = models.OneToOneField('contest.Score', related_name='trial', on_delete=models.CASCADE, null=True)
+    score = models.FloatField(null=True, blank=True)
     due_time = models.DateTimeField()
     start_time = models.DateTimeField(auto_now_add=True)
     submit_time = models.DateTimeField(null=True, blank=True)

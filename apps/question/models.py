@@ -1,5 +1,7 @@
 import enum
 import os
+import re
+import uuid
 
 from django.conf import settings
 from django.db import models
@@ -47,6 +49,15 @@ class Question(PolymorphicModel):
     type = models.CharField(max_length=50, choices=QuestionTypes.TYPES)
     max_score = models.PositiveSmallIntegerField()
 
+    @staticmethod
+    def change_function_name(function: str):
+        name_start = function.find(" ")
+        while function[name_start] == " ":
+            name_start += 1
+        name_end = function.find("(")
+        function_new_name = uuid.uuid4().hex[:16]
+        return function[:name_start] + function_new_name + function[name_end:], function_new_name
+
     def dir_path(self):
         return settings.MEDIA_ROOT + 'private/' + str(self.id)
 
@@ -67,6 +78,7 @@ class SingleAnswer(Question):
 
     def pre_save(self):
         self.type = QuestionTypes.SINGLE_ANSWER
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
