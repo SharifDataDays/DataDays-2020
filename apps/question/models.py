@@ -91,6 +91,7 @@ class MultiAnswer(Question):
 
     def pre_save(self):
         self.type = QuestionTypes.MULTI_ANSWER
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
@@ -104,6 +105,7 @@ class Selective(Question):
 class SingleSelect(Selective):
     def pre_save(self):
         self.type = QuestionTypes.SINGLE_SELECT
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
@@ -115,6 +117,7 @@ class MultiSelect(Selective):
 
     def pre_save(self):
         self.type = QuestionTypes.MULTI_SELECT
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
@@ -127,6 +130,7 @@ class FileUpload(Question):
 
     def pre_save(self):
         self.type = QuestionTypes.FILE_UPLOAD
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
@@ -136,6 +140,7 @@ class FileUpload(Question):
 class ManualJudgment(Question):
     def pre_save(self):
         self.type = QuestionTypes.MANUAL_JUDGMENT
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
@@ -145,6 +150,7 @@ class ManualJudgment(Question):
 class NumericRange(Question):
     def pre_save(self):
         self.type = QuestionTypes.NUMERIC_RANGE
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
