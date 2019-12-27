@@ -66,8 +66,8 @@ class Question(PolymorphicModel):
 
 
 class NeededFilesForQuestionJudgment(models.Model):
-    def upload_path(instance, filename):
-        return os.path.join('private/', str(instance.question_id), filename)
+    def upload_path(self, filename):
+        return os.path.join('private/', str(self.question_id), filename)
 
     question = models.ForeignKey(Question, related_name='files', on_delete=models.CASCADE)
     file = models.FileField(upload_to=upload_path, unique=True)
