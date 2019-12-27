@@ -48,7 +48,7 @@ class Question(PolymorphicModel):
 
 
 class NeededFilesForQuestionJudgment(models.Model):
-    question = models.ForeignKey(Question, related_name='judgment_files', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name='files', on_delete=models.CASCADE)
     file = models.FileField()
 
 
