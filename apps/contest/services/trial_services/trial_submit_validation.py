@@ -67,7 +67,7 @@ class TrialSubmitValidation:
                     self._validate_numeric_range(submission)
 
     def _common_validations(self, submission):
-        if not isinstance(submission.answer, str):
+        if submission.answer and not isinstance(submission.answer, str):
             self._errors += (submission.question_id, trial_submit_exception.ErrorMessages.ANSWER_NOT_STRING)
             self._valid = False
             return False
@@ -166,7 +166,7 @@ class TrialSubmitValidation:
             return
 
     def _validate_file_upload(self, submission):
-        answer = submission.answer
+        answer = submission.file
         file_format = submission.question.file_format
         file_size_limit = submission.question.file_size_limit
 

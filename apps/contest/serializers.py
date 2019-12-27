@@ -51,10 +51,11 @@ class QuestionSubmissionSerializer(ModelSerializer):
 class QuestionSubmissionPostSerializer(ModelSerializer):
     id = serializers.ModelField(model_field=contest_models.QuestionSubmission()._meta.get_field('id'))
     score = ScoreSerializer(read_only=True)
+    file = serializers.FileField(required=False)
 
     class Meta:
         model = contest_models.QuestionSubmission
-        fields = ['id', 'answer', 'score']
+        fields = ['id', 'answer', 'score', 'file']
 
 
 class TrialSerializer(ModelSerializer):

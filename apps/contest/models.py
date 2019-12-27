@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -94,6 +96,12 @@ class QuestionSubmission(models.Model):
     question = models.ForeignKey('question.Question', related_name='question_submissions', on_delete=models.CASCADE)
     question_priority = models.PositiveSmallIntegerField()
     answer = models.TextField(blank=True, null=False)
+
+    def upload_path(self, filename):
+        return os.path.join('private', str(self.trial.team_task.team.name), str(self.trial_id), str(self.question_id),
+                            filename)
+
+    file_answer = models.FileField(blank=True, null=True, upload_to=upload_path)
 
 
 class Score(models.Model):

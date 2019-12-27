@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.generics import GenericAPIView
+from rest_framework.parsers import FileUploadParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
@@ -70,6 +71,7 @@ class CreateTrialAPIView(GenericAPIView):
 
 
 class SubmitTrialAPIView(GenericAPIView):
+    parser_classes = (MultiPartParser,)
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.TrialPostSerializer
 
