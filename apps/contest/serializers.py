@@ -2,7 +2,7 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
 from apps.participation.serializers import TeamSerializer
-from apps.question.serializers import QuestionSerializer, QuestionPolymorphismSerializer
+from apps.question.serializers import QuestionPolymorphismSerializer
 from apps.resources.serializers import DocumentSerializer
 
 from . import models as contest_models
@@ -45,7 +45,7 @@ class QuestionSubmissionSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.QuestionSubmission
-        fields = ['id', 'question', 'answer', 'score']
+        fields = ['id', 'question', 'answer', 'file_answer', 'score']
 
 
 class QuestionSubmissionPostSerializer(ModelSerializer):
