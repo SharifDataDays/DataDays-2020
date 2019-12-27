@@ -9,11 +9,15 @@ from django_ace import AceWidget
 from . import models as question_models
 
 
-class Choices(admin.StackedInline):
+class ChoicesInline(admin.StackedInline):
     model = question_models.Choices
     formfield_overrides = {
         models.TextField: {'widget': AdminMartorWidget},
     }
+
+
+class FilesInline(admin.StackedInline):
+    model = question_models.NeededFilesForQuestionJudgment
 
 
 class CommonAdminFeatures(admin.ModelAdmin):
@@ -31,6 +35,7 @@ class CommonAdminFeatures(admin.ModelAdmin):
 
 @admin.register(question_models.Question)
 class QuestionAdmin(PolymorphicParentModelAdmin, CommonAdminFeatures):
+    inlines = [FilesInline]
     base_model = question_models.Question
 
     child_models = [question_models.SingleAnswer, question_models.MultiAnswer,
@@ -46,37 +51,41 @@ class QuestionAdmin(PolymorphicParentModelAdmin, CommonAdminFeatures):
 
 @admin.register(question_models.SingleAnswer)
 class SingleAnswerAdmin(PolymorphicChildModelAdmin, CommonAdminFeatures):
+    inlines = [FilesInline]
     base_model = question_models.Question
     show_in_index = True
 
 
 @admin.register(question_models.MultiAnswer)
 class MultiAnswerAdmin(PolymorphicChildModelAdmin, CommonAdminFeatures):
+    inlines = [FilesInline]
     base_model = question_models.Question
     show_in_index = True
 
 
 @admin.register(question_models.SingleSelect)
 class SingleSelectAdmin(PolymorphicChildModelAdmin, CommonAdminFeatures):
-    inlines = [Choices]
+    inlines = [ChoicesInline, FilesInline]
     base_model = question_models.Question
     show_in_index = True
 
 
 @admin.register(question_models.MultiSelect)
 class MultiSelectAdmin(PolymorphicChildModelAdmin, CommonAdminFeatures):
-    inlines = [Choices]
+    inlines = [ChoicesInline, FilesInline]
     base_model = question_models.Question
     show_in_index = True
 
 
 @admin.register(question_models.FileUpload)
 class FileUploadAdmin(PolymorphicChildModelAdmin, CommonAdminFeatures):
+    inlines = [FilesInline]
     base_model = question_models.Question
     show_in_index = True
 
 
 @admin.register(question_models.NumericRange)
 class NumericRangeAdmin(PolymorphicChildModelAdmin, CommonAdminFeatures):
+    inlines = [FilesInline]
     base_model = question_models.Question
     show_in_index = True
