@@ -1,6 +1,7 @@
 import ast
+from typing import List, Tuple
 
-from apps.contest.models import ScoreStatusTypes, Score, TaskScoringType
+from apps.contest.models import ScoreStatusTypes, Score, TaskScoringType, QuestionSubmission, Trial
 from apps.question.models import QuestionTypes
 
 
@@ -32,7 +33,6 @@ class JudgeService:
             score = Score()
         else:
             score = question_submission.score
-        print(question_submission.question_id)
         score.question_submission = question_submission
         for id, error in self.errors:
             if question_submission.question_id == id:
@@ -81,11 +81,33 @@ class JudgeService:
             return 'file_path', file_answer
 
 
-def set_task_score(trial):
+class JudgeQuestionSubmission:
+    """ This class judges a single QuestionSubmission
+        and generate a number as it's score by calling
+        a judge function that entered in admin panel
+        for question.
+    """
+
+    def __init__(self, question_submission, errors):
+        self.question_submission: QuestionSubmission = question_submission
+        self.errors: List[Tuple[int, str]] = errors if errors else []
+
+    def judge(self) -> None:
+        if not hasattr(self.question_submission, 'score'):
+            score = Score()
+        else:
+            score = self.question_submission.score
+        score.question_submission = self.question_submission
+
+    def check_for_errors(self):
+        pass
+
+
+def set_task_score(trial: Trial) -> None:
     task = trial.team_task.task
     if task.scoring_type == TaskScoringType.FINAL_TRIAL:
         if trial.team_task.final_trial is not None:
-            trial.team_task.final_score = trial.score.number
+            trial.team_task.final_score = trial.score  # TODO debug this line, trial score is a float field not an object
             trial.team_task.save()
     else:
         trials = trial.team_task.trials.all()

@@ -112,4 +112,5 @@ class ScoreAdmin(admin.ModelAdmin):
 
 @admin.register(contest_models.Rejudge)
 class RejudgeAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', '__str__', 'date']
+    list_display_links = ['id', '__str__']
