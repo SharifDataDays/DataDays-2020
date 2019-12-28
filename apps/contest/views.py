@@ -10,6 +10,7 @@ from apps.contest.services.create_team_tasks import GetOrCreateTeamTasks
 from apps.contest.services.trial_services.scoring_service import JudgeService
 from apps.contest.services.trial_services.trial_corrector import TrialCorrector
 from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
+from apps.contest.tasks import scoring_service_task
 
 from apps.participation.models import Team, Participant
 
@@ -82,6 +83,8 @@ class SubmitTrialAPIView(GenericAPIView):
             return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
         trial.submit_time = timezone.now()
         trial.save()
-        judge_trial = JudgeService(trial, errors)
-        score = judge_trial()
-        return Response(data={'trial': self.get_serializer(trial).data, 'score': score}, status=status.HTTP_200_OK)
+
+        # Scoring Service Task Queued
+        scoring_service_task.apply_async([trial, errors])
+
+        return Response(data={'trial': self.get_serializer(trial).data}, status=status.HTTP_200_OK)
