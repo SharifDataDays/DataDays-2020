@@ -111,3 +111,19 @@ class Score(models.Model):
                                                on_delete=models.CASCADE)
     status = models.CharField(choices=ScoreStatusTypes.TYPES, max_length=10, default=ScoreStatusTypes.UNDEF)
     info = models.CharField(max_length=1000, blank=True, null=False, default='')
+
+
+class Rejudge(models.Model):
+    question = models.ForeignKey('question.Question', related_name='rejudges', on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    reason = models.CharField(max_length=1000, blank=True, null=False)
+
+    def pre_save(self):
+        # TODO first we need to change judging system,
+        # TODO the system should capable of judging a question submission alone and
+        # TODO set it's score
+        pass
+
+    def save(self, *args, **kwargs):
+        self.pre_save()
+        super().save(*args, **kwargs)

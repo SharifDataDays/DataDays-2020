@@ -108,3 +108,8 @@ class QuestionSubmissionAdmin(admin.ModelAdmin):
 @admin.register(contest_models.Score)
 class ScoreAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(contest_models.Rejudge)
+class RejudgeAdmin(admin.ModelAdmin):
+    pass

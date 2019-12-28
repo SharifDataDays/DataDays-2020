@@ -85,6 +85,6 @@ class SubmitTrialAPIView(GenericAPIView):
         trial.save()
 
         # Scoring Service Task Queued
-        scoring_service_task.apply_async([trial, errors])
+        scoring_service_task.apply_async([trial, errors], queue='contest')
 
         return Response(data={'trial': self.get_serializer(trial).data}, status=status.HTTP_200_OK)
