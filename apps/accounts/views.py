@@ -28,44 +28,43 @@ class SignUpView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if User.objects.filter(email=serializer.initial_data['email']).count() > 0:
-            return Response({'error': 'A user with this email currently exists'}, status=400)
-        if serializer.is_valid(raise_exception=True):
+            return Response({'detail': _('A user with this email currently exists')}, status=400)
+        if not serializer.is_valid(raise_exception=False):
+            return Response({'detail': serializer.errors}, status=400)
 
-            activate_user_token = ActivateUserToken(
-                    token=secrets.token_urlsafe(32),
-                    eid=urlsafe_base64_encode(force_bytes(serializer.validated_data['email'])),
-                    )
-            activate_user_token.save()
-
-            context = {
-                'domain': 'datadays.sharif.edu',
-                'eid': activate_user_token.eid,
-                'token': activate_user_token.token,
-            }
-
-            email_html_message = render_to_string('accounts/email/user_activate_email.html', context)
-            email_plaintext_message = render_to_string('accounts/email/user_activate_email.txt', context)
-
-            msg = EmailMultiAlternatives(
-                    # title:
-                    _("Activate Account for {title}".format(title="DataDays")),
-                    # message:
-                    email_plaintext_message,
-                    # from:
-                    "datadays.sharif@gmail.com",
-                    # to:
-                    [serializer.validated_data['email']]
+        activate_user_token = ActivateUserToken(
+                token=secrets.token_urlsafe(32),
+                eid=urlsafe_base64_encode(force_bytes(serializer.validated_data['email'])),
                 )
-            msg.attach_alternative(email_html_message, "text/html")
-            msg.send()
+        activate_user_token.save()
 
-            serializer.save()
-            serializer.instance.is_active = False
-            serializer.instance.save()
+        context = {
+            'domain': 'datadays.sharif.edu',
+            'eid': activate_user_token.eid,
+            'token': activate_user_token.token,
+        }
 
-            return Response({'detail': 'User created successfully. Check your email for confirmation link'}, status=200)
-        else:
-            return Response({'error': 'Error occurred during User creation'}, status=500)
+        email_html_message = render_to_string('accounts/email/user_activate_email.html', context)
+        email_plaintext_message = render_to_string('accounts/email/user_activate_email.txt', context)
+
+        msg = EmailMultiAlternatives(
+                # title:
+                _("Activate Account for {title}".format(title="DataDays")),
+                # message:
+                email_plaintext_message,
+                # from:
+                "datadays.sharif@gmail.com",
+                # to:
+                [serializer.validated_data['email']]
+            )
+        msg.attach_alternative(email_html_message, "text/html")
+        msg.send()
+
+        serializer.save()
+        serializer.instance.is_active = False
+        serializer.instance.save()
+
+        return Response({'detail': _('User created successfully.')}, status=200)
 
 
 class ActivateView(GenericAPIView):
@@ -79,7 +78,7 @@ class ActivateView(GenericAPIView):
         user.is_active = True
         user.save()
 
-        return redirect('http://datadays.sharif.edu/login')
+        return Response({'detail': {}}, status=200)
 
 
 class LogoutView(GenericAPIView):
@@ -132,7 +131,7 @@ class ResetPasswordView(GenericAPIView):
         msg.attach_alternative(email_html_message, "text/html")
         msg.send()
 
-        return Response({'detail': 'Successfully Sent Reset Password Email'}, status=200)
+        return Response({'detail': _('Successfully Sent Reset Password Email')}, status=200)
 
 
 class ResetPasswordConfirmView(GenericAPIView):
@@ -143,7 +142,7 @@ class ResetPasswordConfirmView(GenericAPIView):
 
         rs_token = get_object_or_404(ResetPasswordToken, uid=data['uid'], token=data['token'])
         if (timezone.now() - rs_token.expiration_date).total_seconds() > 24 * 60 * 60:
-            return Response({'error': 'Token Expired'}, status=400)
+            return Response({'detail': _('Token Expired')}, status=400)
 
         user = get_object_or_404(User, id=urlsafe_base64_decode(data['uid']))
         user.password = make_password(data['new_password1'])
@@ -157,17 +156,12 @@ class ProfileView(GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        user = request.user
-        if not user.is_authenticated:
-            return Response({'detail': 'user is not authenticated'})
-        data = self.get_serializer(user).data['profile']
+        data = self.get_serializer(request.user).data['profile']
         return Response(data=data, status=HTTP_200_OK)
 
     def put(self, request):
         user = request.user
-        if not user.is_authenticated:
-            return Response({'detail': 'user is not authenticated'})
         user_serializer = UserViewSerializer(user)
         user_serializer.update(user, request.data)
-        return Response(user_serializer.data)
+        return Response(user_serializer.data, status=200)
 
