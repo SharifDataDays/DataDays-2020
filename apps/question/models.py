@@ -59,7 +59,7 @@ class Question(PolymorphicModel):
         return function[:name_start] + function_new_name + function[name_end:], function_new_name
 
     def dir_path(self):
-        return settings.MEDIA_ROOT + 'private/' + str(self.id)
+        return settings.MEDIA_ROOT + 'private/' + "question_" + str(self.id)
 
     def __str__(self):
         return "id: " + str(self.id) + " task: " + str(self.task.topic)
@@ -67,7 +67,7 @@ class Question(PolymorphicModel):
 
 class NeededFilesForQuestionJudgment(models.Model):
     def upload_path(self, filename):
-        return os.path.join('private/', str(self.question_id), filename)
+        return os.path.join('private/', 'question_', str(self.question_id), filename)
 
     question = models.ForeignKey(Question, related_name='files', on_delete=models.CASCADE)
     file = models.FileField(upload_to=upload_path, unique=True)
