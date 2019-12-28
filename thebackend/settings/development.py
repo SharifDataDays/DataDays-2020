@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'django_extensions',
     'djcelery',
+    'corsheaders',
+    'djcelery_email',
+    'django_ace',
 
     'apps.accounts',
     'apps.blog',
@@ -50,12 +53,13 @@ INSTALLED_APPS = [
     'apps.participation',
     'apps.notification',
     'apps.go',
-    'django_ace',
+    'apps.uploads',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -154,5 +158,3 @@ REST_FRAMEWORK = {
 }
 
 from .martor import *
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
