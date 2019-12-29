@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'django_extensions',
     'djcelery',
+    'corsheaders',
+    'djcelery_email',
+    'django_ace',
 
     'apps.accounts',
     'apps.blog',
@@ -50,12 +53,13 @@ INSTALLED_APPS = [
     'apps.participation',
     'apps.notification',
     'apps.go',
-    'django_ace',
+    'apps.uploads',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -63,6 +67,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     #    'thebackend.middlewares.TranslationMiddleware',
     'thebackend.middlewares.Always200Middleware',
+    'thebackend.middlewares.WrapSerializerErrorsMiddleware',
 ]
 
 ROOT_URLCONF = 'thebackend.urls'
@@ -157,3 +162,4 @@ from .martor import *
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CELERY_BROKER_URL = 'amqp://localhost'
+

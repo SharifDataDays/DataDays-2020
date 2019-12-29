@@ -16,7 +16,7 @@ class Team(models.Model):
 
 class Participant(models.Model):
     user = models.OneToOneField(User, related_name='participant', on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, related_name='participants', on_delete=models.CASCADE)
+    teams = models.ManyToManyField(Team, related_name='participants')
 
     def __str__(self):
         return self.user.username

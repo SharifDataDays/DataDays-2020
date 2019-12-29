@@ -18,17 +18,30 @@ from . import models as contest_models, serializers
 from apps.contest.services.trial_services import trial_maker
 
 
+def get_participant(user):
+    if not hasattr(user, 'participant'):
+        Participant.objects.create(user=user)
+    return user.participant
+
+
+def get_team(participant, contest):
+    if not contest in [team.contest for team in participant.teams]:
+        new_team = Team.objects.create(contest=contest, name=participant.user.username)
+        participant.teams.add(new_team)
+    return participants.teams.get(contest=contest)
+
+
 class ContestAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.ContestSerializer
 
     def get(self, request, contest_id):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
-        if not hasattr(request.user, 'participant'):
-            new_team = Team(contest=contest, name=request.user.username)
-            new_team.save()
-            new_participant = Participant(user=request.user, team=new_team)
-            new_participant.save()
+
+        get_participant(request.user)
+        #TODO: team invitaion for team_size > 1
+        get_team(request.user.participant, contest)
+
         data = self.get_serializer(contest).data
         return Response(data={'contest': data})
 
@@ -44,9 +57,11 @@ class MilestoneAPIView(GenericAPIView):
         if milestone.contest != contest:
             return Response(data={'detail': 'milestone is unrelated to contest'},
                             status=status.HTTP_400_BAD_REQUEST)
-        team = request.user.participant.team
+
+        team = get_team(request.user.participant, contest)
         team_task_creator = GetOrCreateTeamTasks(team=team, milestone=milestone)
         team_tasks = team_task_creator.get_team_tasks()
+
         data = self.get_serializer(milestone).data
         return Response(data={'milestone': data}, status=status.HTTP_200_OK)
 
@@ -57,6 +72,7 @@ class CreateTrialAPIView(GenericAPIView):
     serializer_class = serializers.TrialSerializer
 
     def get(self, request, contest_id, milestone_id, task_id):
+
         maker = trial_maker.TrialMaker(request, contest_id, milestone_id, task_id)
         trial, errors = maker.make_trial()
         if trial is None:

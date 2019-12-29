@@ -40,7 +40,7 @@ class ParticipantAdmin(admin.ModelAdmin):
 
 @admin.register(participation_models.Team)
 class TeamAdmin(admin.ModelAdmin):
-    inlines = [ParticipantInline, TeamTaskInline]
+    inlines = [TeamTaskInline]
 
 
 @admin.register(participation_models.Invitation)

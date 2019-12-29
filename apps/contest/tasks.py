@@ -8,4 +8,3 @@ from thebackend.celery import app
 def scoring_service_task(trial, errors):
     judge_trial = JudgeService(trial, errors)
     score = judge_trial()
-
