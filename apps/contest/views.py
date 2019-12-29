@@ -25,29 +25,32 @@ def get_participant(user):
 
 
 def get_team(participant, contest):
-    if not contest in [team.contest for team in participant.teams]:
+    if not contest in [team.contest for team in participant.teams.all()]:
         new_team = Team.objects.create(contest=contest, name=participant.user.username)
         participant.teams.add(new_team)
     return participant.teams.get(contest=contest)
 
 
 class ContestAPIView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest]
     serializer_class = serializers.ContestSerializer
 
-    def get(self, request, contest_id):
+    def get_object(self, contest_id):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
+        if contest.team_size > 1:
+            self.check_object_permissions(self.request, contest)
+        else:
+            get_team(self.request.user.participant, contest)
+        return contest
 
-        get_participant(request.user)
-        # TODO: team invitaion for team_size > 1
-        get_team(request.user.participant, contest)
-
+    def get(self, request, contest_id):
+        contest = self.get_object(contest_id)
         data = self.get_serializer(contest).data
         return Response(data={'contest': data})
 
 
 class MilestoneAPIView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest]
     queryset = contest_models.Milestone.objects.all()
     serializer_class = serializers.MilestoneSerializer
 
@@ -55,23 +58,30 @@ class MilestoneAPIView(GenericAPIView):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
         milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
         if milestone.contest != contest:
-            return Response(data={'details': 'milestone is unrelated to contest'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        team = get_team(request.user.participant, contest)
-        team_task_creator = GetOrCreateTeamTasks(team=team, milestone=milestone)
-        team_tasks = team_task_creator.get_team_tasks()
+            return Response(data={'detail': 'milestone is unrelated to contest'},
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
+        self.check_object_permissions(self.request, contest)
+        self.check_object_permissions(self.request, milestone)
 
         data = self.get_serializer(milestone).data
         return Response(data={'milestone': data}, status=status.HTTP_200_OK)
 
 
 class CreateTrialAPIView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
     queryset = contest_models.Task.objects.all()
     serializer_class = serializers.TrialSerializer
 
     def get(self, request, contest_id, milestone_id, task_id):
+        contest = get_object_or_404(contest_models.Contest, id=contest_id)
+        milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
+        if milestone.contest != contest:
+            return Response(data={'detail': 'milestone is unrelated to contest'},
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
+        self.check_object_permissions(self.request, contest)
+        self.check_object_permissions(self.request, milestone)
+
+        team = request.user.participant.teams.get(contest=contest)
 
         maker = trial_maker.TrialMaker(request, contest_id, milestone_id, task_id)
         trial, errors = maker.make_trial()
@@ -81,7 +91,7 @@ class CreateTrialAPIView(GenericAPIView):
             if trials.count() == 1:
                 data = self.get_serializer(trials.get()).data
             else:
-                return Response(data={'details': errors}, status=status.HTTP_200_OK)
+                return Response(data={'detail': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
             data = self.get_serializer(trial).data
         return Response(data={'trial': data}, status=status.HTTP_200_OK)
@@ -89,14 +99,27 @@ class CreateTrialAPIView(GenericAPIView):
 
 class SubmitTrialAPIView(GenericAPIView):
     parser_classes = (MultiPartParser,)
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
     serializer_class = serializers.TrialPostSerializer
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):
+        contest = get_object_or_404(contest_models.Contest, id=contest_id)
+        milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
+        if milestone.contest != contest:
+            return Response(data={'detail': 'milestone is unrelated to contest'},
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
+        self.check_object_permissions(self.request, contest)
+        self.check_object_permissions(self.request, milestone)
+        trial = get_object_or_404(contest_models.Trial, id=trial_id)
+        team = request.user.participant.teams.get(contest=contest)
+        team_task = team.tasks.get(task_id=task_id)
+        if trial not in team_task.trials.all():
+            return Response(data={'detail': 'This trial is not yours. bitch'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         trial_submitter = TrialSubmitValidation(request, contest_id, milestone_id, task_id, trial_id)
         trial, valid, errors = trial_submitter.validate()
         if not valid:
-            return Response(data={'details': errors}, status=status.HTTP_200_OK)
+            return Response(data={'detail': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
         trial.submit_time = timezone.now()
         trial.save()
 
