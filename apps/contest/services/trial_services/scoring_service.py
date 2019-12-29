@@ -1,7 +1,6 @@
 import ast
 from typing import List, Tuple
 
-from apps.contest.models import ScoreStatusTypes, Score, TaskScoringType, QuestionSubmission, Trial
 from apps.question.models import QuestionTypes
 
 
@@ -19,6 +18,8 @@ class JudgeTrial:
         pass
 
     def judge_trial(self):
+        from apps.contest.models import Score
+
         for question_submission in self.trial.question_submissions:
             if not hasattr(question_submission, 'score'):
                 score = Score()
@@ -39,6 +40,7 @@ class JudgeQuestionSubmission:
     """
 
     def __init__(self, question_submission, score):
+        from apps.contest.models import Score, QuestionSubmission
         self.question_submission: QuestionSubmission = question_submission
         self.score: Score = score
 
@@ -48,6 +50,8 @@ class JudgeQuestionSubmission:
         self.score.save()
 
     def _judge_question(self, score):
+        from apps.contest.models import ScoreStatusTypes
+
         question = self.question_submission.question
         answer = ast.literal_eval(
             self.question_submission.answer) if not self.question_submission.file_answer else self.question_submission.file_answer
@@ -80,7 +84,9 @@ class JudgeQuestionSubmission:
             return 'file_path', answer
 
 
-def set_task_score(trial: Trial) -> None:
+def set_task_score(trial) -> None:
+    from apps.contest.models import TaskScoringType
+
     task = trial.team_task.task
     if task.scoring_type == TaskScoringType.FINAL_TRIAL:
         if trial.team_task.final_trial is not None:

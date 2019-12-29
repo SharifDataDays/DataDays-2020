@@ -6,11 +6,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from apps.contest.services.create_team_tasks import GetOrCreateTeamTasks
-from apps.contest.services.trial_services.scoring_service import JudgeTrial
-from apps.contest.services.trial_services.trial_corrector import TrialCorrector
+from apps.contest.permissions import UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks
 from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
-from apps.contest.tasks import judge_submissions, judge_trials
+from apps.contest.tasks import judge_trials
 
 from apps.participation.models import Team, Participant
 
