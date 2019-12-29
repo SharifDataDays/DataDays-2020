@@ -25,7 +25,7 @@ class MilestoneSerializer(ModelSerializer):
 
 
 class ContestSerializer(ModelSerializer):
-    milestones = MilestoneSerializer(many=True, read_only=True)
+    milestones = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = contest_models.Contest
