@@ -28,7 +28,7 @@ def get_team(participant, contest):
     if not contest in [team.contest for team in participant.teams]:
         new_team = Team.objects.create(contest=contest, name=participant.user.username)
         participant.teams.add(new_team)
-    return participants.teams.get(contest=contest)
+    return participant.teams.get(contest=contest)
 
 
 class ContestAPIView(GenericAPIView):
@@ -39,7 +39,7 @@ class ContestAPIView(GenericAPIView):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
 
         get_participant(request.user)
-        #TODO: team invitaion for team_size > 1
+        # TODO: team invitaion for team_size > 1
         get_team(request.user.participant, contest)
 
         data = self.get_serializer(contest).data
