@@ -3,6 +3,7 @@ import os
 from django.db import models
 from django.contrib.auth.models import User
 
+from apps.contest.tasks import judge_submissions
 from ..question.models import QuestionTypes
 
 
@@ -117,12 +118,12 @@ class Rejudge(models.Model):
     question = models.ForeignKey('question.Question', related_name='rejudges', on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     reason = models.CharField(max_length=1000, blank=True, null=False)
+    finished = models.BooleanField(default=False)
 
     def pre_save(self):
-        # TODO first we need to change judging system,
-        # TODO the system should capable of judging a question submission alone and
-        # TODO set it's score
-        pass
+        question_submissions = self.question.question_submissions.all()
+        for submission in question_submissions:
+            judge_submissions.apply_async([submission, self], queue='main')
 
     def save(self, *args, **kwargs):
         self.pre_save()

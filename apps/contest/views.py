@@ -7,10 +7,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from apps.contest.services.create_team_tasks import GetOrCreateTeamTasks
-from apps.contest.services.trial_services.scoring_service import JudgeService
+from apps.contest.services.trial_services.scoring_service import JudgeTrial
 from apps.contest.services.trial_services.trial_corrector import TrialCorrector
 from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
-from apps.contest.tasks import scoring_service_task
+from apps.contest.tasks import judge_submissions, judge_trials
 
 from apps.participation.models import Team, Participant
 
@@ -55,7 +55,7 @@ class MilestoneAPIView(GenericAPIView):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
         milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
         if milestone.contest != contest:
-            return Response(data={'detail': 'milestone is unrelated to contest'},
+            return Response(data={'details': 'milestone is unrelated to contest'},
                             status=status.HTTP_400_BAD_REQUEST)
 
         team = get_team(request.user.participant, contest)
@@ -81,7 +81,7 @@ class CreateTrialAPIView(GenericAPIView):
             if trials.count() == 1:
                 data = self.get_serializer(trials.get()).data
             else:
-                return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
+                return Response(data={'details': errors}, status=status.HTTP_200_OK)
         else:
             data = self.get_serializer(trial).data
         return Response(data={'trial': data}, status=status.HTTP_200_OK)
@@ -96,11 +96,11 @@ class SubmitTrialAPIView(GenericAPIView):
         trial_submitter = TrialSubmitValidation(request, contest_id, milestone_id, task_id, trial_id)
         trial, valid, errors = trial_submitter.validate()
         if not valid:
-            return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response(data={'details': errors}, status=status.HTTP_200_OK)
         trial.submit_time = timezone.now()
         trial.save()
 
         # Scoring Service Task Queued
-        scoring_service_task.apply_async([trial, errors], queue='contest')
+        judge_trials.apply_async([trial], queue='main')
 
         return Response(data={'trial': self.get_serializer(trial).data}, status=status.HTTP_200_OK)
