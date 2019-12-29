@@ -4,21 +4,17 @@ from apps.participation.models import Team, Participant
 from apps.contest.models import Milestone
 
 
-class UserParticipatedTeam(permissions.BasePermission):
+class UserHasParticipant(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        if hasattr(request.user, 'participant') \
-                and request.user.participant is not None \
-                and hasattr(request.user.participant, 'team') \
-                and request.user.participant.team is not None:
-            return True
-        return False
+        if not hasattr(request.user, 'participant'):
+            Participant.objects.create(user=request.user)
+        return True
 
 
-class CompletedTeam(permissions.BasePermission):
+class UserHasTeam(permissions.BasePermission):
 
-    # obj is a Contest instance which has 'team_size' attr
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, view):
         return len(request.user.participant.team.participants) == obj.team_size
 
 
