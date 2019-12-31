@@ -16,19 +16,6 @@ from . import models as contest_models, serializers
 from apps.contest.services.trial_services import trial_maker
 
 
-def get_participant(user):
-    if not hasattr(user, 'participant'):
-        Participant.objects.create(user=user)
-    return user.participant
-
-
-def get_team(participant, contest):
-    if not contest in [team.contest for team in participant.teams.all()]:
-        new_team = Team.objects.create(contest=contest, name=participant.user.username)
-        participant.teams.add(new_team)
-    return participant.teams.get(contest=contest)
-
-
 class ContestAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest]
     serializer_class = serializers.ContestSerializer
@@ -38,7 +25,7 @@ class ContestAPIView(GenericAPIView):
         if contest.team_size > 1:
             self.check_object_permissions(self.request, contest)
         else:
-            get_team(self.request.user.participant, contest)
+            Team.get_team(self.request.user.participant, contest)
         return contest
 
     def get(self, request, contest_id):
@@ -78,8 +65,6 @@ class CreateTrialAPIView(GenericAPIView):
                             status=status.HTTP_406_NOT_ACCEPTABLE)
         self.check_object_permissions(self.request, contest)
         self.check_object_permissions(self.request, milestone)
-
-        team = request.user.participant.teams.get(contest=contest)
 
         maker = trial_maker.TrialMaker(request, contest_id, milestone_id, task_id)
         trial, errors = maker.make_trial()

@@ -112,5 +112,6 @@ class ScoreAdmin(admin.ModelAdmin):
 
 @admin.register(contest_models.Rejudge)
 class RejudgeAdmin(admin.ModelAdmin):
-    list_display = ['id', '__str__', 'date']
-    list_display_links = ['id', '__str__']
+    list_display = ['id', '__str__', 'date', 'question_id']
+    list_display_links = ['id', '__str__', 'question_id']
+    readonly_fields = ['finished']
