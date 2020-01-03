@@ -3,6 +3,7 @@ from rest_framework import permissions
 from apps.participation.models import Team, Participant
 from apps.contest.models import Contest, Milestone, TeamTask
 
+
 class UserHasParticipant(permissions.BasePermission):
 
     def has_permission(self, request, view):
@@ -32,4 +33,3 @@ class UserHasTeamTasks(permissions.BasePermission):
             if task not in [tt.task for tt in team_tasks]:
                 TeamTask.objects.create(team=team, task=task, content_finished=False)
         return True
-

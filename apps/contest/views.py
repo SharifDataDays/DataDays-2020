@@ -6,31 +6,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from apps.contest.services.create_team_tasks import GetOrCreateTeamTasks
-from apps.contest.services.trial_services.scoring_service import JudgeService
-from apps.contest.services.trial_services.trial_corrector import TrialCorrector
-from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
-from apps.contest.tasks import scoring_service_task
-
 from apps.contest.permissions import UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks
+from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
+from apps.contest.tasks import judge_trials
 
 from apps.participation.models import Team, Participant
 
 from . import models as contest_models, serializers
 from apps.contest.services.trial_services import trial_maker
-
-
-def get_participant(user):
-    if not hasattr(user, 'participant'):
-        Participant.objects.create(user=user)
-    return user.participant
-
-
-def get_team(participant, contest):
-    if not contest in [team.contest for team in participant.teams.all()]:
-        new_team = Team.objects.create(contest=contest, name=participant.user.username)
-        participant.teams.add(new_team)
-    return participant.teams.get(contest=contest)
 
 
 class ContestAPIView(GenericAPIView):
@@ -42,7 +25,7 @@ class ContestAPIView(GenericAPIView):
         if contest.team_size > 1:
             self.check_object_permissions(self.request, contest)
         else:
-            get_team(self.request.user.participant, contest)
+            Team.get_team(self.request.user.participant, contest)
         return contest
 
     def get(self, request, contest_id):
@@ -83,7 +66,6 @@ class CreateTrialAPIView(GenericAPIView):
         self.check_object_permissions(self.request, contest)
         self.check_object_permissions(self.request, milestone)
 
-        team = request.user.participant.teams.get(contest=contest)
         maker = trial_maker.TrialMaker(request, contest_id, milestone_id, task_id)
         trial, errors = maker.make_trial()
         if trial is None:
@@ -114,7 +96,7 @@ class SubmitTrialAPIView(GenericAPIView):
         trial = get_object_or_404(contest_models.Trial, id=trial_id)
         team = request.user.participant.teams.get(contest=contest)
         team_task = team.tasks.get(task_id=task_id)
-        if trail not in team_task.trials.all():
+        if trial not in team_task.trials.all():
             return Response(data={'detail': 'This trial is not yours. bitch'}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         trial_submitter = TrialSubmitValidation(request, contest_id, milestone_id, task_id, trial_id)
@@ -122,14 +104,10 @@ class SubmitTrialAPIView(GenericAPIView):
         if not valid:
             return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        trial_corrector = TrialCorrector(trial=trial)
-        score = trial_corrector()
-        return Response(data={'trial': self.get_serializer(trial).data, 'score': score}, status=status.HTTP_200_OK)
-
         trial.submit_time = timezone.now()
         trial.save()
-
         # Scoring Service Task Queued
-        scoring_service_task.apply_async([trial, errors], queue='contest')
+        judge_trials.apply_async([trial], queue='main')
 
         return Response(data={'trial': self.get_serializer(trial).data}, status=status.HTTP_200_OK)
+

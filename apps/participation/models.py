@@ -10,6 +10,13 @@ class Team(models.Model):
     badges = models.ManyToManyField('participation.Badge', related_name='teams', null=True, blank=True)
     name = models.CharField(max_length=50)
 
+    @staticmethod
+    def get_team(participant, contest):
+        if contest not in [team.contest for team in participant.teams.all()]:
+            new_team = Team.objects.create(contest=contest, name=participant.user.username)
+            participant.teams.add(new_team)
+        return participant.teams.get(contest=contest)
+
     def __str__(self):
         return self.name
 
@@ -25,6 +32,12 @@ class Participant(models.Model):
 class Invitation(models.Model):
     host = models.ForeignKey(Participant, related_name='invitations_as_host', on_delete=models.CASCADE)
     guest = models.ForeignKey(Participant, related_name='invitations_as_gust', on_delete=models.CASCADE)
+
+    @staticmethod
+    def get_participant(user):
+        if not hasattr(user, 'participant'):
+            Participant.objects.create(user=user)
+        return user.participant
 
     def __str__(self):
         return str(self.id)
