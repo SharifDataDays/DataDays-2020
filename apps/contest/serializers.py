@@ -2,7 +2,7 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
 from apps.participation.serializers import TeamSerializer
-from apps.question.serializers import QuestionSerializer
+from apps.question.serializers import QuestionPolymorphismSerializer
 from apps.resources.serializers import DocumentSerializer
 
 from . import models as contest_models
@@ -29,31 +29,33 @@ class ContestSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.Contest
-        fields = ['id', 'title', 'team_size', 'start_time', 'end_time', 'milestones']
+        fields = ['id', 'title', 'team_size', 'start_time', 'end_time', 'milestones', 'scoreboard_freeze',
+                  'scoreboard_order_freeze', 'scoring_type']
 
 
 class ScoreSerializer(ModelSerializer):
-
     class Meta:
         model = contest_models.Score
-        fields = '__all__'
+        fields = ['question_submission_id', 'number', 'status', 'info']
 
 
 class QuestionSubmissionSerializer(ModelSerializer):
-    question = QuestionSerializer()
+    question = QuestionPolymorphismSerializer()
+    score = ScoreSerializer()
 
     class Meta:
         model = contest_models.QuestionSubmission
-        fields = ['id', 'question', 'answer', 'score']
+        fields = ['id', 'question', 'answer', 'file_answer', 'score']
 
 
 class QuestionSubmissionPostSerializer(ModelSerializer):
-
     id = serializers.ModelField(model_field=contest_models.QuestionSubmission()._meta.get_field('id'))
+    score = ScoreSerializer(read_only=True)
+    file = serializers.FileField(required=False)
 
     class Meta:
         model = contest_models.QuestionSubmission
-        fields = ['id', 'answer']
+        fields = ['id', 'answer', 'score', 'file']
 
 
 class TrialSerializer(ModelSerializer):
@@ -66,14 +68,14 @@ class TrialSerializer(ModelSerializer):
 
 
 class TrialPostSerializer(ModelSerializer):
-
     id = serializers.ModelField(model_field=contest_models.Trial()._meta.get_field('id'))
     question_submissions = QuestionSubmissionPostSerializer(many=True)
     final_submit = serializers.BooleanField(default=False)
+    score = serializers.FloatField(read_only=True)
 
     class Meta:
         model = contest_models.Trial
-        fields = ['id', 'question_submissions', 'final_submit']
+        fields = ['id', 'question_submissions', 'final_submit', 'score']
 
     def save(self):
         tf = contest_models.Trial.objects.filter(id=self.validated_data['id'])
@@ -97,5 +99,3 @@ class TeamTaskSerializer(ModelSerializer):
     class Meta:
         model = contest_models.TeamTask
         fields = ['id', 'contest_finished', 'max_trials_count', 'last_trial_time', 'team', 'task']
-
-

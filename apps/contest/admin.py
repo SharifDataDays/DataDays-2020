@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.db import models
 from martor.widgets import AdminMartorWidget
 
+from apps.contest.models import QuestionSubmission
 from . import models as contest_models
 
 
@@ -37,10 +38,11 @@ class TrialInline(admin.StackedInline):
 
 @admin.register(contest_models.Contest)
 class ContestAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'start_time', 'end_time', 'team_size']
-    list_editable = ['title', 'start_time', 'end_time', 'team_size']
+    list_display = ['id', 'title', 'start_time', 'end_time', 'team_size', 'scoreboard_freeze',
+                    'scoreboard_order_freeze']
+    list_editable = ['title', 'start_time', 'end_time', 'team_size', 'scoreboard_freeze', 'scoreboard_order_freeze']
     sortable_by = ['title', 'start_time', 'end_time', 'team_size']
-    list_filter = ['start_time', 'end_time']
+    list_filter = ['start_time', 'end_time', 'scoreboard_freeze', 'scoreboard_order_freeze']
     inlines = [MilestoneInline]
 
 
@@ -55,10 +57,10 @@ class MilestoneAdmin(admin.ModelAdmin):
 
 @admin.register(contest_models.Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ['id', 'topic', 'trial_cooldown', 'max_trials_count']
-    list_editable = ['topic', 'trial_cooldown', 'max_trials_count']
+    list_display = ['id', 'topic', 'trial_cooldown', 'max_trials_count', 'scoring_type']
+    list_editable = ['topic', 'trial_cooldown', 'max_trials_count', 'scoring_type']
     sortable_by = ['topic', 'trial_cooldown', 'max_trials_count']
-    list_filter = ['trial_cooldown', 'max_trials_count']
+    list_filter = ['trial_cooldown', 'max_trials_count', 'scoring_type']
     inlines = [TrialRecipeInline]
 
 
@@ -94,6 +96,21 @@ class QuestionRecipeAdmin(admin.ModelAdmin):
 
 @admin.register(contest_models.QuestionSubmission)
 class QuestionSubmissionAdmin(admin.ModelAdmin):
-    list_display = ['answer', 'score']
-    list_editable = ['score']
-    sortable_by = ['score']
+    list_display = ['question_id', 'question_priority', 'get_submission_score']
+
+    def get_submission_score(self, q: QuestionSubmission):
+        return q.score.number
+
+    get_submission_score.short_description = 'Question Submission Score'
+    get_submission_score.admin_order_field = 'question_submission_score'
+
+
+@admin.register(contest_models.Score)
+class ScoreAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(contest_models.Rejudge)
+class RejudgeAdmin(admin.ModelAdmin):
+    list_display = ['id', '__str__', 'date']
+    list_display_links = ['id', '__str__']

@@ -44,7 +44,7 @@ class TrialMaker:
         if not valid:
             return None, errors
         print(self._has_uncompleted_trial())
-        if self._has_uncompleted_trial():
+        if not self._has_uncompleted_trial():
             try:
                 self.task = self.team_task.task
                 self.trial_recipe = self.task.trial_recipe
@@ -53,7 +53,8 @@ class TrialMaker:
                 self.trial_questions = self._set_trial_questions()
                 self.trial = self._create_trial()
                 self.question_submissions = self._create_trial_question_submissions()
-            except Exception:
+            except Exception as e:
+                print(e)
                 if self.trial is not None:
                     self.trial.delete()
                 if self.question_submissions is not None:
@@ -71,7 +72,7 @@ class TrialMaker:
 
     def _has_uncompleted_trial(self):
         try:
-            existing_trial = Trial.objects.filter(
+            existing_trial = Trial.objects.get(
                     team_task=self.team_task,
                     submit_time__isnull=True
                 )
@@ -105,14 +106,11 @@ class TrialMaker:
     def _create_trial_question_submissions(self):
         question_submissions = []
         for question, priority in self.trial_questions:
-            sc = Score()
-            sc.save()
             qs = QuestionSubmission(
                     trial=self.trial,
                     question=question,
                     question_priority=priority,
                     answer=[],
-                    score=sc
                 )
             qs.save()
             question_submissions.append(qs)

@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -23,11 +25,22 @@ class ScoreStatusTypes:
     )
 
 
+class TaskScoringType:
+    FINAL_TRIAL = 'final_trial'
+    WEIGHTED_AVERAGE = 'weighted_average'
+    TYPES = (
+        (FINAL_TRIAL, 'final_trial'),
+        (WEIGHTED_AVERAGE, 'weighted_average'),
+    )
+
+
 class Contest(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     team_size = models.PositiveSmallIntegerField()
     title = models.CharField(max_length=100, unique=True)
+    scoreboard_freeze = models.BooleanField(default=False)
+    scoreboard_order_freeze = models.BooleanField(default=False)
 
 
 class Milestone(models.Model):
@@ -48,6 +61,8 @@ class Task(models.Model):
     max_trials_count = models.PositiveSmallIntegerField(default=3)
     trial_cooldown = models.PositiveSmallIntegerField()
     trial_time = models.PositiveSmallIntegerField()
+    scoring_type = models.CharField(choices=TaskScoringType.TYPES, max_length=10,
+                                    default=TaskScoringType.WEIGHTED_AVERAGE)
 
 
 class TeamTask(models.Model):
@@ -55,11 +70,12 @@ class TeamTask(models.Model):
     team = models.ForeignKey('participation.Team', related_name='tasks', on_delete=models.CASCADE)
     content_finished = models.BooleanField(default=False)
     final_score = models.FloatField(blank=True, null=True)
+    final_trial = models.OneToOneField('contest.Trial', null=True, blank=True, on_delete=models.CASCADE)
 
 
 class Trial(models.Model):
     team_task = models.ForeignKey('contest.TeamTask', related_name='trials', on_delete=models.CASCADE)
-    score = models.OneToOneField('contest.Score', related_name='trial', on_delete=models.CASCADE, null=True)
+    score = models.FloatField(null=True, blank=True)
     due_time = models.DateTimeField()
     start_time = models.DateTimeField(auto_now_add=True)
     submit_time = models.DateTimeField(null=True, blank=True)
@@ -81,10 +97,33 @@ class QuestionSubmission(models.Model):
     question = models.ForeignKey('question.Question', related_name='question_submissions', on_delete=models.CASCADE)
     question_priority = models.PositiveSmallIntegerField()
     answer = models.TextField(blank=True, null=False)
-    score = models.OneToOneField('contest.Score', related_name='question_submission', on_delete=models.CASCADE)
+
+    def upload_path(self, filename):
+        return os.path.join('private', str(self.trial.team_task.team.name), str(self.trial_id), str(self.question_id),
+                            filename)
+
+    file_answer = models.FileField(blank=True, null=True, upload_to=upload_path)
 
 
 class Score(models.Model):
     number = models.FloatField(default=0)
+    question_submission = models.OneToOneField('contest.QuestionSubmission', related_name='score',
+                                               on_delete=models.CASCADE)
     status = models.CharField(choices=ScoreStatusTypes.TYPES, max_length=10, default=ScoreStatusTypes.UNDEF)
     info = models.CharField(max_length=1000, blank=True, null=False, default='')
+
+
+class Rejudge(models.Model):
+    question = models.ForeignKey('question.Question', related_name='rejudges', on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    reason = models.CharField(max_length=1000, blank=True, null=False)
+
+    def pre_save(self):
+        # TODO first we need to change judging system,
+        # TODO the system should capable of judging a question submission alone and
+        # TODO set it's score
+        pass
+
+    def save(self, *args, **kwargs):
+        self.pre_save()
+        super().save(*args, **kwargs)

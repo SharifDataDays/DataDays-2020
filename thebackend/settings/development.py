@@ -159,3 +159,7 @@ REST_FRAMEWORK = {
 }
 
 from .martor import *
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+CELERY_BROKER_URL = 'amqp://localhost'
+

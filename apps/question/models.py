@@ -1,4 +1,9 @@
 import enum
+import os
+import re
+import uuid
+
+from django.conf import settings
 from django.db import models
 from polymorphic.models import PolymorphicModel
 
@@ -39,17 +44,33 @@ class Question(PolymorphicModel):
     task = models.ForeignKey('contest.Task', related_name='questions', on_delete=None)
 
     judge_function = models.CharField(max_length=8000)
+    judge_function_name = models.CharField(max_length=150, default='function')
     body = models.TextField()
     type = models.CharField(max_length=50, choices=QuestionTypes.TYPES)
     max_score = models.PositiveSmallIntegerField()
+
+    @staticmethod
+    def change_function_name(function: str):
+        name_start = function.find(" ")
+        while function[name_start] == " ":
+            name_start += 1
+        name_end = function.find("(")
+        function_new_name = 'q_' + uuid.uuid4().hex[:16]
+        return function[:name_start] + function_new_name + function[name_end:], function_new_name
+
+    def dir_path(self):
+        return settings.MEDIA_ROOT + 'private/' + "question_" + str(self.id)
 
     def __str__(self):
         return "id: " + str(self.id) + " task: " + str(self.task.topic)
 
 
 class NeededFilesForQuestionJudgment(models.Model):
-    question = models.ForeignKey(Question, related_name='judgment_files', on_delete=models.CASCADE)
-    file = models.FileField()
+    def upload_path(self, filename):
+        return os.path.join('private/', 'question_', str(self.question_id), filename)
+
+    question = models.ForeignKey(Question, related_name='files', on_delete=models.CASCADE)
+    file = models.FileField(upload_to=upload_path, unique=True)
 
 
 class SingleAnswer(Question):
@@ -57,6 +78,7 @@ class SingleAnswer(Question):
 
     def pre_save(self):
         self.type = QuestionTypes.SINGLE_ANSWER
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
@@ -69,6 +91,7 @@ class MultiAnswer(Question):
 
     def pre_save(self):
         self.type = QuestionTypes.MULTI_ANSWER
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
@@ -82,6 +105,7 @@ class Selective(Question):
 class SingleSelect(Selective):
     def pre_save(self):
         self.type = QuestionTypes.SINGLE_SELECT
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
@@ -93,6 +117,7 @@ class MultiSelect(Selective):
 
     def pre_save(self):
         self.type = QuestionTypes.MULTI_SELECT
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
@@ -105,6 +130,7 @@ class FileUpload(Question):
 
     def pre_save(self):
         self.type = QuestionTypes.FILE_UPLOAD
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
@@ -114,6 +140,7 @@ class FileUpload(Question):
 class ManualJudgment(Question):
     def pre_save(self):
         self.type = QuestionTypes.MANUAL_JUDGMENT
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()
@@ -123,6 +150,7 @@ class ManualJudgment(Question):
 class NumericRange(Question):
     def pre_save(self):
         self.type = QuestionTypes.NUMERIC_RANGE
+        self.judge_function, self.judge_function_name = Question.change_function_name(self.judge_function)
 
     def save(self, *args, **kwargs):
         self.pre_save()

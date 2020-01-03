@@ -1,12 +1,16 @@
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework.generics import GenericAPIView
+from rest_framework.parsers import FileUploadParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from apps.contest.services.create_team_tasks import GetOrCreateTeamTasks
+from apps.contest.services.trial_services.scoring_service import JudgeService
 from apps.contest.services.trial_services.trial_corrector import TrialCorrector
 from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
+from apps.contest.tasks import scoring_service_task
 
 from apps.contest.permissions import UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks
 
@@ -96,6 +100,7 @@ class CreateTrialAPIView(GenericAPIView):
 
 class SubmitTrialAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
+    parser_classes = (MultiPartParser,)
     serializer_class = serializers.TrialPostSerializer
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):
@@ -116,7 +121,15 @@ class SubmitTrialAPIView(GenericAPIView):
         trial, valid, errors = trial_submitter.validate()
         if not valid:
             return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         trial_corrector = TrialCorrector(trial=trial)
         score = trial_corrector()
         return Response(data={'trial': self.get_serializer(trial).data, 'score': score}, status=status.HTTP_200_OK)
 
+        trial.submit_time = timezone.now()
+        trial.save()
+
+        # Scoring Service Task Queued
+        scoring_service_task.apply_async([trial, errors], queue='contest')
+
+        return Response(data={'trial': self.get_serializer(trial).data}, status=status.HTTP_200_OK)

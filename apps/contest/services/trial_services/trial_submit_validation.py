@@ -38,7 +38,7 @@ class TrialSubmitValidation:
                 return Trial.objects.get(id=self.trial_id)
             else:
                 return None
-        except Exception:
+        except Trial.DoesNotExist as e:
             self._valid = False
             self._errors += trial_submit_exception.ErrorMessages.TRIAL_NOT_FOUNT
             return None
@@ -67,8 +67,8 @@ class TrialSubmitValidation:
                     self._validate_numeric_range(submission)
 
     def _common_validations(self, submission):
-        if not isinstance(submission.answer, str):
-            self._errors += trial_submit_exception.ErrorMessages.ANSWER_NOT_STRING
+        if submission.answer and not isinstance(submission.answer, str):
+            self._errors += (submission.question_id, trial_submit_exception.ErrorMessages.ANSWER_NOT_STRING)
             self._valid = False
             return False
         return True
@@ -77,11 +77,11 @@ class TrialSubmitValidation:
         try:
             answer = literal_eval(submission.answer)
         except ValueError:
-            self._errors += trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST
+            self._errors += (submission.question_id, trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST)
             self._valid = False
             return
         if len(answer) >= 2:
-            self._errors += trial_submit_exception.ErrorMessages.SINGLE_ANSWER_ERROR
+            self._errors += (submission.question_id, trial_submit_exception.ErrorMessages.SINGLE_ANSWER_ERROR)
             self._valid = False
             return
         answer_type = submission.question.answer_type
@@ -89,13 +89,15 @@ class TrialSubmitValidation:
             try:
                 int(answer[0])
             except ValueError:
-                self._errors += trial_submit_exception.ErrorMessages.ANSWER_TYPE_ERROR.format(answer_type)
+                self._errors += (
+                    submission.question_id, trial_submit_exception.ErrorMessages.ANSWER_TYPE_ERROR.format(answer_type))
                 self._valid = False
         elif answer_type == AnswerDataTypes.DOUBLE:
             try:
                 float(answer[0])
             except ValueError:
-                self._errors += trial_submit_exception.ErrorMessages.ANSWER_TYPE_ERROR.format(answer_type)
+                self._errors += (
+                    submission.question_id, trial_submit_exception.ErrorMessages.ANSWER_TYPE_ERROR.format(answer_type))
                 self._valid = False
         elif answer_type == AnswerDataTypes.TEXT:
             pass
@@ -104,13 +106,14 @@ class TrialSubmitValidation:
         try:
             answers = literal_eval(submission.answer)
         except ValueError:
-            self._errors += trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST
+            self._errors += (submission.question_id, trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST)
             self._valid = False
             return
         answer_type = submission.question.answer_type
         answer_count = submission.question.answer_count_limit
         if len(answers) > answer_count:
-            self._errors += trial_submit_exception.ErrorMessages.MULTI_ANSWER_LIMIT_REACHED_ERROR.format(answer_count)
+            self._errors += (submission.question_id,
+                             trial_submit_exception.ErrorMessages.MULTI_ANSWER_LIMIT_REACHED_ERROR.format(answer_count))
             self._valid = False
             return
         for answer in answers:
@@ -118,14 +121,18 @@ class TrialSubmitValidation:
                 try:
                     int(answer)
                 except ValueError:
-                    self._errors += trial_submit_exception.ErrorMessages.ANSWER_TYPE_ERROR.format(answer_type)
+                    self._errors += (
+                        submission.question_id,
+                        trial_submit_exception.ErrorMessages.ANSWER_TYPE_ERROR.format(answer_type))
                     self._valid = False
                     break
             elif answer_type == AnswerDataTypes.DOUBLE:
                 try:
                     float(answer)
                 except ValueError:
-                    self._errors += trial_submit_exception.ErrorMessages.ANSWER_TYPE_ERROR.format(answer_type)
+                    self._errors += (
+                        submission.question_id,
+                        trial_submit_exception.ErrorMessages.ANSWER_TYPE_ERROR.format(answer_type))
                     self._valid = False
                     break
             elif answer_type == AnswerDataTypes.TEXT:
@@ -135,11 +142,11 @@ class TrialSubmitValidation:
         try:
             label = literal_eval(submission.answer)
         except ValueError:
-            self._errors += trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST
+            self._errors += (submission.qustion_id, trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST)
             self._valid = False
             return
         if len(label) >= 2:
-            self._errors += trial_submit_exception.ErrorMessages.SINGLE_SELECT_ERROR
+            self._errors += (submission.qustion_id, trial_submit_exception.ErrorMessages.SINGLE_SELECT_ERROR)
             self._valid = False
             return
 
@@ -147,29 +154,32 @@ class TrialSubmitValidation:
         try:
             labels = literal_eval(submission.answer)
         except ValueError:
-            self._errors += trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST
+            self._errors += (submission.question_id, trial_submit_exception.ErrorMessages.ANSWER_STRING_MUST_BE_A_LIST)
             self._valid = False
             return
         answer_count = submission.question.answer_count_limit
 
         if len(labels) > answer_count:
-            self._errors += trial_submit_exception.ErrorMessages.MULTI_SELECT_LIMIT_REACHED_ERROR.format(answer_count)
+            self._errors += (submission.question_id,
+                             trial_submit_exception.ErrorMessages.MULTI_SELECT_LIMIT_REACHED_ERROR.format(answer_count))
             self._valid = False
             return
 
     def _validate_file_upload(self, submission):
-        answer = submission.answer
+        answer = submission.file
         file_format = submission.question.file_format
         file_size_limit = submission.question.file_size_limit
 
         answer_file_format = os.path.splitext(answer)[1]
         if file_format != answer_file_format:
-            self._errors += trial_submit_exception.ErrorMessages.INVALID_FILE_FORMAT.format(file_format)
+            self._errors += (
+                submission.question_id, trial_submit_exception.ErrorMessages.INVALID_FILE_FORMAT.format(file_format))
             self._valid = False
             return
         answer_file_size = os.path.getsize(answer)
         if answer_file_size > file_size_limit:
-            self._errors += trial_submit_exception.ErrorMessages.FILE_SIZE_LIMIT_EXCEEDED.format(file_size_limit)
+            self._errors += (submission.question_id,
+                             trial_submit_exception.ErrorMessages.FILE_SIZE_LIMIT_EXCEEDED.format(file_size_limit))
             self._valid = False
             return
 
@@ -180,10 +190,11 @@ class TrialSubmitValidation:
         try:
             answer = eval(submission.answer)
         except ValueError:
-            self._errors += trial_submit_exception.ErrorMessages.INVALID_LITERALS_FOR_NUMERIC_RANGE
+            self._errors += (
+                submission.question_id, trial_submit_exception.ErrorMessages.INVALID_LITERALS_FOR_NUMERIC_RANGE)
             self._valid = False
             return
         if answer[0] > answer[1]:
-            self._errors += trial_submit_exception.ErrorMessages.INVALID_NUMERIC_RANGE
+            self._errors += (submission.question_id, trial_submit_exception.ErrorMessages.INVALID_NUMERIC_RANGE)
             self._valid = False
             return
