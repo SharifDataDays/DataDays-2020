@@ -19,6 +19,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='scoring_type',
-            field=models.CharField(choices=[('final_trial', 'final_trial'), ('weighted_average', 'weighted_average')], default='weighted_average', max_length=10),
+            field=models.CharField(choices=[('final_trial', 'final_trial'), ('weighted_average', 'weighted_average')], default='weighted_average', max_length=20),
         ),
     ]
