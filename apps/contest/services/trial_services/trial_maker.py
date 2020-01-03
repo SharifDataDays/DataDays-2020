@@ -62,7 +62,7 @@ class TrialMaker:
         return self.trial, errors
 
     def _set_team_task(self):
-        team = self.request.user.participant.team
+        team = self.request.user.participant.teams.get(contest__id=self.contest_id)
         try:
             team_task = TeamTask.objects.get(team=team, task_id=self.task_id)
         except (TeamTask.DoesNotExist, TeamTask.MultipleObjectsReturned) as e:

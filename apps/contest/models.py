@@ -62,7 +62,7 @@ class Task(models.Model):
     max_trials_count = models.PositiveSmallIntegerField(default=3)
     trial_cooldown = models.PositiveSmallIntegerField()
     trial_time = models.PositiveSmallIntegerField()
-    scoring_type = models.CharField(choices=TaskScoringType.TYPES, max_length=10,
+    scoring_type = models.CharField(choices=TaskScoringType.TYPES, max_length=20,
                                     default=TaskScoringType.WEIGHTED_AVERAGE)
 
 

@@ -13,7 +13,7 @@ class TaskSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.Task
-        fields = ['id', 'topic', 'trial_cooldown', 'content']
+        fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type']
 
 
 class MilestoneSerializer(ModelSerializer):
@@ -25,12 +25,11 @@ class MilestoneSerializer(ModelSerializer):
 
 
 class ContestSerializer(ModelSerializer):
-    milestones = MilestoneSerializer(many=True, read_only=True)
+    milestones = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = contest_models.Contest
-        fields = ['id', 'title', 'team_size', 'start_time', 'end_time', 'milestones', 'scoreboard_freeze',
-                  'scoreboard_order_freeze', 'scoring_type']
+        fields = ['id', 'title', 'team_size', 'start_time', 'end_time', 'milestones']
 
 
 class ScoreSerializer(ModelSerializer):
