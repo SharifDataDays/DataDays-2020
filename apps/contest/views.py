@@ -110,7 +110,7 @@ class SubmitTrialAPIView(GenericAPIView):
 class ContentFinishedAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
 
-    def post(self, request, contest_id, milestone_id, task_id):
+    def get(self, request, contest_id, milestone_id, task_id):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
         milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
         if milestone.contest != contest:
