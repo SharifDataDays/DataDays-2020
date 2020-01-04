@@ -106,3 +106,23 @@ class SubmitTrialAPIView(GenericAPIView):
 
         return Response(data={'trial': self.get_serializer(trial).data}, status=status.HTTP_200_OK)
 
+
+class ContentFinishedAPIView(GenericAPIView):
+    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
+
+    def post(self, request, contest_id, milestone_id, task_id):
+        contest = get_object_or_404(contest_models.Contest, id=contest_id)
+        milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
+        if milestone.contest != contest:
+            return Response(data={'detail': 'milestone is unrelated to contest'},
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
+        self.check_object_permissions(self.request, contest)
+        self.check_object_permissions(self.request, milestone)
+        team = request.user.participant.teams.get(contest=contest)
+        team_task = team.tasks.get(task_id=task_id)
+        team_task.content_finished = True
+        team_task.save()
+        return Response(data={'detail': 'done'}, status=status.HTTP_200_OK)
+
+
+
