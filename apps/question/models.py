@@ -40,6 +40,11 @@ class QuestionTypes:
     )
 
 
+class QuestionTag(models.Model):
+    title = models.CharField(max_length=50)
+    milestone = models.ForeignKey('contest.Milestone', related_name='question_tags', on_delete=models.CASCADE)
+
+
 class Question(PolymorphicModel):
     task = models.ForeignKey('contest.Task', related_name='questions', on_delete=None)
 
@@ -48,6 +53,7 @@ class Question(PolymorphicModel):
     body = models.TextField()
     type = models.CharField(max_length=50, choices=QuestionTypes.TYPES)
     max_score = models.PositiveSmallIntegerField()
+    tag = models.ForeignKey(QuestionTag, related_name='questions', on_delete=models.CASCADE, blank=True, null=True)
 
     @staticmethod
     def change_function_name(function: str):
