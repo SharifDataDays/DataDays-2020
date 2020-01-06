@@ -49,11 +49,14 @@ class SignUpView(GenericAPIView):
                     [serializer.validated_data['email']]
                 )
             msg.attach_alternative(email_html_message, "text/html")
-            msg.send()
+            try:
+                msg.send()
 
-            serializer.save()
-            serializer.instance.is_active = False
-            serializer.instance.save()
+                serializer.save()
+                serializer.instance.is_active = False
+                serializer.instance.save()
+            except:
+                return Response({'detail': 'Invalid email or user has not been saved.'}, status=406)
 
             return Response({'detail': 'User created successfully. Check your email for confirmation link'}, status=200)
         else:
@@ -131,7 +134,7 @@ class ResetPasswordConfirmView(GenericAPIView):
         if (timezone.now() - rs_token.expiration_date).total_seconds() > 24 * 60 * 60:
             return Response({'error': 'Token Expired'}, status=400)
 
-        user = get_object_or_404(User, id=urlsafe_base64_decode(data['uid']))
+        user = get_object_or_404(User, id=urlsafe_base64_decode(data['uid']).decode('utf-8'))
         user.password = make_password(data['new_password1'])
         user.save()
         return Response({'detail': 'Successfully Changed Password'}, status=200)
