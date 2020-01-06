@@ -91,6 +91,8 @@ class QuestionRecipe(models.Model):
     question_type = models.CharField(max_length=20, choices=QuestionTypes.TYPES)
     priority = models.PositiveSmallIntegerField()
     count = models.PositiveSmallIntegerField()
+    question_tag = models.ForeignKey('question.QuestionTag', related_name='question_recipes', on_delete=models.CASCADE,
+                                     blank=True, null=True)
 
 
 class QuestionSubmission(models.Model):
