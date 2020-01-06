@@ -76,7 +76,7 @@ class TeamTask(models.Model):
 
 class Trial(models.Model):
     team_task = models.ForeignKey('contest.TeamTask', related_name='trials', on_delete=models.CASCADE)
-    score = models.FloatField(null=True, blank=True)
+    score = models.FloatField(default=0.0)
     due_time = models.DateTimeField()
     start_time = models.DateTimeField(auto_now_add=True)
     submit_time = models.DateTimeField(null=True, blank=True)
@@ -125,7 +125,7 @@ class Rejudge(models.Model):
     def pre_save(self):
         question_submissions = self.question.question_submissions.all()
         for submission in question_submissions:
-            judge_submissions.apply_async([submission, self], queue='main')
+            judge_submissions.delay(submission.pk, self.pk)
 
     def save(self, *args, **kwargs):
         self.pre_save()
