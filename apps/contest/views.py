@@ -16,6 +16,16 @@ from . import models as contest_models, serializers
 from apps.contest.services.trial_services import trial_maker
 
 
+class ContestsListAPIView(GenericAPIView):
+    permission_classes = [IsAuthenticated, UserHasParticipant]
+    serializer_class = serializers.ContestAsAListItemSerializer
+    queryset = contest_models.Contest.objects.all()
+
+    def get(self, request):
+        data = self.get_serializer(self.get_queryset(), many=True).data
+        return Response(data={'contests': data}, status=status.HTTP_200_OK)
+
+
 class ContestAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest]
     serializer_class = serializers.ContestSerializer

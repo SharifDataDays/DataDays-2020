@@ -32,6 +32,12 @@ class ContestSerializer(ModelSerializer):
         fields = ['id', 'title', 'team_size', 'start_time', 'end_time', 'milestones']
 
 
+class ContestAsAListItemSerializer(ModelSerializer):
+    class Meta:
+        model = contest_models.Contest
+        fields = ['id', 'title', 'start_time', 'end_time']
+
+
 class ScoreSerializer(ModelSerializer):
     class Meta:
         model = contest_models.Score
