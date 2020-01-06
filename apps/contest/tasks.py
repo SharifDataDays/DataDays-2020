@@ -7,10 +7,15 @@ from thebackend.celery import app
 
 
 @app.task(name='judge_submissions')
-def judge_submissions(question_submission_pk, rejudge_model_pk=None) -> None:
+def judge_submissions(question_submission_pk: int, rejudge_model_pk: int = None) -> None:
     from apps.contest.models import Score, QuestionSubmission, Rejudge
-    """ This task Judges a single submission and set it's score
-        and save it in database
+    """ This task Judges a single QuestionSubmission and set it's score
+        and save it in database.
+        
+        If rejudge a QuestionSubmission is requested,
+        the rejudge_model_pk field should be settled
+        to a Rejudge object primary key.
+        
     :param rejudge_model: Rejudge
     :param question_submission: QuestionSubmission
     :return: None
@@ -24,26 +29,35 @@ def judge_submissions(question_submission_pk, rejudge_model_pk=None) -> None:
     judge_submission.judge()
     if rejudge_model_pk:
         rejudge_model = Rejudge.objects.get(pk=rejudge_model_pk)
+        recalculate_trials_scores.delay()
         rejudge_model.finished = True
 
 
 @app.task(name='judge_trials')
-def judge_trials(trial_pk):
+def judge_trials(trial_pk: int) -> None:
+    """ This task judges a single trial
+    :param trial_pk:
+    :return:
+    """
     from apps.contest.models import Trial
 
     trial = Trial.objects.get(pk=trial_pk)
     judge_trial = JudgeTrial(trial=trial)
     judge_trial.judge_trial()
-    # rejudge_trials.apply_async([], queue='main')
 
 
 @app.task(name='rejudge_trials')
-def rejudge_trials():
+def recalculate_trials_scores():
+    """ This Task recalculate the score of a
+        trial after Updating it's QuestionSubmissions
+    :return:
+    """
     from apps.contest.models import Trial
 
     trials = Trial.objects.filter(submit_time__isnull=False)
     for trial in trials:
-        for submission in trial.question_submissions:
+        trial.score = 0.0
+        for submission in trial.question_submissions.all():
             trial.score += submission.score.number
         trial.save()
         set_task_score(trial=trial)
