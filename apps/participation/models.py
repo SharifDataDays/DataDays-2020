@@ -47,3 +47,6 @@ class Badge(models.Model):
     image = models.ImageField()
     milestone = models.ForeignKey('contest.Milestone', related_name='badges', on_delete=models.CASCADE)
     text = models.TextField()
+
+    def __str__(self):
+        return f'id:{self.id} milestone_title:{self.milestone.title}'
