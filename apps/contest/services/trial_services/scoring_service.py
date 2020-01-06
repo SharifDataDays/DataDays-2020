@@ -20,7 +20,7 @@ class JudgeTrial:
     def judge_trial(self):
         from apps.contest.models import Score
 
-        for question_submission in self.trial.question_submissions:
+        for question_submission in self.trial.question_submissions.all():
             if not hasattr(question_submission, 'score'):
                 score = Score()
             else:
@@ -93,13 +93,13 @@ def set_task_score(trial) -> None:
             trial.team_task.final_score = trial.score
             trial.team_task.save()
     else:
-        trials = trial.team_task.trials.all()
+        trials = list(trial.team_task.trials.all())
         if len(trials) == 0:
             return
         trials.sort(key=lambda x: x.id)
         team_task_score = 0
         factors = [1, 0.9, 0.7, 0.5]
         for i in range(len(trials)):
-            team_task_score += factors[i] * trials[i]
+            team_task_score += factors[i] * trials[i].score
         trial.team_task.final_score = team_task_score / len(trials)
         trial.team_task.save()

@@ -77,7 +77,7 @@ class CreateTrialAPIView(GenericAPIView):
 
 class SubmitTrialAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
-    parser_classes = (MultiPartParser,)
+    # parser_classes = (MultiPartParser,)
     serializer_class = serializers.TrialPostSerializer
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):
@@ -102,7 +102,8 @@ class SubmitTrialAPIView(GenericAPIView):
         trial.submit_time = timezone.now()
         trial.save()
         # Scoring Service Task Queued
-        judge_trials.apply_async([trial], queue='main')
+        print("hello <==========================================")
+        judge_trials.delay(trial.pk)
 
         return Response(data={'trial': self.get_serializer(trial).data}, status=status.HTTP_200_OK)
 

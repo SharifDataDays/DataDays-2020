@@ -26,10 +26,13 @@ def judge_submissions(question_submission, rejudge_model=None) -> None:
 
 
 @app.task(name='judge_trials')
-def judge_trials(trial):
+def judge_trials(trial_pk):
+    from apps.contest.models import Trial
+
+    trial = Trial.objects.get(pk=trial_pk)
     judge_trial = JudgeTrial(trial=trial)
     judge_trial.judge_trial()
-    rejudge_trials.apply_async([], queue='main')
+    # rejudge_trials.apply_async([], queue='main')
 
 
 @app.task(name='rejudge_trials')
