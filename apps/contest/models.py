@@ -43,12 +43,18 @@ class Contest(models.Model):
     scoreboard_freeze = models.BooleanField(default=False)
     scoreboard_order_freeze = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f'id:{self.id} title:{self.title}'
+
 
 class Milestone(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     contest = models.ForeignKey('contest.Contest', related_name='milestones', on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'id:{self.id} title:{self.title} contest_title:{self.contest.title}'
 
 
 class Task(models.Model):
@@ -65,6 +71,10 @@ class Task(models.Model):
     scoring_type = models.CharField(choices=TaskScoringType.TYPES, max_length=20,
                                     default=TaskScoringType.WEIGHTED_AVERAGE)
 
+    def __str__(self):
+        return f'id:{self.id} topic:{self.topic} ' \
+               f'milestone_title:{self.milestone.title} contest_title:{self.milestone.contest.title}'
+
 
 class TeamTask(models.Model):
     task = models.ForeignKey('contest.Task', related_name='team_tasks', on_delete=models.CASCADE)
@@ -72,6 +82,9 @@ class TeamTask(models.Model):
     content_finished = models.BooleanField(default=False)
     final_score = models.FloatField(blank=True, null=True)
     final_trial = models.OneToOneField('contest.Trial', null=True, blank=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'id:{self.id} team_name:{self.team.name}'
 
 
 class Trial(models.Model):
@@ -81,9 +94,15 @@ class Trial(models.Model):
     start_time = models.DateTimeField(auto_now_add=True)
     submit_time = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return f'id:{self.id} team_name:{self.team_task.team.name}'
+
 
 class TrialRecipe(models.Model):
     task = models.OneToOneField('contest.Task', related_name='trial_recipe', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.id)
 
 
 class QuestionRecipe(models.Model):
@@ -93,6 +112,9 @@ class QuestionRecipe(models.Model):
     count = models.PositiveSmallIntegerField()
     question_tag = models.ForeignKey('question.QuestionTag', related_name='question_recipes', on_delete=models.CASCADE,
                                      blank=True, null=True)
+
+    def __str__(self):
+        return str(self.id)
 
 
 class QuestionSubmission(models.Model):
@@ -107,6 +129,9 @@ class QuestionSubmission(models.Model):
 
     file_answer = models.FileField(blank=True, null=True, upload_to=upload_path)
 
+    def __str__(self):
+        return str(self.id)
+
 
 class Score(models.Model):
     number = models.FloatField(default=0)
@@ -114,6 +139,9 @@ class Score(models.Model):
                                                on_delete=models.CASCADE)
     status = models.CharField(choices=ScoreStatusTypes.TYPES, max_length=10, default=ScoreStatusTypes.UNDEF)
     info = models.CharField(max_length=1000, blank=True, null=False, default='')
+
+    def __str__(self):
+        return str(self.id)
 
 
 class Rejudge(models.Model):
@@ -130,3 +158,6 @@ class Rejudge(models.Model):
     def save(self, *args, **kwargs):
         self.pre_save()
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return str(self.id)

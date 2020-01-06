@@ -68,7 +68,7 @@ class Question(PolymorphicModel):
         return settings.MEDIA_ROOT + 'private/' + "question_" + str(self.id)
 
     def __str__(self):
-        return "id: " + str(self.id) + " task: " + str(self.task.topic)
+        return f'id:{self.id} task_topic:{self.task.topic}'
 
 
 class NeededFilesForQuestionJudgment(models.Model):
