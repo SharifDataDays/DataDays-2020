@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.generics import GenericAPIView
-from rest_framework.parsers import FileUploadParser, MultiPartParser
+from rest_framework.parsers import FileUploadParser, MultiPartParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
@@ -77,7 +77,7 @@ class CreateTrialAPIView(GenericAPIView):
 
 class SubmitTrialAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
-    # parser_classes = (MultiPartParser,)
+    parser_classes = (MultiPartParser, JSONParser)
     serializer_class = serializers.TrialPostSerializer
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):
@@ -123,6 +123,3 @@ class ContentFinishedAPIView(GenericAPIView):
         team_task.content_finished = True
         team_task.save()
         return Response(data={'detail': 'done'}, status=status.HTTP_200_OK)
-
-
-
