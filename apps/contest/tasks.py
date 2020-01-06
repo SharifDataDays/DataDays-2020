@@ -7,21 +7,23 @@ from thebackend.celery import app
 
 
 @app.task(name='judge_submissions')
-def judge_submissions(question_submission, rejudge_model=None) -> None:
-    from apps.contest.models import Score
+def judge_submissions(question_submission_pk, rejudge_model_pk=None) -> None:
+    from apps.contest.models import Score, QuestionSubmission, Rejudge
     """ This task Judges a single submission and set it's score
         and save it in database
     :param rejudge_model: Rejudge
     :param question_submission: QuestionSubmission
     :return: None
     """
+    question_submission = QuestionSubmission.objects.get(pk=question_submission_pk)
     if not hasattr(question_submission, 'score'):
         score = Score()
     else:
         score = question_submission.score
     judge_submission = JudgeQuestionSubmission(question_submission=question_submission, score=score)
     judge_submission.judge()
-    if rejudge_model:
+    if rejudge_model_pk:
+        rejudge_model = Rejudge.objects.get(pk=rejudge_model_pk)
         rejudge_model.finished = True
 
 

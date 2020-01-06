@@ -125,7 +125,7 @@ class Rejudge(models.Model):
     def pre_save(self):
         question_submissions = self.question.question_submissions.all()
         for submission in question_submissions:
-            judge_submissions.apply_async([submission, self], queue='main')
+            judge_submissions.delay(submission.pk, self.pk)
 
     def save(self, *args, **kwargs):
         self.pre_save()

@@ -102,7 +102,6 @@ class SubmitTrialAPIView(GenericAPIView):
         trial.submit_time = timezone.now()
         trial.save()
         # Scoring Service Task Queued
-        print("hello <==========================================")
         judge_trials.delay(trial.pk)
 
         return Response(data={'trial': self.get_serializer(trial).data}, status=status.HTTP_200_OK)
