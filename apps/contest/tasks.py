@@ -1,5 +1,6 @@
 from typing import List, Tuple
 
+from django.utils import timezone
 from celery import task, shared_task
 
 from apps.contest.services.trial_services.scoring_service import JudgeTrial, JudgeQuestionSubmission, set_task_score
@@ -11,11 +12,11 @@ def judge_submissions(question_submission_pk: int, rejudge_model_pk: int = None)
     from apps.contest.models import Score, QuestionSubmission, Rejudge
     """ This task Judges a single QuestionSubmission and set it's score
         and save it in database.
-        
+
         If rejudge a QuestionSubmission is requested,
         the rejudge_model_pk field should be settled
         to a Rejudge object primary key.
-        
+
     :param rejudge_model: Rejudge
     :param question_submission: QuestionSubmission
     :return: None
@@ -42,6 +43,9 @@ def judge_trials(trial_pk: int) -> None:
     from apps.contest.models import Trial
 
     trial = Trial.objects.get(pk=trial_pk)
+    if trial.submit_time is None:
+        trial.submit_time = timezone.now()
+        trial.save()
     judge_trial = JudgeTrial(trial=trial)
     judge_trial.judge_trial()
 
