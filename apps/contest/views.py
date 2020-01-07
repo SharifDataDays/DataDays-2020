@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.generics import GenericAPIView
-from rest_framework.parsers import FileUploadParser, MultiPartParser, JSONParser
+from rest_framework.parsers import FileUploadParser, MultiPartParser, JSONParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
@@ -79,6 +79,15 @@ class CreateTrialAPIView(GenericAPIView):
         maker = trial_maker.TrialMaker(request, contest_id, milestone_id, task_id)
         trial, errors = maker.make_trial()
         if trial is None:
+            team_task = get_object_or_404(
+                    contest_models.TeamTask,
+                    task_id=task_id,
+                    team=request.user.teams.get(contest=contest)
+                )
+            trial = get_object_or_404(contest_models.Trial, team_task=team_task)
+        else:
+            judge_trials.apply_async(trial.pk, countdown=int(60*60*trial.task.trial_time))
+        if trial is None:
             return Response(data={'detail': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
             data = self.get_serializer(trial).data
@@ -87,7 +96,7 @@ class CreateTrialAPIView(GenericAPIView):
 
 class SubmitTrialAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
-    parser_classes = (MultiPartParser, JSONParser)
+    parser_classes = (MultiPartParser, FormParser)
     serializer_class = serializers.TrialPostSerializer
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):
@@ -109,10 +118,12 @@ class SubmitTrialAPIView(GenericAPIView):
         if not valid:
             return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        trial.submit_time = timezone.now()
-        trial.save()
-        # Scoring Service Task Queued
-        judge_trials.delay(trial.pk)
+        if trial.final_submit:
+            trial.submit_time = timezone.now()
+            trial.save()
+            judge_trials.delay(trial.pk)
+        else:
+            trial.save()
 
         return Response(data={'trial': self.get_serializer(trial).data}, status=status.HTTP_200_OK)
 

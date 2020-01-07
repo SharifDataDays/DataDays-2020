@@ -1,9 +1,13 @@
+from collections import OrderedDict
+
 from rest_framework.serializers import ModelSerializer, Serializer
 from rest_framework import serializers
+from rest_framework.fields import SkipField
 
 from django.conf import settings
 
 from .models import Document, Section, Subsection
+
 
 
 class SubtitleSerializer(ModelSerializer):
@@ -31,6 +35,31 @@ class SectionSerializer(ModelSerializer):
         model = Section
         fields = ['uuid', 'title_en', 'title_fa', 'markdown', 'subtitles', 'link_to_colab']
 
+    def to_representation(self, instance):
+        """
+        Object instance -> Dict of primitive datatypes.
+        """
+        ret = OrderedDict()
+        fields = [field for field in self.fields.values() if not field.write_only]
+
+        for field in fields:
+            try:
+                attribute = field.get_attribute(instance)
+            except SkipField:
+                continue
+
+            if attribute is not None:
+                represenation = field.to_representation(attribute)
+                if represenation is None:
+                    # Do not seralize empty objects
+                    continue
+                if isinstance(represenation, list) and not represenation:
+                   # Do not serialize empty lists
+                   continue
+                ret[field.field_name] = represenation
+
+        return ret
+
     def validate(self, attrs):
         if 'title_en' not in attrs:
             raise serializers.ValidationError('Title Field Missing!')
@@ -55,11 +84,40 @@ class DocumentSerializer(ModelSerializer):
         model = Document
         fields = ['id', 'title_en', 'title_fa', 'description_en', 'description_fa', 'thumbnail', 'file', 'time_to_read']
 
+    def to_representation(self, instance):
+        """
+        Object instance -> Dict of primitive datatypes.
+        """
+        ret = OrderedDict()
+        fields = [field for field in self.fields.values() if not field.write_only]
+
+        for field in fields:
+            try:
+                attribute = field.get_attribute(instance)
+            except SkipField:
+                continue
+
+            if attribute is not None:
+                represenation = field.to_representation(attribute)
+                if represenation is None:
+                    # Do not seralize empty objects
+                    continue
+                if isinstance(represenation, list) and not represenation:
+                   # Do not serialize empty lists
+                   continue
+                ret[field.field_name] = represenation
+
+        return ret
+
     def get_thumbnail(self, obj):
-        return settings.MEDIA_URL + obj.thumbnail.name
+        if obj.thumbnail.name == "":
+            return None
+        return settings.MEDIA_URL + str(obj.thumbnail.name)
 
     def get_file(self, obj):
-        return settings.MEDIA_URL + obj.file.name
+        if obj.file.name == "":
+            return None
+        return settings.MEDIA_URL + str(obj.file.name)
 
     def validate(self, attrs):
         if 'title_en' not in attrs:

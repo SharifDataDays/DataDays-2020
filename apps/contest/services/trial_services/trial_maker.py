@@ -91,6 +91,8 @@ class TrialMaker:
         questions = []
         for question_recipe in self.trial_recipe.question_recipes.all():
             questions_available = Question.objects.filter(task=self.task, type=question_recipe.question_type)
+            if question_recipe.question_tag is not None:
+                questions_availabe = questions_available.filter(tag=question_recipe.question_tag)
             repeated_questions = list(questions_available.filter(id__in=self.before_selected_questions_ids))
             questions_available = list(questions_available)
             while len(repeated_questions) > 0 and len(questions_available) > question_recipe.count:
