@@ -82,7 +82,7 @@ class CreateTrialAPIView(GenericAPIView):
             team_task = get_object_or_404(
                     contest_models.TeamTask,
                     task_id=task_id,
-                    team=request.user.teams.get(contest=contest)
+                    team=request.user.participant.teams.get(contest=contest)
                 )
             trial = get_object_or_404(contest_models.Trial, team_task=team_task)
         else:
@@ -96,7 +96,7 @@ class CreateTrialAPIView(GenericAPIView):
 
 class SubmitTrialAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, JSONParser)
     serializer_class = serializers.TrialPostSerializer
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):

@@ -169,7 +169,14 @@ class TrialSubmitValidation:
             return
 
     def _validate_file_upload(self, submission):
-        answer_file = self._request.FILES[str(submission.id)]
+        if not submiision.has_file:
+            return
+        try:
+            answer_file = self._request.FILES[str(submission.id)]
+        except:
+            self._valid = False
+            self._errors += ['file with name {submission.id} does not exists']
+            return
         file_format = submission.question.file_format
         file_size_limit = submission.question.file_size_limit
 
@@ -185,7 +192,11 @@ class TrialSubmitValidation:
                              trial_submit_exception.ErrorMessages.FILE_SIZE_LIMIT_EXCEEDED.format(file_size_limit))
             self._valid = False
             return
-        submission.answer = self._save_to_storage(self._request, submission.id)
+
+        for qs in self._trial.validated_data['question_submissions']:
+            if qs['id'] == submission.id:
+                qs['answer'] = self._save_to_storage(self._request, submission.id)
+                break
 
     def _validate_manual_judgment(self, submission):
         pass
