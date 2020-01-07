@@ -1,5 +1,8 @@
 import ast
+import os
 from typing import List, Tuple
+
+from django.conf import settings
 
 from apps.question.models import QuestionTypes
 
@@ -54,7 +57,8 @@ class JudgeQuestionSubmission:
 
         question = self.question_submission.question
         answer = ast.literal_eval(
-            self.question_submission.answer) if not self.question_submission.file_answer else self.question_submission.file_answer
+            self.question_submission.answer) \
+            if not self.question_submission.file_answer else self.question_submission.answer
 
         def get_path():
             return question.dir_path()
@@ -81,7 +85,7 @@ class JudgeQuestionSubmission:
         elif question_type in [QuestionTypes.NUMERIC_RANGE, QuestionTypes.MULTI_ANSWER, QuestionTypes.MULTI_SELECT]:
             return 'answers', answer
         elif question_type == QuestionTypes.FILE_UPLOAD:
-            return 'file_path', answer
+            return 'file_path', os.path.join(settings.MEDIA_ROOT, answer)
 
 
 def set_task_score(trial) -> None:

@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='questionsubmission',
             name='file_answer',
-            field=models.FileField(blank=True, null=True, upload_to=apps.contest.models.QuestionSubmission.upload_path),
+            field=models.FileField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name='task',

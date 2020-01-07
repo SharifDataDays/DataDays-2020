@@ -3,6 +3,9 @@ import os
 import json
 from typing import List, Union
 
+from django.conf import settings
+from django.core.files.base import ContentFile
+
 from apps.contest.models import Trial, QuestionSubmission
 from apps.contest.serializers import TrialPostSerializer
 from apps.question.models import QuestionTypes, AnswerDataTypes
@@ -166,22 +169,23 @@ class TrialSubmitValidation:
             return
 
     def _validate_file_upload(self, submission):
-        answer = submission.file
+        answer_file = self._request.FILES[str(submission.id)]
         file_format = submission.question.file_format
         file_size_limit = submission.question.file_size_limit
 
-        answer_file_format = os.path.splitext(answer)[1]
+        answer_file_format = os.path.splitext(answer_file.name)[1][1:]
+
         if file_format != answer_file_format:
             self._errors += (
                 submission.question_id, trial_submit_exception.ErrorMessages.INVALID_FILE_FORMAT.format(file_format))
             self._valid = False
             return
-        answer_file_size = os.path.getsize(answer)
-        if answer_file_size > file_size_limit:
+        if answer_file.size > file_size_limit:
             self._errors += (submission.question_id,
                              trial_submit_exception.ErrorMessages.FILE_SIZE_LIMIT_EXCEEDED.format(file_size_limit))
             self._valid = False
             return
+        submission.answer = self._save_to_storage(self._request, submission.id)
 
     def _validate_manual_judgment(self, submission):
         pass
@@ -198,3 +202,20 @@ class TrialSubmitValidation:
             self._errors += (submission.question_id, trial_submit_exception.ErrorMessages.INVALID_NUMERIC_RANGE)
             self._valid = False
             return
+
+    def _save_to_storage(self, request, submission_id):
+        destination = os.path.join('teams', self._trial.team_task.team.name,
+                                   f'trial{self.trial_id}',
+                                   f'question_submission{submission_id}')
+        uploaded_filename = request.FILES[submission_id].name
+        try:
+            os.makedirs(os.path.join(settings.MEDIA_ROOT, destination))
+        except OSError:
+            print("File Already Exists")
+        full_filename = os.path.join(settings.MEDIA_ROOT, destination, uploaded_filename)
+        copied_file = open(full_filename, 'wb+')
+        file_content = ContentFile(request.FILES[submission_id].read())
+        for chunk in file_content.chunks():
+            copied_file.write(chunk)
+        copied_file.close()
+        return os.path.join(destination, uploaded_filename)
