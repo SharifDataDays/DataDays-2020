@@ -84,7 +84,7 @@ class CreateTrialAPIView(GenericAPIView):
                     task_id=task_id,
                     team=request.user.participant.teams.get(contest=contest)
                 )
-            trials = contest_models.Trial.filter(team_task=team_task)
+            trials = contest_models.Trial.objects.filter(team_task=team_task)
             if trials.count() == 1:
                 trial = trials.get()
         else:
