@@ -88,7 +88,7 @@ class CreateTrialAPIView(GenericAPIView):
             if trials.count() == 1:
                 trial = trials.get()
         else:
-            judge_trials.apply_async(trial.pk, countdown=int(60*60*trial.task.trial_time))
+            judge_trials.apply_async(trial.pk, countdown=int(60*60*trial.team_task.task.trial_time))
         if trial is None:
             return Response(data={'detail': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
