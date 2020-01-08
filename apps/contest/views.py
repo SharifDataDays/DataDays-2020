@@ -98,7 +98,7 @@ class CreateTrialAPIView(GenericAPIView):
 
 class SubmitTrialAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
-    parser_classes = (MultiPartParser, JSONParser)
+    parser_classes = (MultiPartParser, FormParser)
     serializer_class = serializers.TrialPostSerializer
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):
