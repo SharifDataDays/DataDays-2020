@@ -84,7 +84,9 @@ class CreateTrialAPIView(GenericAPIView):
                     task_id=task_id,
                     team=request.user.participant.teams.get(contest=contest)
                 )
-            trial = get_object_or_404(contest_models.Trial, team_task=team_task)
+            trials = contest_models.Trial.filter(team_task=team_task)
+            if trials.count() == 1:
+                trial = trials.get()
         else:
             judge_trials.apply_async(trial.pk, countdown=int(60*60*trial.task.trial_time))
         if trial is None:
