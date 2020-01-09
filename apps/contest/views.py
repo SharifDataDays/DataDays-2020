@@ -15,6 +15,7 @@ from rest_framework.exceptions import ParseError
 from apps.contest.permissions import UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks
 from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
 from apps.contest.tasks import judge_trials
+from apss.contest.serializers import TrialSerializer
 
 from apps.participation.models import Team, Participant
 
