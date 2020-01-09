@@ -57,16 +57,21 @@ class Question(PolymorphicModel):
 
     @staticmethod
     def change_function_name(function: str):
-        patt = 'def\s+(\w+)\s*\((.*)\)\s*:\s*'
+        patt = 'def([^\(])+\(([^\)]+)\):'
         lines =  function.split('\n')
-        first_line, other_lines = lines[0], lines[1:]
-        if not re.match(first_line, patt):
+        first_line, other_lines = lines[0].strip(), lines[1:]
+        if not re.match(patt, first_line):
             raise Exception('First line is not def folan')
         func_name = 'q_' + uuid.uuid4().hex[:16]
-        search = re.search(first_line, patt)
+        search = re.search(patt, first_line)
         g = [search.group(i) for i in range(1, 3)]
-        first_line = f'def {g[1]}({g[2]}):'
-        whole_lines = first_line + '\n' + [line + '\n' for line in other_lines]
+        first_line = f'def {g[0]}({g[1]}):'
+        whole_lines = first_line + '\n' + '\n'.join(other_lines) + '\n'
+        try:
+            exec(whole_lines)
+        except Exception as e:
+            raise Exception(f'judge function malformed. {str(e)}')
+
         return whole_lines, first_line
 
     def dir_path(self, filename):
@@ -177,3 +182,4 @@ class Choices(models.Model):
         return "Label: " + str(self.label) + " Question_id: " + str(
             self.selective_question.id) + " Question_Topic: " + str(
             self.selective_question.task.topic) + " "
+
