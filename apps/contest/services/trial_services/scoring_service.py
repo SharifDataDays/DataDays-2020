@@ -56,9 +56,7 @@ class JudgeQuestionSubmission:
         from apps.contest.models import ScoreStatusTypes
 
         question = self.question_submission.question
-        answer = ast.literal_eval(
-            self.question_submission.answer) \
-            if not self.question_submission.file_answer else self.question_submission.answer
+        answer = ast.literal_eval(self.question_submission.answer)
 
         def get_path():
             return question.dir_path()
