@@ -65,7 +65,7 @@ class Question(PolymorphicModel):
         func_name = 'q_' + uuid.uuid4().hex[:16]
         search = re.search(patt, first_line)
         g = [search.group(i) for i in range(1, 3)]
-        first_line = f'def {g[0]}({g[1]}):'
+        first_line = f'def {func_name}({g[1]}):'
         whole_lines = first_line + '\n' + '\n'.join(other_lines) + '\n'
         try:
             exec(whole_lines)
