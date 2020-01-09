@@ -85,7 +85,6 @@ class JudgeQuestionSubmission:
             score.status = ScoreStatusTypes.FAILED
             score.info = str(e.ERROR_MESSAGE)
         except Exception as e:
-            raise Exception(e)
             print(e)
             score.status = ScoreStatusTypes.ERROR
             score.info = 'Judge function runtime error'

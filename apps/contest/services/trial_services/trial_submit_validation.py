@@ -175,7 +175,7 @@ class TrialSubmitValidation:
         if not submiision.has_file:
             return
         try:
-            answer_file = self._request.files[str(submission.id)]
+            answer_file = self._request.FILES[str(submission.id)]
         except:
             self._valid = False
             self._errors += ['file with name {submission.id} does not exists']
