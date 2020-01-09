@@ -162,12 +162,10 @@ class SubmitTrialAPIView(GenericAPIView):
         if not valid:
             return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
+        trial.save()
         if trial_submitter.final_submit:
             trial.submit_time = timezone.now()
-            trial.save()
             judge_trials.delay(trial.pk)
-        else:
-            trial.save()
 
         return Response(data={'trial': TrialSerializer(trial).data}, status=status.HTTP_200_OK)
 
