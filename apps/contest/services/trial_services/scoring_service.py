@@ -64,7 +64,8 @@ class JudgeQuestionSubmission:
         try:
             exec(question.judge_function)
             answer_name, answer = self.get_parameters(question.type, answer)
-            call_function = f'{question.judge_function_name}({answer_name}={answer})'
+            answer = answer.replace("'", '"')
+            call_function = f'{question.judge_function_name}({answer_name}=\'{answer}\')'
             if question.type == QuestionTypes.SINGLE_SELECT:
                 call_function = f'{question.judge_function_name}({answer_name}=\'{answer}\')'
             score.number = eval(call_function) * question.max_score
