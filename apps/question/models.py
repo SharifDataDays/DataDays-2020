@@ -57,15 +57,20 @@ class Question(PolymorphicModel):
 
     @staticmethod
     def change_function_name(function: str):
-        name_start = function.find(" ")
-        while function[name_start] == " ":
-            name_start += 1
-        name_end = function.find("(")
-        function_new_name = 'q_' + uuid.uuid4().hex[:16]
-        return function[:name_start] + function_new_name + function[name_end:], function_new_name
+        patt = 'def\s+(\w+)\s*\((.*)\)\s*:\s*'
+        lines =  function.split('\n')
+        first_line, other_lines = lines[0], lines[1:]
+        if not re.match(first_line, patt):
+            raise Exception('First line is not def folan')
+        func_name = 'q_' + uuid.uuid4().hex[:16]
+        search = re.search(first_line, patt)
+        g = [search.group(i) for i in range(1, 3)]
+        first_line = f'def {g[1]}({g[2]}):'
+        whole_lines = first_line + '\n' + [line + '\n' for line in other_lines]
+        return whole_lines, first_line
 
-    def dir_path(self):
-        return settings.MEDIA_ROOT + 'private/' + "question_" + str(self.id)
+    def dir_path(self, filename):
+        return settings.MEDIA_ROOT + 'private/' + "question_" + str(self.id) + '/' + filename
 
     def __str__(self):
         return f'id:{self.id} task_topic:{self.task.topic}'
