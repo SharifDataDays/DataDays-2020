@@ -80,17 +80,23 @@ class TrialPostSerializer(ModelSerializer):
         model = contest_models.Trial
         fields = ['id', 'question_submissions', 'final_submit']
 
-    def save(self):
-        tf = contest_models.Trial.objects.filter(id=self.validated_data['id'])
+    def validate(self, data):
+        tf = contest_models.Trial.objects.filter(id=data['id'])
         if tf.count() != 1:
-            raise Exception
+            raise serializers.ValidationError('Trial does not exists')
         trial = tf.get()
         qss = trial.question_submissions.all()
-        for qs in self.validated_data['question_submissions']:
+        for qs in data['question_submissions']:
             qsf = qss.filter(id=qs['id'])
             if qsf.count() != 1:
-                raise Exception
-            q = qsf.get()
+                raise serializers.ValidationError('QuestionSubmission doest not exists')
+        return data
+
+    def save(self):
+        trial = contest_models.Trial.objects.get(id=self.validated_data['id'])
+        qss = trial.question_submissions.all()
+        for qs in self.validated_data['question_submissions']:
+            q = qss.get(id=qs['id'])
             q.answer = qs['answer']
             q.save()
 

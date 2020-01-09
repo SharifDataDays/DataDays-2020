@@ -38,8 +38,11 @@ class TrialSubmitValidation:
             trial = TrialPostSerializer(data=self._request.data)
             if trial.is_valid():
                 trial.save()
+                self.final_submit = self._request.data['final_submit']
                 return Trial.objects.get(id=self.trial_id)
             else:
+                self._valid = False
+                self._errors = [trial.errors[e][0] for e in trial.errors]
                 return None
         except Trial.DoesNotExist as e:
             self._valid = False
@@ -222,7 +225,7 @@ class TrialSubmitValidation:
         try:
             os.makedirs(os.path.join(settings.MEDIA_ROOT, destination))
         except OSError:
-            print("File Already Exists")
+            print('oops')
         full_filename = os.path.join(settings.MEDIA_ROOT, destination, uploaded_filename)
         copied_file = open(full_filename, 'wb+')
         file_content = ContentFile(request.FILES[submission_id].read())

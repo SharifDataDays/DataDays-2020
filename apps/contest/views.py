@@ -1,10 +1,16 @@
+import json
+
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.http.multipartparser import MultiPartParser as DjangoMultiPartParser
+
 from rest_framework.generics import GenericAPIView
-from rest_framework.parsers import FileUploadParser, MultiPartParser, JSONParser, FormParser
+from rest_framework.parsers import FileUploadParser, MultiPartParser, JSONParser, FormParser, BaseParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from rest_framework.parsers import DataAndFiles
+from rest_framework.exceptions import ParseError
 
 from apps.contest.permissions import UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks
 from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
@@ -88,7 +94,7 @@ class CreateTrialAPIView(GenericAPIView):
             if trials.count() == 1:
                 trial = trials.get()
         else:
-            judge_trials.apply_async(trial.pk, countdown=int(60*60*trial.team_task.task.trial_time))
+            judge_trials.apply_async([trial.pk], countdown=int(60*60*trial.team_task.task.trial_time))
         if trial is None:
             return Response(data={'detail': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
@@ -96,9 +102,43 @@ class CreateTrialAPIView(GenericAPIView):
         return Response(data={'trial': data}, status=status.HTTP_200_OK)
 
 
+class MyMultiPartParser(BaseParser):
+
+    media_type = 'multipart/form-data'
+
+    def parse(self, stream, media_type=None, parser_context=None):
+        """
+        Parses the incoming bytestream as a multipart encoded form,
+        and returns a DataAndFiles object.
+
+        `.data` will be a `QueryDict` containing all the form parameters.
+        `.files` will be a `QueryDict` containing all the form files.
+        """
+
+        try:
+            parser_context = parser_context or {}
+            request = parser_context['request']
+            encoding = 'utf-8'
+            meta = request.META.copy()
+            meta['CONTENT_TYPE'] = media_type
+            upload_handlers = request.upload_handlers
+            stream = request._request.__dict__['_stream'].__dict__['stream']
+            parser = DjangoMultiPartParser(meta, stream, upload_handlers, encoding)
+            data, files = parser.parse()
+            if 'json' not in files:
+                raise ParseError('Multipart form parse error: json file missing!')
+            try:
+                data = json.loads(files['json'].read())
+            except ValueError:
+                raise ParseError('Malformed Json')
+            return DataAndFiles(data, files)
+        except Exception as e:
+            raise ParseError(f'Multipart form parse error: {str(e)}')
+
+
 class SubmitTrialAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MyMultiPartParser,)
     serializer_class = serializers.TrialPostSerializer
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):
@@ -114,20 +154,21 @@ class SubmitTrialAPIView(GenericAPIView):
         team_task = team.tasks.get(task_id=task_id)
         if trial not in team_task.trials.all():
             return Response(data={'detail': 'This trial is not yours. bitch'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-
+        if trial.submit_time is not None:
+            return Response(data={'detail': 'This trial has already been submitted.'}, status=403)
         trial_submitter = TrialSubmitValidation(request, contest_id, milestone_id, task_id, trial_id)
         trial, valid, errors = trial_submitter.validate()
         if not valid:
             return Response(data={'errors': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        if trial.final_submit:
+        if trial_submitter.final_submit:
             trial.submit_time = timezone.now()
             trial.save()
             judge_trials.delay(trial.pk)
         else:
             trial.save()
 
-        return Response(data={'trial': self.get_serializer(trial).data}, status=status.HTTP_200_OK)
+        return Response(data={'trial': TrialSerializer(trial).data}, status=status.HTTP_200_OK)
 
 
 class ContentFinishedAPIView(GenericAPIView):
