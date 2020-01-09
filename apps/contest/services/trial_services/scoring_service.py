@@ -64,7 +64,8 @@ class JudgeQuestionSubmission:
         try:
             exec(question.judge_function)
             answer_name, answer = self.get_parameters(question.type, answer)
-            answer = answer.replace("'", '"')
+            if isinstance(answer, list):
+                answer = [x.replace("'", '"') for x in answer]
             call_function = f'{question.judge_function_name}({answer_name}=\'{answer}\')'
             if question.type == QuestionTypes.SINGLE_SELECT:
                 call_function = f'{question.judge_function_name}({answer_name}=\'{answer}\')'
