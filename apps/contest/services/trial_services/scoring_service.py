@@ -58,8 +58,8 @@ class JudgeQuestionSubmission:
         question = self.question_submission.question
         answer = ast.literal_eval(self.question_submission.answer.replace("'", '"'))
 
-        def get_path():
-            return question.dir_path()
+        def get_path(filename):
+            return question.dir_path() + filename
 
         try:
             if question.type == QuestionTypes.MANUAL_JUDGMENT:

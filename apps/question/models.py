@@ -72,10 +72,10 @@ class Question(PolymorphicModel):
         except Exception as e:
             raise Exception(f'judge function malformed. {str(e)}')
 
-        return whole_lines, first_line
+        return whole_lines, func_name
 
-    def dir_path(self, filename):
-        return settings.MEDIA_ROOT + 'private/' + "question_" + str(self.id) + '/' + filename
+    def dir_path(self):
+        return settings.MEDIA_ROOT + 'private/' + "question_" + str(self.id) + '/'
 
     def __str__(self):
         return f'id:{self.id} task_topic:{self.task.topic}'
