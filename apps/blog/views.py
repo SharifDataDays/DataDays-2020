@@ -30,7 +30,7 @@ class PostView(GenericAPIView):
 
 
 class CommentListView(GenericAPIView):
-    serializer_class = CommentSerializer
+    serializer_class = PostCommentSerializer
     queryset = Comment.objects.all().order_by('-date')
     permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = paginations.CommentsPagination
@@ -49,7 +49,7 @@ class CommentListView(GenericAPIView):
             comments = list(user_comments) + list(other_users_comments)
         else:
             comments = all_comments
-        data = CommentSerializer(comments, many=True).data
+        data = PostCommentSerializer(comments, many=True).data
         return Response(data)
 
     def post(self, request, post_id):
