@@ -3,6 +3,7 @@ from typing import List, Tuple
 from django.utils import timezone
 from celery import task, shared_task
 
+from apps.contest.services.scoreboard import Scoreboard
 from apps.contest.services.trial_services.scoring_service import JudgeTrial, JudgeQuestionSubmission, set_task_score
 from thebackend.celery import app
 
@@ -65,3 +66,8 @@ def recalculate_trials_scores():
             trial.score += submission.score.number
         trial.save()
         set_task_score(trial=trial)
+        Scoreboard.update_score(
+            task=trial.team_task.task,
+            team=trial.team_task.team,
+            score=trial.team_task.final_score
+        )

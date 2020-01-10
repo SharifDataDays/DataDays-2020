@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'apps.notification',
     'apps.go',
     'apps.uploads',
+    'private_files',
 ]
 
 MIDDLEWARE = [
@@ -162,4 +163,4 @@ from .martor import *
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CELERY_BROKER_URL = 'amqp://localhost'
-
+SCOREBOARD_HOST = 'http://localhost:8080'

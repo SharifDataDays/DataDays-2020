@@ -18,6 +18,10 @@ class UserHasTeamInContest(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if not isinstance(obj, Contest):
             return True
+
+        if not obj.released and not request.user.is_staff:
+            return False
+
         return obj in [team.contest for team in request.user.participant.teams.all()]
 
 
@@ -27,6 +31,10 @@ class UserHasTeamTasks(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if not isinstance(obj, Milestone):
             return True
+
+        if not obj.released and not request.user.is_staff:
+            return False
+
         team = request.user.participant.teams.get(contest=obj.contest)
         team_tasks = team.tasks.all()
         for task in obj.tasks.all():

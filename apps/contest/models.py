@@ -43,6 +43,8 @@ class Contest(models.Model):
     scoreboard_freeze = models.BooleanField(default=False)
     scoreboard_order_freeze = models.BooleanField(default=False)
 
+    released = models.BooleanField(default=False)
+
     def __str__(self):
         return f'id:{self.id} title:{self.title}'
 
@@ -55,6 +57,8 @@ class Milestone(models.Model):
 
     description = models.TextField(default="")
     image = models.ImageField(default="")
+
+    released = models.BooleanField(default=False)
 
     def __str__(self):
         return f'id:{self.id} title:{self.title} contest_title:{self.contest.title}'
