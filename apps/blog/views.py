@@ -39,7 +39,16 @@ class CommentListView(GenericAPIView):
         return Comment.objects.all().exclude(shown=False)
 
     def get(self, request, post_id):
-        comments = self.get_queryset().filter(post_id=post_id)
+        father_comments = self.get_queryset().filter(post_id=post_id).filter(reply_to=None)
+        comments = []
+        for comment in father_comments:
+            reply_comments = []
+            for reply_comment_id in eval(comment.replies):
+                reply_comments.append(self.get_queryset().get(id=reply_comment_id))
+            reply_comments.sort(key=lambda x: x.date)
+            comments.append(comment)
+            comments.extend(reply_comments)
+
         data = CommentSerializer(comments, many=True).data
         return Response(data)
 
@@ -48,7 +57,7 @@ class CommentListView(GenericAPIView):
         post = Post.objects.all().filter(id=post_id)
         serializer.is_valid(raise_exception=True)
         comment = serializer.save()
-        self.set_replies(serializer, comment)
+        self.set_replies(comment)
         comment.post = post
         comment.save()
         return Response({"detail": "کامنت شما ثبت شد."})
@@ -56,7 +65,5 @@ class CommentListView(GenericAPIView):
     @staticmethod
     def set_replies(comment):
         reply_to = comment.reply_to
-        if reply_to.replies is '':
-            reply_to.replies += str(comment.id)
-        else:
-            reply_to.replies += (',' + str(comment.id))
+        replies = eval(reply_to.replies)
+        replies.append(comment.id)
