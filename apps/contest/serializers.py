@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from apps.participation.serializers import TeamSerializer
 from apps.question.serializers import QuestionPolymorphismSerializer
+from apps.question.models import QuestionTypes
 from apps.resources.serializers import DocumentSerializer
 
 from . import models as contest_models
@@ -48,9 +49,16 @@ class QuestionSubmissionSerializer(ModelSerializer):
     question = QuestionPolymorphismSerializer()
     score = ScoreSerializer()
 
+    answer = serializers.SerializerMethodField()
+
     class Meta:
         model = contest_models.QuestionSubmission
         fields = ['id', 'question', 'answer', 'score']
+
+    def get_answer(self, obj):
+        if obj.question.type == QuestionTypes.FILE_UPLOAD and len(obj.answer) == 1:
+                return ['/media' + obj.answer[0]]
+        return obj.answer
 
 
 class QuestionSubmissionPostSerializer(ModelSerializer):
