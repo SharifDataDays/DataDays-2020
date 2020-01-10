@@ -122,6 +122,7 @@ class QuestionSubmission(models.Model):
     question = models.ForeignKey('question.Question', related_name='question_submissions', on_delete=models.CASCADE)
     question_priority = models.PositiveSmallIntegerField()
     answer = models.TextField(blank=True, null=False)
+    has_file = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.id)

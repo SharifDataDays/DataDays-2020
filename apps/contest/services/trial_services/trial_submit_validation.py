@@ -52,26 +52,23 @@ class TrialSubmitValidation:
 
     def _check_different_question_types(self):
         for submission in self._question_submissions.all():
-            if not literal_eval(submission.answer):
-                pass
-            else:
-                question_type = submission.question.type
-                if not self._common_validations(submission):
-                    return
-                if question_type == QuestionTypes.SINGLE_ANSWER:
-                    self._validate_single_answer(submission)
-                elif question_type == QuestionTypes.MULTI_ANSWER:
-                    self._validate_multi_answer(submission)
-                elif question_type == QuestionTypes.SINGLE_SELECT:
-                    self._validate_single_select(submission)
-                elif question_type == QuestionTypes.MULTI_SELECT:
-                    self._validate_multi_select(submission)
-                elif question_type == QuestionTypes.FILE_UPLOAD:
-                    self._validate_file_upload(submission)
-                elif question_type == QuestionTypes.MANUAL_JUDGMENT:
-                    self._validate_manual_judgment(submission)
-                elif question_type == QuestionTypes.NUMERIC_RANGE:
-                    self._validate_numeric_range(submission)
+            question_type = submission.question.type
+            if not self._common_validations(submission):
+                return
+            if question_type == QuestionTypes.SINGLE_ANSWER:
+                self._validate_single_answer(submission)
+            elif question_type == QuestionTypes.MULTI_ANSWER:
+                self._validate_multi_answer(submission)
+            elif question_type == QuestionTypes.SINGLE_SELECT:
+                self._validate_single_select(submission)
+            elif question_type == QuestionTypes.MULTI_SELECT:
+                self._validate_multi_select(submission)
+            elif question_type == QuestionTypes.FILE_UPLOAD:
+                self._validate_file_upload(submission)
+            elif question_type == QuestionTypes.MANUAL_JUDGMENT:
+                self._validate_manual_judgment(submission)
+            elif question_type == QuestionTypes.NUMERIC_RANGE:
+                self._validate_numeric_range(submission)
 
     def _common_validations(self, submission):
         if submission.answer and not isinstance(submission.answer, str):

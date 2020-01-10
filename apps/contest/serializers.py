@@ -55,7 +55,6 @@ class QuestionSubmissionSerializer(ModelSerializer):
 
 class QuestionSubmissionPostSerializer(ModelSerializer):
     id = serializers.ModelField(model_field=contest_models.QuestionSubmission()._meta.get_field('id'))
-    has_file = serializers.BooleanField(default=False)
 
     class Meta:
         model = contest_models.QuestionSubmission
