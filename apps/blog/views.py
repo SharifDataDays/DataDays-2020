@@ -1,7 +1,10 @@
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from rest_framework import status
+
 from apps.blog.serializers import *
 from apps.blog import paginations
 
@@ -39,23 +42,38 @@ class CommentListView(GenericAPIView):
         return Comment.objects.all().exclude(shown=False)
 
     def get(self, request, post_id):
-        all_comments = self.get_queryset().filter(post__id=post_id)
+        father_comments = self.get_queryset().filter(post_id=post_id).filter(reply_to=None)
+        comments = []
+        for comment in father_comments:
+            reply_comments = []
+            for reply_comment_id in eval(comment.replies):
+                reply_comments.append(self.get_queryset().get(id=reply_comment_id))
+            reply_comments.sort(key=lambda x: x.date)
+            comments.append(comment)
+            comments.extend(reply_comments)
 
-        if request.user.is_authenticated:
-            user_comments = all_comments.filter(user=request.user)
-            user_comments.order_by('-date')
-            other_users_comments = all_comments.exclude(user=request.user)
-            other_users_comments.order_by('-date')
-            comments = list(user_comments) + list(other_users_comments)
-        else:
-            comments = all_comments
         data = CommentSerializer(comments, many=True).data
         return Response(data)
 
-
-    def post(self, request):
+    def post(self, request, post_id):
         serializer = self.get_serializer(data=request.data)
+        post = get_object_or_404(Post, id=post_id)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        comment = serializer.save()
+        if comment.reply_to is not None:
+            self.set_replies(comment)
+            comment.reply_to.save()
+        comment.post = post
+        comment.user = request.user
+        comment.save()
         return Response({"detail": "کامنت شما ثبت شد."})
 
+    @staticmethod
+    def set_replies(comment):
+        reply = comment.reply_to
+        replies = eval(reply.replies)
+        replies.append(comment.id)
+        print(replies)
+        comment.reply_to.replies = str(replies)
+        print(comment.reply_to.replies)
+        # return True

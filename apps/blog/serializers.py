@@ -5,20 +5,21 @@ from apps.blog.models import *
 
 
 class TagSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Tag
         fields = ['name_en', 'name_fa', 'color']
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    post = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all())
+    reply_to = serializers.PrimaryKeyRelatedField(queryset=Comment.objects.all(), allow_null=True)
 
     class Meta:
         model = Comment
-        fields = ['user', 'text', 'date']
+        fields = ['user', 'text', 'date', 'reply_to', 'post']
+        read_only_fields = ['replies']
 
     def create(self, validated_data):
-        validated_data['user'] = self.request.user
         return Comment.objects.create(**validated_data)
 
 

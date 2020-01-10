@@ -16,8 +16,6 @@ class Post(models.Model):
         return '%s %s' % (self.title_en, self.title_fa)
 
 
-
-
 class Comment(models.Model):
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name='comments')
@@ -27,9 +25,10 @@ class Comment(models.Model):
     shown = models.BooleanField(default=True)
     reply_to = models.ForeignKey(
         'Comment', on_delete=models.CASCADE, null=True, blank=True)
+    replies = models.CharField(max_length=1000, default='[]', blank=True, null=False)
 
     def __str__(self):
-        return '%s' % (self.user)
+        return '%s' % (self.text[:min(10, len(self.text))])
 
 
 class Tag(models.Model):
