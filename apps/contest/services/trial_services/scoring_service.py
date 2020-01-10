@@ -97,7 +97,7 @@ class JudgeQuestionSubmission:
         elif question_type == QuestionTypes.NUMERIC_RANGE:
             return 'range', answer
         elif question_type == QuestionTypes.FILE_UPLOAD:
-            return 'file_path', os.path.join(settings.MEDIA_ROOT, answer)
+            return 'file_path', os.path.join(settings.MEDIA_ROOT, answer[0])
 
 
 def set_task_score(trial) -> None:
