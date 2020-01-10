@@ -30,7 +30,7 @@ class PostView(GenericAPIView):
 
 
 class CommentListView(GenericAPIView):
-    serializer_class = PostCommentSerializer
+    serializer_class = CommentSerializer
     queryset = Comment.objects.all().order_by('-date')
     permission_classes = [IsAuthenticatedOrReadOnly]
     pagination_class = paginations.CommentsPagination
@@ -39,17 +39,8 @@ class CommentListView(GenericAPIView):
         return Comment.objects.all().exclude(shown=False)
 
     def get(self, request, post_id):
-        all_comments = self.get_queryset().filter(post__id=post_id)
-
-        if request.user.is_authenticated:
-            user_comments = all_comments.filter(user=request.user)
-            user_comments.order_by('-date')
-            other_users_comments = all_comments.exclude(user=request.user)
-            other_users_comments.order_by('-date')
-            comments = list(user_comments) + list(other_users_comments)
-        else:
-            comments = all_comments
-        data = PostCommentSerializer(comments, many=True).data
+        comments = self.get_queryset().filter(post_id=post_id)
+        data = CommentSerializer(comments, many=True).data
         return Response(data)
 
     def post(self, request, post_id):

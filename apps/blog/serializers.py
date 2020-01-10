@@ -10,7 +10,7 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ['name_en', 'name_fa', 'color']
 
 
-class PostCommentSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ['user', 'text', 'date', 'reply_to_id']
