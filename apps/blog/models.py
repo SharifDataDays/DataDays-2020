@@ -25,7 +25,7 @@ class Comment(models.Model):
     shown = models.BooleanField(default=True)
     reply_to = models.ForeignKey(
         'Comment', on_delete=models.CASCADE, null=True, blank=True)
-    replies = models.CharField(max_length=1000, null=True)
+    replies = models.CharField(max_length=1000, default='')
 
     def __str__(self):
         return '%s' % (self.user)

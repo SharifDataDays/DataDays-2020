@@ -52,14 +52,20 @@ class CommentListView(GenericAPIView):
         data = CommentSerializer(comments, many=True).data
         return Response(data)
 
-    def post(self, request):
+    def post(self, request, post_id):
         serializer = self.get_serializer(data=request.data)
+        post = Post.objects.all().filter(id=post_id)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        comment = serializer.save()
+        self.set_replies(serializer, comment)
+        comment.post = post
+        comment.save()
         return Response({"detail": "کامنت شما ثبت شد."})
 
-    def set_reply_to(self, request):
-        pass
-
-    def set_replies(self, request):
-        pass
+    @staticmethod
+    def set_replies(comment):
+        reply_to = comment.reply_to
+        if reply_to.replies is '':
+            reply_to.replies += str(comment.id)
+        else:
+            reply_to.replies += (',' + str(comment.id))
