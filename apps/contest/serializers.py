@@ -57,7 +57,7 @@ class QuestionSubmissionSerializer(ModelSerializer):
 
     def get_answer(self, obj):
         if obj.question.type == QuestionTypes.FILE_UPLOAD and len(eval(obj.answer)) == 1:
-                return ['/media' + obj.answer[0]]
+                return ['/media' + eval(obj.answer)[0]]
         return obj.answer
 
 
