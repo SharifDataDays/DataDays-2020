@@ -170,10 +170,10 @@ class TrialSubmitValidation:
             return
 
     def _validate_file_upload(self, submission):
-        if not {qs['id']: qs['has_file'] for qs in self._request.data['question_submissions']}[submission.id]:
+        if not {qs['id']: qs['has_file'] for qs in self._request._data['question_submissions']}[submission.id]:
             return
         try:
-            answer_file = self._request.FILES[str(submission.id)]
+            answer_file = self._request._files[str(submission.id)]
         except:
             self._valid = False
             self._errors += ['file with name {submission.id} does not exists']
@@ -229,3 +229,4 @@ class TrialSubmitValidation:
             copied_file.write(chunk)
         copied_file.close()
         return destination + uploaded_filename
+
