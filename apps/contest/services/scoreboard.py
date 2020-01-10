@@ -5,14 +5,11 @@ from django.conf import settings
 
 from rest_framework import status
 
-from apps.contest import models as contest_models
-from apps.participation import models as participation_models
-
 
 class Scoreboard:
 
     @staticmethod
-    def add_milestone(milestone: contest_models.Milestone) -> requests.Response:
+    def add_milestone(milestone) -> requests.Response:
         add_milestone_response = requests.post(os.path.join(settings.SCOREBOARD_HOST, 'add_ms'),
                                                json={
                                                    "ms_id": milestone.id,
@@ -30,7 +27,7 @@ class Scoreboard:
         return add_milestone_response
 
     @staticmethod
-    def add_task(task: contest_models.Task) -> requests.Response:
+    def add_task(task) -> requests.Response:
         add_task_response = requests.post(os.path.join(settings.SCOREBOARD_HOST, 'add_task'),
                                           json={
                                               "task_id": task.id,
@@ -46,7 +43,7 @@ class Scoreboard:
         return add_task_response
 
     @staticmethod
-    def add_task_to_milestone(task: contest_models.Task, milestone: contest_models.Milestone) -> requests.Response:
+    def add_task_to_milestone(task, milestone) -> requests.Response:
         add_task_to_milestone_response = requests.post(os.path.join(settings.SCOREBOARD_HOST, 'add_task_to_milestone'),
                                                        json={
                                                            "task_id": task.id,
@@ -64,7 +61,7 @@ class Scoreboard:
         return add_task_to_milestone_response
 
     @staticmethod
-    def update_score(task: contest_models.Task, team: participation_models.Team, score: float):
+    def update_score(task, team, score):
         update_score_response = requests.post(os.path.join(settings.SCOREBOARD_HOST, 'update_score'),
                                               json={
                                                   "task_id": task.id,
