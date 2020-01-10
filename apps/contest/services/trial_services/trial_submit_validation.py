@@ -170,7 +170,7 @@ class TrialSubmitValidation:
             return
 
     def _validate_file_upload(self, submission):
-        if not {qs['id']: qs['has_file'] for qs in self._reqeust.DATA['question_submissions']}[submission.id]:
+        if not {qs['id']: qs['has_file'] for qs in self._request.data['question_submissions']}[submission.id]:
             return
         try:
             answer_file = self._request.FILES[str(submission.id)]
