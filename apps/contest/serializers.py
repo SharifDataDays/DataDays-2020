@@ -22,7 +22,7 @@ class MilestoneSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.Milestone
-        fields = ['id', 'title', 'start_time', 'end_time', 'tasks']
+        fields = ['id', 'title', 'start_time', 'end_time', 'tasks', 'description', 'image']
 
 
 class ContestSerializer(ModelSerializer):
