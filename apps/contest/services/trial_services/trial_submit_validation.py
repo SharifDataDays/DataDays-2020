@@ -170,7 +170,7 @@ class TrialSubmitValidation:
             return
 
     def _validate_file_upload(self, submission):
-        if not submission.has_file:
+        if not {qs['id']: qs['has_file'] for qs in self._reqeust.DATA['question_submissions']}[submission.id]:
             return
         try:
             answer_file = self._request.FILES[str(submission.id)]
@@ -194,7 +194,7 @@ class TrialSubmitValidation:
             self._valid = False
             return
 
-        answer = [self._save_to_storage(self._request, submission.id)]
+        answer = [self._save_to_storage(answer_file, submission.id)]
         qs = self._trial.question_submissions.get(id=subbmission.id)
         qs.answer = str(answer)
         qs.save()
@@ -215,7 +215,7 @@ class TrialSubmitValidation:
             self._valid = False
             return
 
-    def _save_to_storage(self, request, submission_id):
+    def _save_to_storage(self, given_file, submission_id):
         destination = f'teams/{self._trial.team_task.team.name}/trial_{self.trial_id}/qs_{submission_id}/'
         uploaded_filename = 'f_' + uuid.uuid4().hex[:16]
         try:
@@ -224,7 +224,7 @@ class TrialSubmitValidation:
             print('oops')
         full_filename = settings.MEDIA_ROOT + destination + uploaded_filename
         copied_file = open(full_filename, 'wb+')
-        file_content = ContentFile(request.FILES[submission_id].read())
+        file_content = ContentFile(given_file.read())
         for chunk in file_content.chunks():
             copied_file.write(chunk)
         copied_file.close()
