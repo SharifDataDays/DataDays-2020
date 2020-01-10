@@ -2,6 +2,7 @@ from ast import literal_eval
 import os
 import json
 from typing import List, Union
+import uuid
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -172,7 +173,7 @@ class TrialSubmitValidation:
             return
 
     def _validate_file_upload(self, submission):
-        if not submiision.has_file:
+        if not submission.has_file:
             return
         try:
             answer_file = self._request.FILES[str(submission.id)]
@@ -221,10 +222,8 @@ class TrialSubmitValidation:
             return
 
     def _save_to_storage(self, request, submission_id):
-        destination = os.path.join('teams', self._trial.team_task.team.name,
-                                   f'trial{self.trial_id}',
-                                   f'question_submission{submission_id}')
-        uploaded_filename = request.FILES[submission_id].name
+        destination = f'teams/{self._trial.team_task.team.name}/trial_{self.trial_id}/qs_{submission_id}/'
+        uploaded_filename = 'f_' + uuid.uuid4().hex[:16]
         try:
             os.makedirs(os.path.join(settings.MEDIA_ROOT, destination))
         except OSError:
