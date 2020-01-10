@@ -1,7 +1,10 @@
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from rest_framework import status
+
 from apps.blog.serializers import *
 from apps.blog import paginations
 
@@ -54,16 +57,23 @@ class CommentListView(GenericAPIView):
 
     def post(self, request, post_id):
         serializer = self.get_serializer(data=request.data)
-        post = Post.objects.all().filter(id=post_id)
+        post = get_object_or_404(Post, id=post_id)
         serializer.is_valid(raise_exception=True)
         comment = serializer.save()
-        self.set_replies(comment)
+        if comment.reply_to is not None:
+            self.set_replies(comment)
+            comment.reply_to.save()
         comment.post = post
+        comment.user = request.user
         comment.save()
         return Response({"detail": "کامنت شما ثبت شد."})
 
     @staticmethod
     def set_replies(comment):
-        reply_to = comment.reply_to
-        replies = eval(reply_to.replies)
+        reply = comment.reply_to
+        replies = eval(reply.replies)
         replies.append(comment.id)
+        print(replies)
+        comment.reply_to.replies = str(replies)
+        print(comment.reply_to.replies)
+        # return True

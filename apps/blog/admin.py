@@ -20,7 +20,7 @@ class CommentAdmin(ModelAdmin):
     formfield_overrides = {
         models.TextField: {'widget': AdminMartorWidget},
     }
-    pass
+
 
 
 @admin.register(Tag)

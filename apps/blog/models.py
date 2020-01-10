@@ -24,11 +24,11 @@ class Comment(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     shown = models.BooleanField(default=True)
     reply_to = models.ForeignKey(
-        'Comment', on_delete=models.CASCADE, null=True, blank=True, default='[]')
-    replies = models.CharField(max_length=1000, default='')
+        'Comment', on_delete=models.CASCADE, null=True, blank=True)
+    replies = models.CharField(max_length=1000, default='[]', blank=True, null=False)
 
     def __str__(self):
-        return '%s' % (self.user)
+        return '%s' % (self.text[:min(10, len(self.text))])
 
 
 class Tag(models.Model):
