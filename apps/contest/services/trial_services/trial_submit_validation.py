@@ -194,7 +194,7 @@ class TrialSubmitValidation:
             self._valid = False
             return
 
-        answer = [self._save_to_storage(answer_file, submission.id)]
+        answer = [self._save_to_storage(answer_file, answer_file_format, submission.id)]
         qs = self._trial.question_submissions.get(id=submission.id)
         qs.answer = str(answer)
         qs.save()
@@ -215,9 +215,9 @@ class TrialSubmitValidation:
             self._valid = False
             return
 
-    def _save_to_storage(self, given_file, submission_id):
+    def _save_to_storage(self, given_file, file_format, submission_id):
         destination = f'teams/{self._trial.team_task.team.name}/trial_{self.trial_id}/qs_{submission_id}/'
-        uploaded_filename = 'f_' + uuid.uuid4().hex[:16]
+        uploaded_filename = 'f_' + uuid.uuid4().hex[:16] + '.' + file_format
         try:
             os.makedirs(settings.MEDIA_ROOT + destination)
         except OSError:
