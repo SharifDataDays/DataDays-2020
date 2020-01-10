@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
         parser.add_argument(
             'ids',
-            nargs='+',
+            nargs='*',
             type=int,
             help='Task or milestone ids',
         )

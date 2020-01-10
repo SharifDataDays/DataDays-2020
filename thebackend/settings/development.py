@@ -163,4 +163,4 @@ from .martor import *
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CELERY_BROKER_URL = 'amqp://localhost'
-SCOREBOARD_HOST = 'localhost:8000'
+SCOREBOARD_HOST = 'http://localhost:8080'
