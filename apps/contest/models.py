@@ -53,6 +53,9 @@ class Milestone(models.Model):
     contest = models.ForeignKey('contest.Contest', related_name='milestones', on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
 
+    description = models.TextField(default="")
+    image = models.ImageField(default="")
+
     def __str__(self):
         return f'id:{self.id} title:{self.title} contest_title:{self.contest.title}'
 
