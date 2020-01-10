@@ -197,13 +197,10 @@ class TrialSubmitValidation:
             self._valid = False
             return
 
-        for qs in self._trial.validated_data['question_submissions']:
-            if qs['id'] == submission.id:
-                qs['answer'] = self._save_to_storage(self._request, submission.id)
-                qqs = self._trial.question_submissions.get(id=subbmission.id)
-                qqs.answer = [qs['answer']]
-                qqs.save()
-                break
+        answer = [self._save_to_storage(self._request, submission.id)]
+        qs = self._trial.question_submissions.get(id=subbmission.id)
+        qs.answer = str(answer)
+        qs.save()
 
     def _validate_manual_judgment(self, submission):
         pass
@@ -225,13 +222,13 @@ class TrialSubmitValidation:
         destination = f'teams/{self._trial.team_task.team.name}/trial_{self.trial_id}/qs_{submission_id}/'
         uploaded_filename = 'f_' + uuid.uuid4().hex[:16]
         try:
-            os.makedirs(os.path.join(settings.MEDIA_ROOT, destination))
+            os.makedirs(settings.MEDIA_ROOT + destination)
         except OSError:
             print('oops')
-        full_filename = os.path.join(settings.MEDIA_ROOT, destination, uploaded_filename)
+        full_filename = settings.MEDIA_ROOT + destination + uploaded_filename
         copied_file = open(full_filename, 'wb+')
         file_content = ContentFile(request.FILES[submission_id].read())
         for chunk in file_content.chunks():
             copied_file.write(chunk)
         copied_file.close()
-        return os.path.join(destination, uploaded_filename)
+        return destination + uploaded_filename
