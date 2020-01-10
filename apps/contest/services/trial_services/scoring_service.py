@@ -4,6 +4,7 @@ from typing import List, Tuple
 
 from django.conf import settings
 
+from apps.contest.services.scoreboard import Scoreboard
 from apps.question.models import QuestionTypes
 
 
@@ -32,7 +33,12 @@ class JudgeTrial:
             self.trial.score += score.number
         self.trial.save()
         set_task_score(self.trial)
+        self._update_scoreboard()
         return self.trial.score
+
+    def _update_scoreboard(self):
+        Scoreboard.update_score(task=self.trial.team_task.task, team=self.trial.team_task.team,
+                                score=self.trial.team_task.final_score)
 
 
 class JudgeQuestionSubmission:
@@ -119,4 +125,3 @@ def set_task_score(trial) -> None:
             team_task_score += factors[i] * trials[i].score
         trial.team_task.final_score = team_task_score / len(trials)
         trial.team_task.save()
-
