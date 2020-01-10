@@ -195,7 +195,7 @@ class TrialSubmitValidation:
             return
 
         answer = [self._save_to_storage(answer_file, submission.id)]
-        qs = self._trial.question_submissions.get(id=subbmission.id)
+        qs = self._trial.question_submissions.get(id=submission.id)
         qs.answer = str(answer)
         qs.save()
 
