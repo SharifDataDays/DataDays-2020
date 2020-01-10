@@ -5,17 +5,15 @@ from apps.blog.models import *
 
 
 class TagSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Tag
         fields = ['name_en', 'name_fa', 'color']
 
 
 class CommentSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Comment
-        fields = ['user', 'text', 'date']
+        fields = ['user', 'text', 'date', 'reply_to_id']
 
     def create(self, validated_data):
         validated_data['user'] = self.request.user
