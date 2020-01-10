@@ -119,7 +119,7 @@ class MyMultiPartParser(BaseParser):
         try:
             parser_context = parser_context or {}
             request = parser_context['request']
-            encoding = 'utf-8'
+            encoding = parser_context['encoding'] or settings.DEFAULT_CHARSET
             meta = request.META.copy()
             meta['CONTENT_TYPE'] = media_type
             upload_handlers = request.upload_handlers
