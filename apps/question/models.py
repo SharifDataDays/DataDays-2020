@@ -6,6 +6,9 @@ import uuid
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
 
 from polymorphic.models import PolymorphicModel
 
@@ -97,8 +100,14 @@ class NeededFilesForQuestionJudgment(models.Model):
     file = models.FileField(upload_to=upload_path, unique=True)
 
     def clean(self):
+        print(settings.MEDIA_ROOT + self.upload_path(self.file.name.split('/')[-1]))
         if os.path.exists(settings.MEDIA_ROOT + self.upload_path(self.file.name.split('/')[-1])):
             raise ValidationError(f'File {self.file.name} already exists')
+
+
+@receiver(post_delete, sender=NeededFilesForQuestionJudgment)
+def submission_delete(sender, instance, **kwargs):
+    instance.file.delete(False)
 
 
 class SingleAnswer(Question):
