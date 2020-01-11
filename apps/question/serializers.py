@@ -1,3 +1,5 @@
+import ast
+
 from rest_framework import serializers
 from rest_polymorphic.serializers import PolymorphicSerializer
 
@@ -84,3 +86,25 @@ class QuestionPolymorphismSerializer(PolymorphicSerializer):
         question_models.ManualJudgment: ManualJudgmentSerializer,
         question_models.NumericRange: NumericRangeSerializer
     }
+
+
+class QuestionTestSerializer(serializers.Serializer):
+
+    answer = serializers.CharField()
+    question_id = serializers.IntegerField()
+
+    def validate(self, data):
+        ans = data['answer']
+        try:
+            ans = ast.literal_eval(ans)
+            if not isinstance(ans, list):
+                raise serializers.ValidationError('answer must be a list')
+        except Exception as e:
+            raise serializers.ValidationError('answer can\'t be evaluated to python object')
+
+        if question_models.Question.objects.filter(id=data['question_id']).count() != 1:
+            raise serializers.ValidationError('question with given id does not exists')
+
+        return data
+
+

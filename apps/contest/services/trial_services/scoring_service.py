@@ -77,8 +77,6 @@ class JudgeQuestionSubmission:
 
             exec(question.judge_function)
             answer_name, answer = self.get_parameters(question.type, answer)
-            print(answer)
-            print(answer_name)
 
             if isinstance(answer, str):
                 call_function = f'{question.judge_function_name}({answer_name}=\'{answer}\')'
