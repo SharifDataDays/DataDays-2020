@@ -86,7 +86,7 @@ class Question(PolymorphicModel):
         super(Question, self).save(*args, **kwargs)
 
     def dir_path(self):
-        return os.path.join(settings.MEDIA_ROOT + 'private', "question_" + str(self.id)) + '/'
+        return os.path.join(settings.MEDIA_ROOT, 'private', "question_" + str(self.id)) + '/'
 
     def __str__(self):
         return f'id:{self.id} task_topic:{self.task.topic}'
