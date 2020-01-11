@@ -54,7 +54,7 @@ class QuestionTestAPIView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             data = serializer.data
-        question = question_models.Question.objects.get(id=data['question'])
+        self.question = question_models.Question.objects.get(id=data['question'])
 
         score = self.judge_question(question, data['answer'], data['file'])
 
@@ -65,6 +65,9 @@ class QuestionTestAPIView(GenericAPIView):
         }
 
         return Response(data, status=200)
+
+    def get_path(filename):
+        return self.question.dir_path() + filename
 
     def judge_question(self, question, answer, file=None):
         from apps.contest.models import Score, ScoreStatusTypes
@@ -77,11 +80,6 @@ class QuestionTestAPIView(GenericAPIView):
                 score.number = 0.0
                 score.status = ScoreStatusTypes.UNDEF
                 score.info = "waiting for admin to score"
-
-            def get_path(filename):
-                return question.dir_path() + filename
-            import time
-            time.sleep(1)
 
             exec(question.judge_function)
             answer_name, answer = self.get_parameters(question.type, answer, file)
