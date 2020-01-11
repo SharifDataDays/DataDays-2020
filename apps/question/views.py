@@ -80,6 +80,8 @@ class QuestionTestAPIView(GenericAPIView):
 
             def get_path(filename):
                 return question.dir_path() + filename
+            import time
+            time.sleep(1)
 
             exec(question.judge_function)
             answer_name, answer = self.get_parameters(question.type, answer, file)
