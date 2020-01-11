@@ -79,11 +79,7 @@ class QuestionTestAPIView(GenericAPIView):
                 score.info = "waiting for admin to score"
 
             exec(
-                f'''
-                def get_path(filename):
-                    return \'{question.dir_path()}\' + filename
-
-                '''
+                f'''\ndef get_path(filename):\n\treturn \'{question.dir_path()}\' + filename\n\n'''
                 + question.judge_function
             )
 
