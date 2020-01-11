@@ -72,14 +72,14 @@ class QuestionTestAPIView(GenericAPIView):
         answer = ast.literal_eval(answer.replace("'", '"'))
         score = Score()
 
-        def get_path(filename):
-            return question.dir_path() + filename
-
         try:
             if question.type == QuestionTypes.MANUAL_JUDGMENT:
                 score.number = 0.0
                 score.status = ScoreStatusTypes.UNDEF
                 score.info = "waiting for admin to score"
+
+            def get_path(filename):
+                return question.dir_path() + filename
 
             exec(question.judge_function)
             answer_name, answer = self.get_parameters(question.type, answer, file)
@@ -96,7 +96,7 @@ class QuestionTestAPIView(GenericAPIView):
             score.info = str(e)
         except Exception as e:
             score.status = ScoreStatusTypes.ERROR
-            score.info = f'Judge function runtime error + \n + {e}'
+            score.info = f'Judge function runtime error: {e}'
 
         return score
 
