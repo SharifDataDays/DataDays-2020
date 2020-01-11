@@ -69,12 +69,16 @@ class Question(PolymorphicModel):
         g = [search.group(i) for i in range(1, 3)]
         first_line = f'def {func_name}({g[1]}):'
         whole_lines = first_line + '\n' + '\n'.join(other_lines) + '\n'
-        try:
-            exec(whole_lines)
-        except Exception as e:
-            raise Exception(f'judge function malformed. {str(e)}')
 
         return whole_lines, func_name
+
+    def clean(self):
+        self.judge_function = self.judge_function.replace('_cwd', self.dir_path())
+        try:
+            exec(self.judge_function)
+        except Exception as e:
+            raise ValidationError(f'shitty judge function: {e}')
+
 
     def dir_path(self):
         return settings.MEDIA_ROOT + 'private/' + "question_" + str(self.id) + '/'
@@ -85,15 +89,14 @@ class Question(PolymorphicModel):
 
 class NeededFilesForQuestionJudgment(models.Model):
     def upload_path(self, filename):
-        return os.path.join('private/', 'question_', str(self.question_id), filename)
+        return f'private/question_{self.question_id}/{filename}'
 
     question = models.ForeignKey(Question, related_name='files', on_delete=models.CASCADE)
     file = models.FileField(upload_to=upload_path, unique=True)
 
-    def save(self, *args, **kwargs):
-        if os.path.exists(self.upload_path(self.file.name.split('/')[-1])):
-            raise ValidationError(f'File {file.name} already exists')
-        super(NeededFilesForQuestionJudgment, self).save(*args, **kwargs)
+    def clean(self):
+        if os.path.exists(settings.MEDIA_ROOT + self.upload_path(self.file.name.split('/')[-1])):
+            raise ValidationError(f'File {self.file.name} already exists')
 
 
 class SingleAnswer(Question):
