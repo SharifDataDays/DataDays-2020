@@ -90,8 +90,9 @@ class QuestionPolymorphismSerializer(PolymorphicSerializer):
 
 class QuestionTestSerializer(serializers.Serializer):
 
+    question = serializers.IntegerField()
     answer = serializers.CharField()
-    question_id = serializers.IntegerField()
+    file = serializers.CharField(style={'base_template': 'textarea.html'})
 
     def validate(self, data):
         ans = data['answer']
@@ -102,7 +103,7 @@ class QuestionTestSerializer(serializers.Serializer):
         except Exception as e:
             raise serializers.ValidationError('answer can\'t be evaluated to python object')
 
-        if question_models.Question.objects.filter(id=data['question_id']).count() != 1:
+        if question_models.Question.objects.filter(id=data['question']).count() != 1:
             raise serializers.ValidationError('question with given id does not exists')
 
         return data

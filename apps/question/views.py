@@ -1,15 +1,25 @@
+import ast
+import os
+import uuid
+
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404
+from django.conf import settings
 
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
 from . import models as question_models
+from apps.question.models import QuestionTypes
 from .serializers import QuestionPolymorphismSerializer, QuestionTestSerializer
 
 
-# Create your views here.
+class JudgeException(Exception):
+
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args)
+
 
 class QuestionsListAPIView(GenericAPIView):
     queryset = question_models.Question.objects.all()
@@ -36,12 +46,63 @@ class QuestionTestAPIView(GenericAPIView):
     queryset = question_models.Question.objects.all()
     serializer_class = QuestionTestSerializer
 
-    def post(self, request):
-        data = self.get_serializer(self.get_queryset).data
-        question = question_models.Question.get(data.question_id)
+    def judge_question(self, question, answer, file=None):
+        from apps.contest.models import Score, ScoreStatusTypes
 
-        judge = Judge()
-        score = judge.judge_question(question, data.answer)
+        answer = ast.literal_eval(answer.replace("'", '"'))
+        score = Score()
+
+        def get_path(filename):
+            return question.dir_path() + filename
+
+        try:
+            if question.type == QuestionTypes.MANUAL_JUDGMENT:
+                score.number = 0.0
+                score.status = ScoreStatusTypes.UNDEF
+                score.info = "waiting for admin to score"
+
+            exec(question.judge_function)
+            answer_name, answer = self.get_parameters(question.type, answer, file)
+
+            if isinstance(answer, str):
+                call_function = f'{question.judge_function_name}({answer_name}=\'{answer}\')'
+            else:
+                call_function = f'{question.judge_function_name}({answer_name}={answer})'
+            score.number = eval(call_function) * question.max_score
+            score.status = ScoreStatusTypes.SCORED
+            score.info = "Judged Successfully"
+        except JudgeException as e:
+            score.status = ScoreStatusTypes.FAILED
+            score.info = str(e)
+        except Exception as e:
+            score.status = ScoreStatusTypes.ERROR
+            score.info = f'Judge function runtime error + \n + {e}'
+
+        return score
+
+    def get_parameters(self, question_type, answer, file=None):
+        if question_type in [QuestionTypes.SINGLE_ANSWER, QuestionTypes.SINGLE_SELECT]:
+            return 'answer', answer[0]
+        elif question_type in [QuestionTypes.MULTI_ANSWER, QuestionTypes.MULTI_SELECT]:
+            return 'answers', answer
+        elif question_type == QuestionTypes.NUMERIC_RANGE:
+            return 'range', answer
+        elif question_type == QuestionTypes.FILE_UPLOAD:
+            dirname = f'{settings.MEDIA_ROOT}question_tests'
+            os.makedirs(dirname, exist_ok=True)
+            filename = f'{dirname}/t_{uuid.uuid4().hex[:16]}'
+            with open(filename, 'w+') as f:
+                [f.write(line) for line in f]
+                f.close()
+            return 'file_path', filename
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            data = serializer.data
+        question = question_models.Question.objects.get(id=data['question'])
+
+        score = self.judge_question(question, data['answer'], data['file'])
 
         data['score'] = {
             'number': score.number,
@@ -50,52 +111,6 @@ class QuestionTestAPIView(GenericAPIView):
         }
 
         return Response(data, status=200)
-
-    class Judge:
-
-        def judge_question(self, question, answer):
-            from apps.contest.models import Score, ScoreStatusTypes
-
-            answer = ast.literal_eval(answer.replace("'", '"'))
-            score = Score()
-
-            def get_path(filename):
-                return question.dir_path() + filename
-
-            try:
-                if question.type == QuestionTypes.MANUAL_JUDGMENT:
-                    score.number = 0.0
-                    score.status = ScoreStatusTypes.UNDEF
-                    score.info = "waiting for admin to score"
-
-                exec(question.judge_function)
-                answer_name, answer = self.get_parameters(question.type, answer)
-
-                if isinstance(answer, str):
-                    call_function = f'{question.judge_function_name}({answer_name}=\'{answer}\')'
-                else:
-                    call_function = f'{question.judge_function_name}({answer_name}={answer})'
-                score.number = eval(call_function) * question.max_score
-                score.status = ScoreStatusTypes.SCORED
-                score.info = "Judged Successfully"
-            except JudgeException as e:
-                score.status = ScoreStatusTypes.FAILED
-                score.info = str(e)
-            except Exception as e:
-                score.status = ScoreStatusTypes.ERROR
-                score.info = f'Judge function runtime error + \n + {e}'
-
-            return score
-
-        def get_parameters(self, question_type, answer):
-            if question_type in [QuestionTypes.SINGLE_ANSWER, QuestionTypes.SINGLE_SELECT]:
-                return 'answer', answer[0]
-            elif question_type in [QuestionTypes.MULTI_ANSWER, QuestionTypes.MULTI_SELECT]:
-                return 'answers', answer
-            elif question_type == QuestionTypes.NUMERIC_RANGE:
-                return 'range', answer
-            elif question_type == QuestionTypes.FILE_UPLOAD:
-                return 'file_path', os.path.join(settings.MEDIA_ROOT, answer[0])
 
 
 
