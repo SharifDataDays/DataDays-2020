@@ -80,7 +80,7 @@ class QuestionTestAPIView(GenericAPIView):
 
             exec(f'''
 def get_path(filename):
-    return \'{question.dir_path()}\' + filename
+    return '{question.dir_path()}' + filename
 
 {question.judge_function}
             ''')
