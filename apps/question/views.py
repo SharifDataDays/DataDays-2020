@@ -78,10 +78,12 @@ class QuestionTestAPIView(GenericAPIView):
                 score.status = ScoreStatusTypes.UNDEF
                 score.info = "waiting for admin to score"
 
-            def get_path(filename):
-                return question.dir_path() + filename
+            exec(f'''
+def get_path(filename):
+    return \'{question.dir_path()}\' + filename
 
-            exec(question.judge_function, globals(), locals())
+{question.judge_function}
+            ''')
 
             answer_name, answer = self.get_parameters(question.type, answer, file)
 
