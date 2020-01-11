@@ -91,7 +91,7 @@ class NeededFilesForQuestionJudgment(models.Model):
     file = models.FileField(upload_to=upload_path, unique=True)
 
     def save(self, *args, **kwargs):
-        if os.path.exists(self.upload_path(self.file.name.split('/')[-1]):
+        if os.path.exists(self.upload_path(self.file.name.split('/')[-1])):
             raise ValidationError(f'File {file.name} already exists')
         super(NeededFilesForQuestionJudgment, self).save(*args, **kwargs)
 
