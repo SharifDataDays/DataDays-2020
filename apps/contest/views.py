@@ -26,7 +26,7 @@ from apps.contest.services.trial_services import trial_maker
 class ContestsListAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant]
     serializer_class = serializers.ContestAsAListItemSerializer
-    queryset = contest_models.Contest.objects.filter(start_time__gt=timezone.now())
+    queryset = contest_models.Contest.objects.filter(start_time__lt=timezone.now())
 
     def get(self, request):
         data = self.get_serializer(self.get_queryset(), many=True).data
@@ -36,7 +36,7 @@ class ContestsListAPIView(GenericAPIView):
 class ContestAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest]
     serializer_class = serializers.ContestSerializer
-    queryset = contest_models.Contest.objects.filter(start_time__gt=timezone.now())
+    queryset = contest_models.Contest.objects.filter(start_time__lt=timezone.now())
 
     def get_object(self, contest_id):
         contest = get_object_or_404(self.get_queryset(), id=contest_id)
@@ -54,7 +54,7 @@ class ContestAPIView(GenericAPIView):
 
 class MilestoneAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest]
-    queryset = contest_models.Milestone.objects.filter(start_time__gt=timezone.now())
+    queryset = contest_models.Milestone.objects.filter(start_time__lt=timezone.now())
     serializer_class = serializers.MilestoneSerializer
 
     def get(self, request, contest_id, milestone_id):
@@ -72,7 +72,7 @@ class MilestoneAPIView(GenericAPIView):
 
 class CreateTrialAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
-    queryset = contest_models.Task.objects.filter(milestone__start_time__gt=timezone.now())
+    queryset = contest_models.Task.objects.filter(milestone__start_time__lt=timezone.now())
     serializer_class = serializers.TrialSerializer
 
     def get(self, request, contest_id, milestone_id, task_id):
