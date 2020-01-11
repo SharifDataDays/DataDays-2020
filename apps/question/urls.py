@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import QuestionsListAPIView
+from .views import QuestionsListAPIView, QuestionTestAPIView
 
 app_name = 'question'
 
