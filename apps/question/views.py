@@ -84,7 +84,7 @@ class QuestionTestAPIView(GenericAPIView):
                     return \'{question.dir_path()}\' + filename
 
                 '''
-                + question.judge_funciton
+                + question.judge_function
             )
 
             answer_name, answer = self.get_parameters(question.type, answer, file)
