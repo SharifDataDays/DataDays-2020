@@ -74,7 +74,7 @@ class Question(PolymorphicModel):
 
     def clean(self):
         try:
-            exec(self.judge_function.replace('_cwd', self.dir_path())
+            exec(self.judge_function.replace('_cwd', self.dir_path()))
         except Exception as e:
             raise ValidationError(f'shitty judge function: {e}')
 
