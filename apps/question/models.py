@@ -86,7 +86,7 @@ class Question(PolymorphicModel):
         super(Question, self).save(*args, **kwargs)
 
     def dir_path(self):
-        return settings.MEDIA_ROOT + '/private/' + "question_" + str(self.id) + '/'
+        return os.path.join(settings.MEDIA_ROOT + 'private', "question_" + str(self.id)) + '/'
 
     def __str__(self):
         return f'id:{self.id} task_topic:{self.task.topic}'
@@ -94,7 +94,7 @@ class Question(PolymorphicModel):
 
 class NeededFilesForQuestionJudgment(models.Model):
     def upload_path(self, filename):
-        return f'/private/question_{self.question_id}/{filename}'
+        return f'private/question_{self.question_id}/{filename}'
 
     question = models.ForeignKey(Question, related_name='files', on_delete=models.CASCADE)
     file = models.FileField(upload_to=upload_path, unique=True)
