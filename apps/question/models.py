@@ -78,6 +78,9 @@ class Question(PolymorphicModel):
         except Exception as e:
             raise ValidationError(f'shitty judge function: {e}')
 
+    def save(self, *args, kwargs**):
+        self.judge_function.replace('_cwd', f'"{self.dir_path()}"')
+        super(Question, self).save(*args, **kwargs)
 
     def dir_path(self):
         return settings.MEDIA_ROOT + '/private/' + "question_" + str(self.id) + '/'
