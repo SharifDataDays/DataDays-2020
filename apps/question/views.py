@@ -56,7 +56,7 @@ class QuestionTestAPIView(GenericAPIView):
             data = serializer.data
         self.question = question_models.Question.objects.get(id=data['question'])
 
-        score = self.judge_question(question, data['answer'], data['file'])
+        score = self.judge_question(self.question, data['answer'], data['file'])
 
         data['score'] = {
             'number': score.number,
