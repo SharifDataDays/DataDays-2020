@@ -4,7 +4,9 @@ import re
 import uuid
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
+
 from polymorphic.models import PolymorphicModel
 
 
@@ -87,6 +89,11 @@ class NeededFilesForQuestionJudgment(models.Model):
 
     question = models.ForeignKey(Question, related_name='files', on_delete=models.CASCADE)
     file = models.FileField(upload_to=upload_path, unique=True)
+
+    def save(self, *args, **kwargs):
+        if os.path.exists(self.upload_path(self.file.name.split('/')[-1]):
+            raise ValidationError(f'File {file.name} already exists')
+        super(NeededFilesForQuestionJudgment, self).save(*args, **kwargs)
 
 
 class SingleAnswer(Question):
