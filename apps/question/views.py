@@ -8,10 +8,12 @@ from django.conf import settings
 
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from . import models as question_models
 from apps.question.models import QuestionTypes
+from apps.question.permissions import HasStaffAccessToQuestions
 from .serializers import QuestionPolymorphismSerializer, QuestionTestSerializer
 
 
@@ -44,7 +46,25 @@ class QuestionsListAPIView(GenericAPIView):
 
 class QuestionTestAPIView(GenericAPIView):
     queryset = question_models.Question.objects.all()
+    permission_classes = (IsAuthenticated, HasStaffAccessToQuestions)
     serializer_class = QuestionTestSerializer
+
+    def post(self, request):
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            data = serializer.data
+        question = question_models.Question.objects.get(id=data['question'])
+
+        score = self.judge_question(question, data['answer'], data['file'])
+
+        data['score'] = {
+            'number': score.number,
+            'status': score.status,
+            'info': score.info
+        }
+
+        return Response(data, status=200)
 
     def judge_question(self, question, answer, file=None):
         from apps.contest.models import Score, ScoreStatusTypes
@@ -95,22 +115,4 @@ class QuestionTestAPIView(GenericAPIView):
                 [f.write(line) for line in f]
                 f.close()
             return 'file_path', filename
-
-    def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            data = serializer.data
-        question = question_models.Question.objects.get(id=data['question'])
-
-        score = self.judge_question(question, data['answer'], data['file'])
-
-        data['score'] = {
-            'number': score.number,
-            'status': score.status,
-            'info': score.info
-        }
-
-        return Response(data, status=200)
-
-
 
