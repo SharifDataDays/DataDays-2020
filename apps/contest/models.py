@@ -43,6 +43,8 @@ class Contest(models.Model):
     scoreboard_freeze = models.BooleanField(default=False)
     scoreboard_order_freeze = models.BooleanField(default=False)
 
+    order = models.PositiveSmallIntegerField(unique=True, null=True)
+
     released = models.BooleanField(default=False)
 
     def __str__(self):
@@ -57,6 +59,8 @@ class Milestone(models.Model):
 
     description = models.TextField(default="")
     image = models.ImageField(default="")
+
+    order = models.PositiveSmallIntegerField(null=True)
 
     released = models.BooleanField(default=False)
 
