@@ -106,11 +106,11 @@ class QuestionTestAPIView(GenericAPIView):
         elif question_type == QuestionTypes.NUMERIC_RANGE:
             return 'range', answer
         elif question_type == QuestionTypes.FILE_UPLOAD:
-            dirname = f'{settings.MEDIA_ROOT}question_tests'
+            dirname = f'{settings.MEDIA_ROOT}/question_tests'
             os.makedirs(dirname, exist_ok=True)
             filename = f'{dirname}/t_{uuid.uuid4().hex[:16]}'
             with open(filename, 'w+') as f:
-                [f.write(line) for line in f]
+                [f.write(line) for line in file]
                 f.close()
             return 'file_path', filename
 
