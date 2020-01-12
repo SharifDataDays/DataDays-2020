@@ -49,6 +49,9 @@ class QuestionTag(models.Model):
     title = models.CharField(max_length=50)
     milestone = models.ForeignKey('contest.Milestone', related_name='question_tags', on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.title + str(self.id) + self.milestone
+
 
 class Question(PolymorphicModel):
     task = models.ForeignKey('contest.Task', related_name='questions', on_delete=None)
