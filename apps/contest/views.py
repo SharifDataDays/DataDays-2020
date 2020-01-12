@@ -53,7 +53,7 @@ class ContestAPIView(GenericAPIView):
 
 
 class MilestoneAPIView(GenericAPIView):
-    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest]
+    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
     queryset = contest_models.Milestone.objects.filter(start_time__lt=timezone.now()).order_by('order')
     serializer_class = serializers.MilestoneSerializer
 
