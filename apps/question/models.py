@@ -50,7 +50,7 @@ class QuestionTag(models.Model):
     milestone = models.ForeignKey('contest.Milestone', related_name='question_tags', on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.title + str(self.id) + self.milestone
+        return self.title + str(self.id) + str(self.milestone)
 
 
 class Question(PolymorphicModel):
