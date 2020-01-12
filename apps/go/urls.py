@@ -4,5 +4,5 @@ from apps.go.views import RedirectView
 
 
 urlpatterns = [
-    path('<slug:source>', RedirectView.as_view()),
+    path('<slug:source>/', RedirectView.as_view()),
 ]
