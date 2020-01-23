@@ -9,6 +9,12 @@ from apps.resources.serializers import DocumentSerializer
 from . import models as contest_models
 
 
+class ScoreSerializer(ModelSerializer):
+    class Meta:
+        model = contest_models.Score
+        fields = ['question_submission_id', 'number', 'status', 'info']
+
+
 class TrialListSerializer(ModelSerializer):
     score = ScoreSerializer()
 
@@ -46,12 +52,6 @@ class ContestAsAListItemSerializer(ModelSerializer):
     class Meta:
         model = contest_models.Contest
         fields = ['id', 'title', 'start_time', 'end_time']
-
-
-class ScoreSerializer(ModelSerializer):
-    class Meta:
-        model = contest_models.Score
-        fields = ['question_submission_id', 'number', 'status', 'info']
 
 
 class QuestionSubmissionSerializer(ModelSerializer):
