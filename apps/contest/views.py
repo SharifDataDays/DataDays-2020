@@ -150,10 +150,10 @@ class MyMultiPartParser(BaseParser):
             stream = request._request.__dict__['_stream'].__dict__['stream']
             parser = DjangoMultiPartParser(meta, stream, upload_handlers, encoding)
             data, files = parser.parse()
-            if 'json' not in files:
-                raise ParseError('Multipart form parse error: json file missing!')
+            if 'json' not in data:
+                raise ParseError('Multipart form parse error: json missing!')
             try:
-                data = json.loads(files['json'].read())
+                data = json.loads(data['json'].read())
             except ValueError:
                 raise ParseError('Malformed Json')
             return DataAndFiles(data, files)
