@@ -70,6 +70,29 @@ class MilestoneAPIView(GenericAPIView):
         return Response(data={'milestone': data}, status=status.HTTP_200_OK)
 
 
+class TrialListAPIView(GenericAPIView):
+    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
+    queryset = contest_models.Task.objects.filter(milestone__start_time__lt=timezone.now()).order_by('order')
+    serializer_class = serializers.TrialSerializer
+
+    def get(self, request, contest_id, milestone_id, task_id):
+        contest = get_object_or_404(contest_models.Contest, id=contest_id)
+        milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
+        if milestone.contest != contest:
+            return Response(data={'detail': 'milestone is unrelated to contest'},
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
+        self.check_object_permissions(self.request, contest)
+        self.check_object_permissions(self.request, milestone)
+
+        team = request.user.participant.teams.get(contest=contest)
+        team_task = team.tasks.get(task_id=task_id)
+
+        trials = team_task.trials.all()
+
+        data = self.get_serializer(trials, many=True).data
+        return Response(data={'trials': data}, status=status.HTTP_200_OK)
+
+
 class CreateTrialAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
     queryset = contest_models.Task.objects.filter(milestone__start_time__lt=timezone.now()).order_by('order')
