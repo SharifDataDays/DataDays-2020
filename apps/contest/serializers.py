@@ -9,12 +9,21 @@ from apps.resources.serializers import DocumentSerializer
 from . import models as contest_models
 
 
+class TrialListSerializer(ModelSerializer):
+    score = ScoreSerializer()
+
+    class Meta:
+        model = contest_models.Trial
+        fields = ['id', 'score', 'due_time', 'start_time', 'submit_time']
+
+
 class TaskSerializer(ModelSerializer):
     content = DocumentSerializer()
+    trials = TrialSerializer(many=True, read_only=True)
 
     class Meta:
         model = contest_models.Task
-        fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type']
+        fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type', 'trials']
 
 
 class MilestoneSerializer(ModelSerializer):
