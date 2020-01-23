@@ -25,7 +25,7 @@ class TrialListSerializer(ModelSerializer):
 
 class TaskSerializer(ModelSerializer):
     content = DocumentSerializer()
-    trials = TrialSerializer(many=True, read_only=True)
+    trials = TrialListSerializer(many=True, read_only=True)
 
     class Meta:
         model = contest_models.Task
