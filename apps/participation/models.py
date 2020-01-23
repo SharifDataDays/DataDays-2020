@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.dispatch import receiver
+from django.db.models.signals import pre_delete
 
 
 # Create your models here.
@@ -27,6 +29,11 @@ class Participant(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+@receiver(pre_delete, sender=Participant, dispatch_uid='participant_delete_signal')
+def delete_teams(sender, instance, *args, **kwargs):
+    instance.teams.all().delete()
 
 
 class Invitation(models.Model):
