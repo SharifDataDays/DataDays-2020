@@ -110,17 +110,6 @@ class CreateTrialAPIView(GenericAPIView):
         maker = trial_maker.TrialMaker(request, contest_id, milestone_id, task_id)
         trial, errors = maker.make_trial()
         if trial is None:
-            team_task = get_object_or_404(
-                    contest_models.TeamTask,
-                    task_id=task_id,
-                    team=request.user.participant.teams.get(contest=contest)
-                )
-            trials = contest_models.Trial.objects.filter(team_task=team_task)
-            if trials.count() == 1:
-                trial = trials.get()
-        else:
-            judge_trials.apply_async([trial.pk], countdown=int(60*60*trial.team_task.task.trial_time))
-        if trial is None:
             return Response(data={'detail': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
             data = self.get_serializer(trial).data

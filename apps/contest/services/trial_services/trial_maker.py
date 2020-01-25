@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from apps.contest.Exceptions import trial_validation_exception
 from apps.contest.models import Trial, TeamTask, QuestionSubmission, Task, TrialRecipe, Score
+from apps.contest.tasks import judge_trials
 
 from apps.question.models import Question
 
@@ -43,7 +44,6 @@ class TrialMaker:
         valid, errors = validator.validate()
         if not valid:
             return None, errors
-        print(self._has_uncompleted_trial())
         if not self._has_uncompleted_trial():
             try:
                 self.task = self.team_task.task
@@ -53,6 +53,8 @@ class TrialMaker:
                 self.trial_questions = self._set_trial_questions()
                 self.trial = self._create_trial()
                 self.question_submissions = self._create_trial_question_submissions()
+
+                judge_trials.apply_async([trial.pk], countdown=int(60*60*trial.team_task.task.trial_time))
             except Exception as e:
                 print(e)
                 if self.trial is not None:
@@ -72,11 +74,6 @@ class TrialMaker:
 
     def _has_uncompleted_trial(self):
         try:
-            for t in self.team_task.trials.filter(submit_time=None):
-                if t.due_time < timezone.now():
-                    t.submit_time = time_zone.now()
-                    t.save()
-                    judge_trials.delay(t.pk)
             existing_trial = self.team_task.trials.get(submit_time=None)
             self.trial = existing_trial
             return True
@@ -138,6 +135,7 @@ class TrialValidation:
 
     def validate(self):
         self._content_finished_check()
+        self._unsubmitted_trial_check()
         self._trial_cooldown_check()
         self._trial_count_limit_check()
         self._milestone_date_range_check()
@@ -151,13 +149,19 @@ class TrialValidation:
     def _trial_cooldown_check(self):
         trials_count = self.team_task.trials.count()
         if trials_count != 0:
-            last_trial_time = self.team_task.trials.last().submit_time
+            last_trial_time = self.team_task.trials.order_by('start_time').last().submit_time
             if last_trial_time is None:
                 self.errors.append(_(trial_validation_exception.ErrorMessages.ACTIVE_TRIAL))
                 self.valid = False
-            elif (timezone.now() - last_trial_time).total_seconds() // Constants.HOUR.value <= self.task.trial_cooldown:
+            elif (timezone.now() - last_trial_time).total_seconds() / Constants.HOUR.value <= self.task.trial_cooldown:
                 self.errors.append(_(trial_validation_exception.ErrorMessages.COOLING_DOWN))
                 self.valid = False
+
+    def _unsubmitted_trial_check(self):
+        for ut in self.team_task.trials.filter(submit_time=None, due_time__lt=timezone.now()):
+            ut.submit_time = timezone.now()
+            ut.save()
+            judge_trials.delay(ut.pk)
 
     def _trial_count_limit_check(self):
         trials_count = self.team_task.trials.count()
