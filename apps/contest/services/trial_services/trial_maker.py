@@ -149,11 +149,11 @@ class TrialValidation:
     def _trial_cooldown_check(self):
         trials_count = self.team_task.trials.count()
         if trials_count != 0:
-            last_trial_time = self.team_task.trials.filter(submit_time=None).order_by('start_time').last().submit_time
-            if last_trial_time is None:
+            last_active_trial = self.team_task.trials.order_by('start_time').last()
+            if last_active_trial.submit_time is None:
                 self.errors.append(_(trial_validation_exception.ErrorMessages.ACTIVE_TRIAL))
                 self.valid = False
-            elif (timezone.now() - last_trial_time).total_seconds() / Constants.HOUR.value <= self.task.trial_cooldown:
+            elif (timezone.now() - last_acvite_trial.submit_time).total_seconds() / Constants.HOUR.value <= self.task.trial_cooldown:
                 self.errors.append(_(trial_validation_exception.ErrorMessages.COOLING_DOWN))
                 self.valid = False
 

@@ -70,14 +70,14 @@ class Milestone(models.Model):
 
 class Task(models.Model):
     """
-    trial_cooldown: Should be in hours
+    trial_cooldown: Must be in hours (floating point numbers accepted)
     """
 
     milestone = models.ForeignKey('contest.Milestone', related_name='tasks', on_delete=models.CASCADE)
     topic = models.CharField(max_length=200, unique=True)
     content = models.ForeignKey('resources.Document', related_name='tasks', on_delete=models.CASCADE)
     max_trials_count = models.PositiveSmallIntegerField(default=3)
-    trial_cooldown = models.PositiveSmallIntegerField()
+    trial_cooldown = models.FloatField()
     trial_time = models.PositiveSmallIntegerField()
     scoring_type = models.CharField(choices=TaskScoringType.TYPES, max_length=20,
                                     default=TaskScoringType.WEIGHTED_AVERAGE)
