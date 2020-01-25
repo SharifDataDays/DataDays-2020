@@ -153,7 +153,7 @@ class TrialValidation:
             if last_active_trial.submit_time is None:
                 self.errors.append(_(trial_validation_exception.ErrorMessages.ACTIVE_TRIAL))
                 self.valid = False
-            elif (timezone.now() - last_acvite_trial.submit_time).total_seconds() / Constants.HOUR.value <= self.task.trial_cooldown:
+            elif (timezone.now() - last_active_trial.submit_time).total_seconds() / Constants.HOUR.value <= self.task.trial_cooldown:
                 self.errors.append(_(trial_validation_exception.ErrorMessages.COOLING_DOWN))
                 self.valid = False
 
