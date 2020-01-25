@@ -142,7 +142,7 @@ class MyMultiPartParser(BaseParser):
             if 'json' not in data:
                 raise ParseError('Multipart form parse error: json missing!')
             try:
-                data = json.loads(data['json'])
+                data = json.loads(data['json'].replace('null', 'None'))
             except ValueError:
                 raise ParseError('Malformed Json')
             return DataAndFiles(data, files)
@@ -169,7 +169,7 @@ class SubmitTrialAPIView(GenericAPIView):
         if trial not in team_task.trials.all():
             return Response(data={'detail': 'This trial is not yours. bitch'}, status=status.HTTP_406_NOT_ACCEPTABLE)
         if trial.submit_time is not None:
-            return Response(data={'detail': 'This trial has already been submitted.'}, status=403)
+            return Response(data={'detail': 'This trial has already been submitted.'}, status=406)
         trial_submitter = TrialSubmitValidation(request, contest_id, milestone_id, task_id, trial_id)
         trial, valid, errors = trial_submitter.validate()
         if not valid:
