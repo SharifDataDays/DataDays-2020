@@ -72,14 +72,16 @@ class TrialMaker:
 
     def _has_uncompleted_trial(self):
         try:
-            existing_trial = Trial.objects.get(
-                    team_task=self.team_task,
-                    submit_time__isnull=True
-                )
+            for t in self.team_task.trials.filter(submit_time=None):
+                if t.due_time > timezone.now():
+                    t.submit_time = time_zone.now()
+                    t.save()
+                    judge_trials.delay(t.pk)
+            existing_trial = self.team_task.trials.get(submit_time=None)
             self.trial = existing_trial
+            return True
         except (Trial.DoesNotExist, Trial.MultipleObjectsReturned):
             return False
-        return True
 
     def _set_before_selected_questions_ids(self):
         questions = []
