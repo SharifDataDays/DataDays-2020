@@ -1,5 +1,6 @@
 import enum
 import random
+import logging
 
 from random import randint
 from typing import Union, List, Tuple
@@ -54,9 +55,9 @@ class TrialMaker:
                 self.trial = self._create_trial()
                 self.question_submissions = self._create_trial_question_submissions()
 
-                judge_trials.apply_async([trial.pk], countdown=int(60*60*trial.team_task.task.trial_time))
+#                judge_trials.apply_async([trial.pk], countdown=int(60*60*trial.team_task.task.trial_time))
             except Exception as e:
-                print(e)
+                logging.debug(e)
                 if self.trial is not None:
                     self.trial.delete()
                 if self.question_submissions is not None:
@@ -119,7 +120,7 @@ class TrialMaker:
         return question_submissions
 
     def _create_trial(self):
-        due_time = timezone.now() + timezone.timedelta(hours=self.task.trial_time)
+        due_time = timezone.now() + timezone.timedelta(seconds=self.task.trial_time*3600)
         trial = Trial(team_task=self.team_task, due_time=due_time)
         trial.save()
         return trial
