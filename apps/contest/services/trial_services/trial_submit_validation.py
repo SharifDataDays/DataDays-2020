@@ -216,7 +216,7 @@ class TrialSubmitValidation:
             return
 
     def _save_to_storage(self, given_file, file_format, submission_id):
-        destination = f'teams/{self._trial.team_task.team.name}/trial_{self.trial_id}/qs_{submission_id}/'
+        destination = f'/teams/{self._trial.team_task.team.name}/trial_{self.trial_id}/qs_{submission_id}/'
         uploaded_filename = 'f_' + uuid.uuid4().hex[:16] + '.' + file_format
         try:
             os.makedirs(settings.MEDIA_ROOT + destination, exist_ok=True)
