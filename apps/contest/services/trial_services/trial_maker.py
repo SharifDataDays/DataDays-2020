@@ -73,7 +73,7 @@ class TrialMaker:
     def _has_uncompleted_trial(self):
         try:
             for t in self.team_task.trials.filter(submit_time=None):
-                if t.due_time > timezone.now():
+                if t.due_time < timezone.now():
                     t.submit_time = time_zone.now()
                     t.save()
                     judge_trials.delay(t.pk)
