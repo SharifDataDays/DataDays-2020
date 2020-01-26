@@ -26,9 +26,14 @@ class TrialListSerializer(ModelSerializer):
 class TaskSerializer(ModelSerializer):
     content = DocumentSerializer()
 
+    trials = serializers.SerializerMethodField()
+
     class Meta:
         model = contest_models.Task
-        fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type']
+        fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type', 'trials']
+
+    def get_trials(self, obj):
+        return TrialListSerializer(self.context.get('trials'), many=True, read_only=True)
 
 
 class MilestoneSerializer(ModelSerializer):
