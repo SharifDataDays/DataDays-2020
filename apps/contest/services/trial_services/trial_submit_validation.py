@@ -229,4 +229,3 @@ class TrialSubmitValidation:
             copied_file.write(chunk)
         copied_file.close()
         return destination + uploaded_filename
-
