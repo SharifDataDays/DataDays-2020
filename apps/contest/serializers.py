@@ -37,11 +37,18 @@ class TaskSerializer(ModelSerializer):
 
 
 class MilestoneSerializer(ModelSerializer):
-    tasks = TaskSerializer(many=True, read_only=True)
+
+    tasks = serializers.SerializerMethodField()
 
     class Meta:
         model = contest_models.Milestone
         fields = ['id', 'title', 'start_time', 'end_time', 'tasks', 'description', 'image']
+
+    def get_tasks(self, obj):
+        tasks = []
+        for task in obj.tasks:
+            tasks.append(TaskSerializer(task, context={'trials': team.tasks.get(task=task).trials.all()}), read_only=True)
+        return tasks
 
 
 class ContestSerializer(ModelSerializer):

@@ -67,7 +67,9 @@ class MilestoneAPIView(GenericAPIView):
         self.check_object_permissions(self.request, contest)
         self.check_object_permissions(self.request, milestone)
 
-        data = self.get_serializer(milestone).data
+        team = request.user.participant.teams.get(contest=contest)
+
+        data = self.get_serializer(milestone, context={'team': team).data
         return Response(data={'milestone': data}, status=status.HTTP_200_OK)
 
 
