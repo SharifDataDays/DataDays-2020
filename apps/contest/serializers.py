@@ -33,7 +33,7 @@ class TaskSerializer(ModelSerializer):
         fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type', 'trials']
 
     def get_trials(self, obj):
-        return TrialListSerializer(self.context.get('trials'), many=True, read_only=True)
+        return [TrialListSerializer(trial, read_only=True).data for trial in self.context.get('trials')]
 
 
 class MilestoneSerializer(ModelSerializer):
@@ -46,8 +46,19 @@ class MilestoneSerializer(ModelSerializer):
 
     def get_tasks(self, obj):
         tasks = []
+        print('=' * 100)
+        print(self.context)
         for task in obj.tasks.all().order_by('order'):
-            tasks.append(TaskSerializer(task, context={'trials': self.context.get('team').tasks.get(task=task).trials.all()}), read_only=True)
+            tasks.append(
+                    TaskSerializer(
+                        task,
+                        context={'trials':
+                            self.context.get('team').tasks.get(task=task).trials.all()
+                        },
+                        read_only=True
+                    ).data
+                )
+        print(tasks)
         return tasks
 
 
