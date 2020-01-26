@@ -82,6 +82,8 @@ class Task(models.Model):
     scoring_type = models.CharField(choices=TaskScoringType.TYPES, max_length=20,
                                     default=TaskScoringType.WEIGHTED_AVERAGE)
 
+    order = models.IntegerField(default=0)
+
     def __str__(self):
         return f'id:{self.id} topic:{self.topic} ' \
                f'milestone_title:{self.milestone.title} contest_title:{self.milestone.contest.title}'

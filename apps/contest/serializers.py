@@ -46,7 +46,7 @@ class MilestoneSerializer(ModelSerializer):
 
     def get_tasks(self, obj):
         tasks = []
-        for task in obj.tasks:
+        for task in obj.tasks.all().order_by('order'):
             tasks.append(TaskSerializer(task, context={'trials': team.tasks.get(task=task).trials.all()}), read_only=True)
         return tasks
 
