@@ -16,7 +16,6 @@ class ScoreSerializer(ModelSerializer):
 
 
 class TrialListSerializer(ModelSerializer):
-    score = ScoreSerializer()
 
     class Meta:
         model = contest_models.Trial
@@ -26,13 +25,15 @@ class TrialListSerializer(ModelSerializer):
 class TaskSerializer(ModelSerializer):
     content = DocumentSerializer()
 
-    trials = serializers.SerializerMethodField()
+    trials = serializers.SerializerMethodField('get_trials')
 
     class Meta:
         model = contest_models.Task
         fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type', 'trials']
 
     def get_trials(self, obj):
+        if 'trials' not in self.context:
+            return []
         return [TrialListSerializer(trial, read_only=True).data for trial in self.context.get('trials')]
 
 
@@ -46,19 +47,17 @@ class MilestoneSerializer(ModelSerializer):
 
     def get_tasks(self, obj):
         tasks = []
-        print('=' * 100)
-        print(self.context)
         for task in obj.tasks.all().order_by('order'):
+            trials = []
+            if 'team' in self.context:
+                trials = self.context.get('team').tasks.get(task=task).trials.all()
             tasks.append(
                     TaskSerializer(
                         task,
-                        context={'trials':
-                            self.context.get('team').tasks.get(task=task).trials.all()
-                        },
+                        context={'trials': trials},
                         read_only=True
                     ).data
                 )
-        print(tasks)
         return tasks
 
 
@@ -102,7 +101,6 @@ class QuestionSubmissionPostSerializer(ModelSerializer):
 
 class TrialSerializer(ModelSerializer):
     question_submissions = QuestionSubmissionSerializer(many=True, read_only=True)
-    score = ScoreSerializer()
 
     class Meta:
         model = contest_models.Trial
