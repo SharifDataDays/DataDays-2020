@@ -78,6 +78,11 @@ class TaskAPIView(GenericAPIView):
     queryset = contest_models.Task.objects.filter(milestone__start_time__lt=timezone.now()).order_by('order')
     serializer_class = serializers.TaskSerializer
 
+    def get_serializer_context(self):
+        print('boooooo'*100)
+        print(self.__dict__)
+        return super().get_serializer_context()
+
     def get_serializer(self, *args, **kwargs):
         serializer_class = self.get_serializer_class()
         if 'context' in kwargs:
@@ -120,9 +125,7 @@ class TaskAPIView(GenericAPIView):
         trial, errors = maker.make_trial()
         if trial is None:
             return Response(data={'detail': errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
-        else:
-            data = self.get_serializer(trial).data
-        return Response(data={'trial': data}, status=status.HTTP_200_OK)
+        return Response(data={'detail': 'ok'}, status=status.HTTP_200_OK)
 
     def put(self, request, contest_id, milestone_id, task_id):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
