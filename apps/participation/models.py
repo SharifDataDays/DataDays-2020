@@ -12,12 +12,17 @@ class Team(models.Model):
     badges = models.ManyToManyField('participation.Badge', related_name='teams', null=True, blank=True)
     name = models.CharField(max_length=50, unique=True)
 
+    name_finalized = models.BooleanField(default=False)
+
     @staticmethod
     def get_team(participant, contest):
         if contest not in [team.contest for team in participant.teams.all()]:
             new_team = Team.objects.create(contest=contest, name=participant.user.username)
             participant.teams.add(new_team)
         return participant.teams.get(contest=contest)
+
+    def finalized(self):
+        return self.name_finalized and self.participants.count() == self.contest.team_size
 
     def __str__(self):
         return self.name
@@ -37,8 +42,13 @@ def delete_teams(sender, instance, *args, **kwargs):
 
 
 class Invitation(models.Model):
-    host = models.ForeignKey(Participant, related_name='invitations_as_host', on_delete=models.CASCADE)
-    guest = models.ForeignKey(Participant, related_name='invitations_as_gust', on_delete=models.CASCADE)
+    contest = models.ForeignKey('contest.Contest',
+            related_name='invitations', on_delete=models.CASCADE)
+
+    sender = models.ForeignKey(Participant,
+            related_name='invitations_sent', on_delete=models.CASCADE)
+    reciever = models.ForeignKey(Participant,
+            related_name='invitations_recieved', on_delete=models.CASCADE)
 
     @staticmethod
     def get_participant(user):

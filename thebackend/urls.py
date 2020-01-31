@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/go/', include('apps.go.urls')),
     path('api/contest/', include('apps.contest.urls')),
     path('api/question/', include('apps.question.urls')),
+    path('api/participation/', include('apps.participation.urls')),
     path('api/private_files/', include('private_files.urls')),
 ]
 

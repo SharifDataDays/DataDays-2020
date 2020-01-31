@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'djcelery_email',
     'martor',
     'private_files',
-    'requests',
+    'request',
     'rest_auth',
     'rest_framework',
     'rest_framework.authtoken',

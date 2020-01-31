@@ -45,3 +45,16 @@ class UserHasTeamTasks(permissions.BasePermission):
             if task not in [tt.task for tt in team_tasks]:
                 TeamTask.objects.create(team=team, task=task, content_finished=False)
         return True
+
+
+class TeamNameFinalized(permissions.BasePermission):
+
+    # obj is Team instance
+    def has_object_permission(self, request, view, obj):
+        if not isinstance(obj, Team):
+            return True
+
+        if request.method == 'GET':
+            return True
+
+        return not obj.name_finalized
