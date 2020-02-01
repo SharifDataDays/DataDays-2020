@@ -85,6 +85,7 @@ class Question(PolymorphicModel):
             raise ValidationError(f'shitty judge function: {e}')
 
     def save(self, *args, **kwargs):
+        super(Question, self).save(*args, **kwargs)
         self.judge_function = self.judge_function.replace('_cwd', f'"{self.dir_path()}"')
         super(Question, self).save(*args, **kwargs)
 
