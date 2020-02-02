@@ -45,10 +45,10 @@ class Invitation(models.Model):
     contest = models.ForeignKey('contest.Contest',
             related_name='invitations', on_delete=models.CASCADE)
 
-    sender = models.ForeignKey(Participant,
-            related_name='invitations_sent', on_delete=models.CASCADE)
-    reciever = models.ForeignKey(Participant,
-            related_name='invitations_recieved', on_delete=models.CASCADE)
+    team = models.ForeignKey(Team,
+            related_name='invitations', on_delete=models.CASCADE)
+    participant = models.ForeignKey(Participant,
+            related_name='invitations', on_delete=models.CASCADE)
 
     @staticmethod
     def get_participant(user):

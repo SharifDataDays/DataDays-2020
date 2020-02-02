@@ -55,7 +55,7 @@ class InvitationAPIView(GenericAPIView):
     def get(self, request, contest_id):
         contest = get_object_or_404(Contest, id=contest_id)
         self.check_object_permissions(self.request, contest)
-        data = self.get_serializer(request.user.participant).data
+        data = self.get_serializer(request.user.participant.teams.get(contest=contest)).data
         return Response(data)
 
     def post(self, request, contest_id):
@@ -71,8 +71,6 @@ class InvitationAPIView(GenericAPIView):
         self.check_object_permissions(self.request, contest)
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            print('"'*100)
-            print(serializer.validated_data)
             invitation = get_object_or_404(self.get_queryset(), id=serializer.validated_data['id'])
             serializer.instance = invitation
             serializer.save()

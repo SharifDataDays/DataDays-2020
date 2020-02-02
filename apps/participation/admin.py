@@ -13,7 +13,7 @@ class ParticipantInline(admin.StackedInline):
 
 class InvitationInline(admin.TabularInline):
     model = participation_models.Invitation
-    fk_name = 'sender'
+    fk_name = 'participant'
 
 
 @admin.register(participation_models.Participant)
