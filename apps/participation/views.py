@@ -1,15 +1,26 @@
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
 
 from rest_framework import status, permissions
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from apps.participation.models import Team, Participant, Invitation
-from apps.participation.serializers import TeamSerializer, ParticipantSerializer, \
+from apps.participation.serializers import TeamListSerializer, TeamSerializer, ParticipantSerializer, \
         InvitationListSerializer, InvitationSerializer, InvitationActionSerializer
 from apps.participation.permissions import UserHasParticipant, UserHasTeamInContest
 
 from apps.contest.models import Contest
+
+
+class TeamListAPIView(GenericAPIView):
+    queryset = User.objects.all()
+    serializer_class = TeamListSerializer
+    permission_classes = [permissions.IsAuthenticated, UserHasParticipant]
+
+    def get(self, request):
+        data = self.get_serializer(request.user)
+        return Response(data)
 
 
 class TeamAPIView(GenericAPIView):

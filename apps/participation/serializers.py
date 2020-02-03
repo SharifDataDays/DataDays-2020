@@ -12,8 +12,19 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name', 'email']
 
 
+class TeamListSerializer(serializers.ModelSerializer):
+    teams = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['username', 'teams']
+
+    def get_teams(self, obj):
+        return [team.name for team in obj.participant.teams]
+
+
 class ParticipantSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Participant
