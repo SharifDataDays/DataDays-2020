@@ -20,7 +20,7 @@ class TeamListSerializer(serializers.ModelSerializer):
         fields = ['username', 'teams']
 
     def get_teams(self, obj):
-        return {team.contest.id: team.name for team in obj.participant.teams}
+        return {team.contest.id: team.name for team in obj.participant.teams.all()}
 
 
 class ParticipantSerializer(serializers.ModelSerializer):
