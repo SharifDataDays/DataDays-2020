@@ -127,17 +127,17 @@ class InvitationActionSerializer(serializers.ModelSerializer):
 
 class InvitationListSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
-    invitations = InvitationSerializer(source='invitations', many=True, read_only=True)
+    invitations = InvitationSerializer(many=True, read_only=True)
     team_invitations = InvitationSerializer(source='team.invitations', many=True, read_only=True)
 
     class Meta:
         model = Participant
-        fields = ['name', 'invitations', 'team_invitations']
+        fields = ['username', 'invitations', 'team_invitations']
 
 
 class TeamSerializer(serializers.ModelSerializer):
     participants = ParticipantSerializer(many=True, read_only=True)
-    invitations = InvitationSerializer(source='invitations', many=True, read_only=True)
+    invitations = InvitationSerializer(many=True, read_only=True)
     name_finalized = serializers.BooleanField(read_only=True)
     finalize = serializers.BooleanField(write_only=True)
 
