@@ -19,7 +19,7 @@ class TeamListAPIView(GenericAPIView):
     permission_classes = [permissions.IsAuthenticated, UserHasParticipant]
 
     def get(self, request):
-        data = self.get_serializer(request.user)
+        data = self.get_serializer(request.user).data
         return Response(data)
 
 
