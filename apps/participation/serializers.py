@@ -110,7 +110,7 @@ class InvitationActionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('requested invitation not found')
         invitation = filtered_invitations.get()
         if self.context.get('view').request.user.participant not in \
-                invitation.team.participants.all() + [invitation.participant]:
+                list(invitation.team.participants.all()) + [invitation.participant]:
             raise serializers.ValidationError('requested invitation is not yours')
         return data
 
