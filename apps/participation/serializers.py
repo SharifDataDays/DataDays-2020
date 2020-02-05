@@ -132,7 +132,7 @@ class InvitationActionSerializer(serializers.ModelSerializer):
 
 class InvitationListSerializer(serializers.ModelSerializer):
     user_invitations = serializers.SerializerMethodField()
-    team_invitations = InvitationSerializer(source='team.invitations', many=True, read_only=True)
+    team_invitations = InvitationSerializer(source='invitations', many=True, read_only=True)
 
     class Meta:
         model = Team
