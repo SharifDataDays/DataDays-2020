@@ -50,6 +50,9 @@ class InvitationSerializer(serializers.ModelSerializer):
         filtered_users = User.objects.filter(username=data['participant']['user']['username'])
         if filtered_users.count() != 1:
             raise serializers.ValidationError('requested user not found')
+        participant_user = filtered_users.get()
+        if not hasattr(participant_user, 'participant'):
+            Participant.objects.create(user=participant_user)
         participant = filtered_users.get().participant
         team = self.context.get('view').request.user.participant.teams.get(contest=contest)
         if team.finalized():
