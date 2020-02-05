@@ -66,6 +66,7 @@ class InvitationAPIView(GenericAPIView):
     def get(self, request, contest_id):
         contest = get_object_or_404(Contest, id=contest_id)
         self.check_object_permissions(self.request, contest)
+        self.contest = contest
         data = self.get_serializer(request.user.participant.teams.get(contest=contest)).data
         return Response(data)
 

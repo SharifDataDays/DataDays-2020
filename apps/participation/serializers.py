@@ -140,8 +140,8 @@ class InvitationListSerializer(serializers.ModelSerializer):
 
     def get_user_invitations(self, obj):
         participant = self.context.get('view').request.user.participant
-        contest_id = self.context.get('view').args['contest_id']
-        return [InvitationSerializer(i, many=True, read_only=True).data for i in participant.invitations.filter(contest_id=contest_id)]
+        contest = self.context.get('view').contest
+        return [InvitationSerializer(i, many=True, read_only=True).data for i in participant.invitations.filter(contest=contest)]
 
 
 class TeamSerializer(serializers.ModelSerializer):
