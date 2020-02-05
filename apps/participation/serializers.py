@@ -47,7 +47,7 @@ class InvitationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('requested contest not found')
         contest = filtered_contests.get()
 
-        filtered_users = User.objects.filter(username=data['participant'])
+        filtered_users = User.objects.filter(username=data['participant']['user']['username'])
         if filtered_users.count() != 1:
             raise serializers.ValidationError('requested user not found')
         participant = filtered_users.get().participant
