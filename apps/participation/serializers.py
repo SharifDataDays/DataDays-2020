@@ -55,6 +55,8 @@ class InvitationSerializer(serializers.ModelSerializer):
         if team.finalized():
             raise serializers.ValidationError(f'your team is finalized')
         participant_team = participant.teams.filter(contest=contest)
+        if team in participant.teams.all():
+            raise serializers.ValidationError(f'requested user\'s already in team')
         if participant_team.count() != 1:
             raise serializers.ValidationError(f'requested user\'s is finalized')
         participant_team = participant_team.get()
