@@ -115,7 +115,7 @@ class InvitationActionSerializer(serializers.ModelSerializer):
         return data
 
     def update(self, instance, validated_data):
-        if self.context.get('view').request.user.participant in instance.team.participants:
+        if self.context.get('view').request.user.participant in instance.team.participants.all():
             if validated_data['accept']:
                raise serializers.ValidationError(
                        'cant send True for \'accept\' as invitation sender'
