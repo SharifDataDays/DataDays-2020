@@ -32,7 +32,7 @@ class ParticipantSerializer(serializers.ModelSerializer):
 
 
 class InvitationSerializer(serializers.ModelSerializer):
-    id = serializers.ModelField(model_field=Invitation()._meta.get_field('id'))
+    id = serializers.ModelField(model_field=Invitation()._meta.get_field('id'), read_only=True)
     contest_id = serializers.CharField(source='contest.id')
     team = serializers.CharField(source='team.name', read_only=True)
     participant = serializers.CharField(source='participant.user.username')
