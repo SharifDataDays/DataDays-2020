@@ -131,13 +131,17 @@ class InvitationActionSerializer(serializers.ModelSerializer):
 
 
 class InvitationListSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
-    invitations = InvitationSerializer(many=True, read_only=True)
+    user_invitations = serializers.SerializerMethodField()
     team_invitations = InvitationSerializer(source='team.invitations', many=True, read_only=True)
 
     class Meta:
-        model = Participant
-        fields = ['username', 'invitations', 'team_invitations']
+        model = Team
+        fields = ['user_invitations', 'team_invitations']
+
+    def get_user_invitations(self, obj):
+        participant = self.context.get('view').request.user.participant
+        contest_id = self.context.get('view').args['contest_id']
+        return [InvitationSerializer(i, many=True, read_only=True).data for i in participant.invitations.filter(contest_id=contest_id)]
 
 
 class TeamSerializer(serializers.ModelSerializer):
