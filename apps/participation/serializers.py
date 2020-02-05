@@ -32,14 +32,14 @@ class ParticipantSerializer(serializers.ModelSerializer):
 
 
 class InvitationSerializer(serializers.ModelSerializer):
+    id = serializers.ModelField(model_field=Invitation()._meta.get_field('id'))
     contest_id = serializers.CharField(source='contest.id')
     team = serializers.CharField(source='team.name', read_only=True)
     participant = serializers.CharField(source='participant.user.username')
-    accept = serializers.BooleanField(write_only=True)
 
     class Meta:
         model = Invitation
-        fields = ['id', 'contest_id', 'team', 'participant', 'accept']
+        fields = ['id', 'contest_id', 'team', 'participant']
 
     def validate(self, data):
         filtered_contests = Contest.objects.filter(id=data['contest']['id'])
