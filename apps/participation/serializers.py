@@ -170,7 +170,7 @@ class TeamSerializer(serializers.ModelSerializer):
             instance.name_finalized = True
 
         name = validated_data['name']
-        if Team.objects.filter(name=name).exclude(instance.team).count() != 0:
+        if Team.objects.exclude(id=instance.id).filter(name=name).count() != 0:
             raise ValidationError('name must be unique')
         instance.name = name
         instance.save()
