@@ -123,7 +123,10 @@ class InvitationActionSerializer(serializers.ModelSerializer):
                     )
         elif self.context.get('view').request.user.participant == instance.participant:
             if validated_data['accept']:
-                instance.participant.teams.filter(contest=instance.contest).delete()
+                prev_team = instance.participant.teams.get(contest=instance.contest)
+                instance.participant.teams.remove(prev_team)
+                if prev_team.participants.count() == 0:
+                    prev_team.delete()
                 instance.participant.teams.add(instance.team)
         else:
             raise serializers.ValidationError('invite not for user')
