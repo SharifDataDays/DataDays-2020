@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 
 from rest_framework import serializers
+from rest_framework import validators
 
 from apps.participation.models import Team, Participant, Invitation, Badge
 from apps.contest.models import Contest
@@ -149,6 +150,7 @@ class TeamSerializer(serializers.ModelSerializer):
     invitations = InvitationSerializer(many=True, read_only=True)
     name_finalized = serializers.BooleanField(read_only=True)
     finalize = serializers.BooleanField(write_only=True)
+    name = serializers.CharField(validators=[validators.UniqueValidator(queryset=Team.objects.all())])
 
     class Meta:
         model = Team
