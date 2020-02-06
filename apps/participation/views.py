@@ -33,6 +33,8 @@ class TeamAPIView(GenericAPIView):
 
     def get(self, request, contest_id):
         contest = get_object_or_404(Contest, id=contest_id)
+        if contest.team_size == 1:
+            return Response(data={'detail': 'requested contest is individual'}, status=406)
         self.check_object_permissions(self.request, contest)
         team = request.user.participant.teams.get(contest=contest)
         data = self.get_serializer(team).data

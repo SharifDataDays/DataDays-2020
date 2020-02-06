@@ -158,7 +158,12 @@ class TeamSerializer(serializers.ModelSerializer):
         if instance.name_finalized:
             raise serializers.ValidationError('Team info finalized')
         if validated_data.pop('finalize'):
+            if instance.participants.count() != instance.contest.team_size:
+                raise serializers.ValidationError('can\'t finalize uncompleted team')
+            instance.invitations.all().delete()
+            Invitation.objects.filter(participant__in=instance.participants.all()).delete()
             instance.name_finalized = True
+
         instance.name = validated_data['name']
         instance.save()
         return instance
