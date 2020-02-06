@@ -153,7 +153,7 @@ class TeamSerializer(serializers.ModelSerializer):
     invitations = InvitationSerializer(many=True, read_only=True)
     name_finalized = serializers.BooleanField(read_only=True)
     finalize = serializers.BooleanField(write_only=True)
-    name = serializers.CharField(validators=[validators.UniqueValidator(queryset=Team.objects.all())])
+    name = serializers.CharField(validators=[])
 
     class Meta:
         model = Team
@@ -169,7 +169,10 @@ class TeamSerializer(serializers.ModelSerializer):
             Invitation.objects.filter(participant__in=instance.participants.all()).delete()
             instance.name_finalized = True
 
-        instance.name = validated_data['name']
+        name = validated_data['name']
+        if Team.objects.filter(name=name).exclude(instance.team).count() != 0:
+            raise ValidationError('name must be unique')
+        instance.name = name
         instance.save()
         return instance
 
