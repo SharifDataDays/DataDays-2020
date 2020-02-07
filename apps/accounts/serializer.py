@@ -67,7 +67,7 @@ class UserViewSerializer(serializers.ModelSerializer):
         uni = University.objects.filter(name=validated_data.get('uni'))
         if uni.count() == 0 and profile.uni is None:
             raise serializers.ValidationError('University with given name not found')
-        else:
+        elif uni.count() == 1:
             uni = uni.get()
             profile.uni = uni
         profile.bmp = validated_data.get('bmp', profile.bmp)
