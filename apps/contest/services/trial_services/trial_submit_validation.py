@@ -43,7 +43,7 @@ class TrialSubmitValidation:
                 return Trial.objects.get(id=self.trial_id)
             else:
                 self._valid = False
-                self._errors = {'trial': [trial.errors[e][0] for e in trial.errors]}
+                self._errors = {'trial': trial.errors}
                 return None
         except Trial.DoesNotExist as e:
             self._valid = False
