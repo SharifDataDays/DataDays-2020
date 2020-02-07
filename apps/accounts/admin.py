@@ -20,6 +20,7 @@ class ProfileAdmin(admin.ModelAdmin):
         'birth_date',
         'university',
         'uni',
+        'major',
         'bmp',
     ]
     list_display = [
@@ -28,6 +29,7 @@ class ProfileAdmin(admin.ModelAdmin):
         'birth_date',
         'university',
         'uni',
+        'major',
         'bmp',
     ]
 

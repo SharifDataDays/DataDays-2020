@@ -19,9 +19,10 @@ class Profile(models.Model):
     lastname_fa = models.TextField(max_length=30)
     lastname_en = models.TextField(max_length=30)
     birth_date = models.DateField()
-    university = models.CharField(max_length=50)
+    university = models.CharField(max_length=50, null=True)
 
     uni = models.ForeignKey(University, on_delete=models.CASCADE, null=True)
+    major = models.CharField(max_length=100, null=True)
     bmp = models.CharField(
             max_length=50,
             choices=(
@@ -33,7 +34,7 @@ class Profile(models.Model):
         )
 
     def completed(self):
-        return self.uni is not None and self.bmp is not None
+        return self.uni is not None and self.major is not None and self.bmp is not None
 
     def __str__(self):
         return f'username: {self.user.username},' \
