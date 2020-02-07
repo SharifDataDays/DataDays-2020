@@ -5,6 +5,11 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from apps.accounts.models import *
 
 
+@admin.register(University)
+class UniversityAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     search_fields = [
@@ -14,12 +19,16 @@ class ProfileAdmin(admin.ModelAdmin):
         'lastname_en',
         'birth_date',
         'university',
+        'uni',
+        'bmp',
     ]
     list_display = [
         'firstname_en',
         'lastname_en',
         'birth_date',
         'university',
+        'uni',
+        'bmp',
     ]
 
 
