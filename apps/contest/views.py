@@ -81,7 +81,7 @@ class TaskAPIView(GenericAPIView):
         contest, milestone, task = self.check_existance(contest_id, milestone_id, task_id)
         team = request.user.participant.teams.get(contest=contest)
         self.team_task = team.tasks.get(task_id=task_id)
-        self.trials = list(team_task.trials.all())
+        self.trials = list(self.team_task.trials.all())
         data = self.get_serializer(self.team_task.task).data
         return Response(data=data, status=status.HTTP_200_OK)
 
