@@ -114,7 +114,7 @@ class TrialAPIView(GenericAPIView):
             raise NotFound(data={'detail': 'milestone is unrelated to contest'})
         if task.milestone != milestone:
             raise NotFound(data={'detail': 'task is unrelated to milestone'})
-        if trial.task != task:
+        if trial.team_task.task != task:
             raise NotFound(data={'detail': 'trial is unrelated to task'})
         return contest, milestone, task, trial
 
