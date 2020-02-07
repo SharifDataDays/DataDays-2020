@@ -14,8 +14,7 @@ class UniversitySerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    uni = UniversitySerializer(read_only=True)
-    uni_name = serializers.CharField(write_only=True, required=False)
+    uni = serializers.CharField(source='uni.name', required=False)
 
     class Meta:
         model = Profile
@@ -28,7 +27,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         return uni.get()
 
     def create(self, validated_data):
-        uni = self.check_uni(validated_data.pop('uni_name'))
+        uni = self.check_uni(validated_data.pop('uni'))
         validated_data['uni'] = uni
         return Profile.objects.create(**validated_data)
 
@@ -42,8 +41,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         profile.university = validated_data.get('university', profile.university)
         profile.bmp = validated_data.get('bmp', profile.bmp)
         profile.major = validated_data.get('major', profile.major)
-        if 'uni_name' in validated_data:
-            profile.uni = self.check_uni(validated_data.get('uni_name'))
+        if 'uni' in validated_data:
+            print(validated_data['uni'])
+            profile.uni = self.check_uni(validated_data.get('uni'))
         profile.save()
         return profile
 
@@ -86,6 +86,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = ['profile', 'email']
 
     def update(self, instance, validated_data):
+        instance.email = validated_data.get('email', instance.email)
         instance.save()
 
         profile_data = validated_data.pop('profile')
