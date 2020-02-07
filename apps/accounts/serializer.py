@@ -70,8 +70,8 @@ class UserViewSerializer(serializers.ModelSerializer):
         elif uni.count() == 1:
             uni = uni.get()
             profile.uni = uni
-        profile.bmp = validated_data.get('bmp', profile.bmp)
-        profile.major = validated_data.get('major', profile.major)
+        profile.bmp = validated_data.get('profile.bmp', profile.bmp)
+        profile.major = validated_data.get('profile.major', profile.major)
         profile.save()
         return instance
 
