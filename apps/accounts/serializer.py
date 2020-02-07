@@ -22,7 +22,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_uni(self, obj):
         if hasattr(obj, 'uni'):
-            return obj.uni.name
+            if obj.uni is not None:
+                return obj.uni.name
         return ''
 
     def update(self, instance, validated_data):
