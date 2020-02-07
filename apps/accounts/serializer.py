@@ -14,7 +14,7 @@ class UniversitySerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    uni = UniversitySerializer()
+    uni = serializers.CharField(source='uni.name')
 
     class Meta:
         model = Profile
