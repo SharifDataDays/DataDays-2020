@@ -154,6 +154,8 @@ class ProfileView(GenericAPIView):
         user = request.user
         user_serializer = UserViewSerializer(user)
         user_serializer.update(user, request.data)
+        profile_serializer = ProfileSerializer(request.data, instance=user.profile)
+        profile_serializer.update(user.profile)
         return Response(user_serializer.data)
 
 
