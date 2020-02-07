@@ -21,7 +21,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         exclude = ['user']
 
     def get_uni(self, obj):
-        if hasattr(self, uni):
+        if hasattr(obj, 'uni'):
             return uni.name
         return ''
 
