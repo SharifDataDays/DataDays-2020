@@ -15,10 +15,37 @@ class UniversitySerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     uni = UniversitySerializer(read_only=True)
+    uni_name = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Profile
         exclude = ['user']
+
+    def check_uni(self, uni_name):
+        uni = University.objects.filter(name=uni_name)
+        if uni.count() != 1:
+            raise serializers.ValidationError('University with given name not found.')
+        return uni.get()
+
+    def create(self, validated_data):
+        uni = self.check_uni(validated_data.pop('uni_name'))
+        validated_data['uni'] = uni
+        return Profile.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        profile = instance
+        profile.firstname_fa = validated_data.get('firstname_fa', profile.firstname_fa)
+        profile.firstname_en = validated_data.get('firstname_en', profile.firstname_en)
+        profile.lastname_fa = validated_data.get('lastname_fa', profile.lastname_fa)
+        profile.lastname_en = validated_data.get('lastname_en', profile.lastname_en)
+        profile.birth_date = validated_data.get('birth_date', profile.birth_date)
+        profile.university = validated_data.get('university', profile.university)
+        profile.bmp = validated_data.get('bmp', profile.bmp)
+        profile.major = validated_data.get('major', profile.major)
+        if 'uni_name' in validated_data:
+            profile.uni = self.check_uni(validated_data.get('uni_name'))
+        profile.save()
+        return profile
 
 
 class UserSignUpSerializer(serializers.ModelSerializer):
@@ -29,11 +56,9 @@ class UserSignUpSerializer(serializers.ModelSerializer):
     password_1 = serializers.CharField(style={'input_type': 'password'})
     password_2 = serializers.CharField(style={'input_type': 'password'})
 
-    uni = serializers.CharField(write_only=True)
-
     class Meta:
         model = User
-        fields = ['username', 'email', 'password_1', 'password_2', 'profile', 'uni']
+        fields = ['username', 'email', 'password_1', 'password_2', 'profile']
 
     def validate(self, data):
         if data['password_1'] != data['password_2']:
@@ -42,45 +67,31 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
-        uni_name = validated_data.pop('uni')
+
         validated_data.pop('password_1')
         validated_data['password'] = make_password(validated_data.pop('password_2'))
         user = User.objects.create(**validated_data)
-        uni = University.objects.filter(name=uni_name)
-        if uni.count() == 0 and profile.uni is None:
-            raise serializers.ValidationError('University with given name not found')
-        elif uni.count() == 1:
-            profile_data['uni'] = uni.get()
-        Profile.objects.create(user=user, **profile_data)
+
+        profile_serializer = ProfileSerializer(data=profile_data)
+        if profile_serializer.is_valid(raise_exception=True):
+            profile_serializer.save()
         return user
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
-    uni = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['profile', 'email', 'uni']
+        fields = ['profile', 'email']
 
     def update(self, instance, validated_data):
         instance.save()
-        profile = instance.profile
-        profile.firstname_fa = validated_data.get('firstname_fa', profile.firstname_fa)
-        profile.firstname_en = validated_data.get('firstname_en', profile.firstname_en)
-        profile.lastname_fa = validated_data.get('lastname_fa', profile.lastname_fa)
-        profile.lastname_en = validated_data.get('lastname_en', profile.lastname_en)
-        profile.birth_date = validated_data.get('birth_date', profile.birth_date)
-        profile.university = validated_data.get('university', profile.university)
-        uni = University.objects.filter(name=validated_data.get('uni'))
-        if uni.count() == 0 and profile.uni is None:
-            raise serializers.ValidationError('University with given name not found')
-        elif uni.count() == 1:
-            uni = uni.get()
-            profile.uni = uni
-        profile.bmp = validated_data.get('bmp', profile.bmp)
-        profile.major = validated_data.get('major', profile.major)
-        profile.save()
+
+        profile_data = validated_data.pop('profile')
+        profile_serializer = ProfileSerializer(data=profile_data, instance=instance.profile)
+        if profile_serializer.is_valid(raise_exception=True):
+            profile_serializer.save()
         return instance
 
 
