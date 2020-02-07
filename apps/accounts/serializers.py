@@ -29,6 +29,8 @@ class UserSignUpSerializer(serializers.ModelSerializer):
     password_1 = serializers.CharField(style={'input_type': 'password'})
     password_2 = serializers.CharField(style={'input_type': 'password'})
 
+    uni = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
         fields = ['username', 'email', 'password_1', 'password_2', 'profile']
@@ -40,10 +42,11 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
+        uni_name = validated_data.pop('uni')
         validated_data.pop('password_1')
         validated_data['password'] = make_password(validated_data.pop('password_2'))
         user = User.objects.create(**validated_data)
-        uni = University.objects.filter(name=profile_data.get('uni'))
+        uni = University.objects.filter(name=uni_name)
         if uni.count() == 0 and profile.uni is None:
             raise serializers.ValidationError('University with given name not found')
         elif uni.count() == 1:
