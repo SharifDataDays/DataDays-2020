@@ -176,7 +176,7 @@ class ChangePasswordAPIView(GenericAPIView):
 
 
 class UniversityAPIView(GenericAPIView):
-    serializer_Class = UniversitySerializer
+    serializer_class = UniversitySerializer
     queryset = University.objects.all()
 
     def get(self, request):
