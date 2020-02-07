@@ -17,13 +17,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
-from apps.accounts.serializer import *
+from apps.accounts.serializers import *
 from apps.accounts.models import ResetPasswordToken, ActivateUserToken, University
 
 
 class SignUpView(GenericAPIView):
     queryset = Profile.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserSignUpSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -142,7 +142,7 @@ class ResetPasswordConfirmView(GenericAPIView):
 
 class ProfileView(GenericAPIView):
     queryset = User.objects.all()
-    serializer_class = UserViewSerializer
+    serializer_class = UserUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):

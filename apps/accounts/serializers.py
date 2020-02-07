@@ -52,7 +52,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserViewSerializer(serializers.ModelSerializer):
+class UserUpdateSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
     uni = serializers.CharField(write_only=True)
 
