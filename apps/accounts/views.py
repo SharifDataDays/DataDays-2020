@@ -183,7 +183,7 @@ class UniversityAPIView(GenericAPIView):
         return Response(self.get_serializer(self.get_queryset(), many=True, read_only=True).data)
 
     def post(self, request):
-        serializer = self.get_serializer(request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
