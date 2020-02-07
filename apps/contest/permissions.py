@@ -57,7 +57,9 @@ class ProfileCompleted(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        return request.user.profile.completed()
+        return hasattr(request.user, 'profile') and \
+                request.user.profile is not None and \
+                request.user.profile.completed()
 
 
 class TeamFinalized(permissions.BasePermission):
