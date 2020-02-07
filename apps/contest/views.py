@@ -119,7 +119,7 @@ class TrialAPIView(GenericAPIView):
         return contest, milestone, task, trial
 
     def get(self, request, contest_id, milestone_id, task_id, trial_id):
-        contest, milestone, task, trial = self.check_existence(contest_id, milestone_id, task_id, trial_id)
+        contest, milestone, task, trial = self.check_existance(contest_id, milestone_id, task_id, trial_id)
         team = request.user.participant.teams.get(contest=contest)
         team_task = team.tasks.get(task_id=task_id)
         if trial not in team_task.trials.all():
@@ -129,7 +129,7 @@ class TrialAPIView(GenericAPIView):
         return Response(data=data, status=200)
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):
-        contest, milestone, task, trial = self.check_existence(contest_id, milestone_id, task_id, trial_id)
+        contest, milestone, task, trial = self.check_existance(contest_id, milestone_id, task_id, trial_id)
         team = request.user.participant.teams.get(contest=contest)
         team_task = team.tasks.get(task_id=task_id)
         if trial not in team_task.trials.all():
