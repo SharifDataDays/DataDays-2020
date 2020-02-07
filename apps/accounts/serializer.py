@@ -14,24 +14,25 @@ class UniversitySerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    uni = serializers.SerializerMethodField()
+    uni_set = serializers.CharField(write_only=True)
+    uni_get = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Profile
         exclude = ['user']
 
-    def get_uni(self, obj):
+    def get_uni_get(self, obj):
         if hasattr(obj, 'uni'):
             if obj.uni is not None:
                 return obj.uni.name
         return ''
 
     def update(self, instance, validated_data):
-        uni = University.objects.filter(name=validated_data['uni'])
+        uni = University.objects.filter(name=validated_data.pop('uni_set'))
         if uni.count() == 0:
             raise serializers.ValidationError('University with given name does not exists.')
         instance.uni = uni.get()
-        instance.save()
+        instance.save(**validated_data)
         return instance
 
 
