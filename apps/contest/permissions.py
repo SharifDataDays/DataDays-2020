@@ -32,7 +32,11 @@ class UserHasTeam(permissions.BasePermission):
 class UserHasTeamTasks(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        milestone = Milestone.objects.filter(id=view.kwargs['milestone_id'])
+        try:
+            milestone = Milestone.objects.filter(id=view.kwargs['milestone_id'])
+        except KeyError as e:
+            return True
+
         if milestone.count() == 0:
             return False
         milestone = milestone.get()
@@ -69,7 +73,11 @@ class TeamFinalized(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        contest = Contest.objects.filter(id=view.kwargs['contest_id'])
+        try:
+            contest = Contest.objects.filter(id=view.kwargs['contest_id'])
+        except KeyError as e:
+            return True
+
         if contest.count() == 0:
             return False
         contest = contest.get()
