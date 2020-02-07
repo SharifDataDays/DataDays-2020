@@ -21,7 +21,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         exclude = ['user']
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSignUpSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
 
     email = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all())])
@@ -43,6 +43,11 @@ class UserSerializer(serializers.ModelSerializer):
         validated_data.pop('password_1')
         validated_data['password'] = make_password(validated_data.pop('password_2'))
         user = User.objects.create(**validated_data)
+        uni = University.objects.filter(name=profile_data.get('uni'))
+        if uni.count() == 0 and profile.uni is None:
+            raise serializers.ValidationError('University with given name not found')
+        elif uni.count() == 1:
+            profile_data['uni'] = uni.get()
         Profile.objects.create(user=user, **profile_data)
         return user
 
