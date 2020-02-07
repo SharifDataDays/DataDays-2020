@@ -85,5 +85,6 @@ class TeamFinalized(permissions.BasePermission):
         if contest.team_size == 1:
             return True
 
-        return obj.finalized()
+        team = request.user.participant.teams.get(contest=contest)
+        return team.finalized()
 
