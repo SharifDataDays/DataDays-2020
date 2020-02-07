@@ -14,7 +14,7 @@ class UniversitySerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    uni = UniversitySerializer()
+    uni = UniversitySerializer(read_only=True)
 
     class Meta:
         model = Profile
@@ -49,10 +49,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserViewSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer()
+    uni = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['profile', 'email']
+        fields = ['profile', 'email', 'uni']
 
     def update(self, instance, validated_data):
         instance.save()
