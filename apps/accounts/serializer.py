@@ -3,11 +3,19 @@ from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
+from apps.accounts.models import University, Profile, ResetPasswordToken
 
-from apps.accounts.models import Profile, ResetPasswordToken
+
+class UniversitySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = University
+        fields = ['name']
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    uni = UniversitySerializer()
+
     class Meta:
         model = Profile
         exclude = ['user']

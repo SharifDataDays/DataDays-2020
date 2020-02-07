@@ -5,9 +5,10 @@ from django.utils import timezone
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
 from rest_framework import status
 
-from apps.contest.permissions import UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks
+from apps.contest.permissions import UserHasTeam, UserHasTeamTasks, ProfileCompleted, TeamFinalized
 from apps.contest.services.trial_services.trial_submit_validation import TrialSubmitValidation
 from apps.contest.tasks import judge_trials
 from apps.contest.serializers import TrialSerializer
@@ -20,104 +21,70 @@ from apps.contest.services.trial_services import trial_maker
 
 
 class ContestAPIView(GenericAPIView):
-    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest]
+    permission_classes = [IsAuthenticated, UserHasTeam, ProfileCompleted, TeamFinalized]
     serializer_class = serializers.ContestSerializer
     queryset = contest_models.Contest.objects.filter(start_time__lt=timezone.now()).order_by('order')
-
-    def get_object(self, contest_id):
-        contest = get_object_or_404(self.get_queryset(), id=contest_id)
-        if contest.team_size > 1:
-            self.check_object_permissions(self.request, contest)
-        else:
-            Team.get_team(self.request.user.participant, contest)
-        return contest
 
     def get(self, request, contest_id=None):
         if contest_id is None:
             data = self.get_serializer(self.get_queryset(), many=True).data
             return Response(data={'contests': data}, status=status.HTTP_200_OK)
 
-        contest = self.get_object(contest_id)
+        contest = get_object_or_404(self.get_queryset(), id=contest_id)
         data = self.get_serializer(contest).data
         return Response(data={'contest': data})
 
 
 class MilestoneAPIView(GenericAPIView):
-    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
+    permission_classes = [IsAuthenticated, UserHasTeam, UserHasTeamTasks, ProfileCompleted, TeamFinalized]
     queryset = contest_models.Milestone.objects.filter(start_time__lt=timezone.now()).order_by('order')
     serializer_class = serializers.MilestoneSerializer
 
-    def get_serializer(self, *args, **kwargs):
-        serializer_class = self.get_serializer_class()
-        if 'context' in kwargs:
-            kwargs['context'].update(self.get_serializer_context())
-        else:
-            kwargs['context'] = self.get_serializer_context()
-        return serializer_class(*args, **kwargs)
+    def get_serializer_context(self):
+        return {'team': self.team}
 
-    def get(self, request, contest_id, milestone_id):
+    def check_existance(self, contest_id, milestone_id):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
         milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
         if milestone.contest != contest:
-            return Response(data={'detail': 'milestone is unrelated to contest'},
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
-        self.check_object_permissions(self.request, contest)
-        self.check_object_permissions(self.request, milestone)
+            raise NotFound(data={'detail': 'milestone is unrelated to contest'})
+        return contest, milestone
 
-        team = request.user.participant.teams.get(contest=contest)
-
-        data = self.get_serializer(milestone, context={'team': team}).data
+    def get(self, request, contest_id, milestone_id):
+        contest, milestone = self.check_existance(contest_id, milestone_id)
+        self.team = request.user.participant.teams.get(contest=contest)
+        data = self.get_serializer(milestone).data
         return Response(data={'milestone': data}, status=status.HTTP_200_OK)
 
 
 class TaskAPIView(GenericAPIView):
-    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
+    permission_classes = [IsAuthenticated, UserHasTeam, UserHasTeamTasks, ProfileCompleted, TeamFinalized]
     queryset = contest_models.Task.objects.filter(milestone__start_time__lt=timezone.now()).order_by('order')
     serializer_class = serializers.TaskSerializer
 
     def get_serializer_context(self):
-        print('boooooo'*100)
-        print(self.__dict__)
-        return super().get_serializer_context()
+        return {'trials': self.trials}
 
-    def get_serializer(self, *args, **kwargs):
-        serializer_class = self.get_serializer_class()
-        if 'context' in kwargs:
-            kwargs['context'].update(self.get_serializer_context())
-        else:
-            kwargs['context'] = self.get_serializer_context()
-        return serializer_class(*args, **kwargs)
-
-    def get(self, request, contest_id, milestone_id, task_id):
+    def check_existance(self, contest_id, milestone_id, task_id):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
         milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
         task = get_object_or_404(contest_models.Task, id=task_id)
         if milestone.contest != contest:
-            return Response(data={'detail': 'milestone is unrelated to contest'},
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
+            raise NotFound(data={'detail': 'milestone is unrelated to contest'})
         if task.milestone != milestone:
-            return Response(data={'detail': 'task is unrelated to milestone'},
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
-        self.check_object_permissions(self.request, contest)
-        self.check_object_permissions(self.request, milestone)
+            raise Response(data={'detail': 'task is unrelated to milestone'})
+        return contest, milestone, task
 
+    def get(self, request, contest_id, milestone_id, task_id):
+        contest, milestone, task = self.check_existance(contest_id, milestone_id, task_id)
         team = request.user.participant.teams.get(contest=contest)
         team_task = team.tasks.get(task_id=task_id)
-
-        trials = list(team_task.trials.all())
-
-        data = self.get_serializer(team_task.task, context={'trials': trials}).data
+        self.trials = list(team_task.trials.all())
+        data = self.get_serializer(team_task.task).data
         return Response(data=data, status=status.HTTP_200_OK)
 
     def post(self, request, contest_id, milestone_id, task_id):
-        contest = get_object_or_404(contest_models.Contest, id=contest_id)
-        milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
-        if milestone.contest != contest:
-            return Response(data={'detail': 'milestone is unrelated to contest'},
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
-        self.check_object_permissions(self.request, contest)
-        self.check_object_permissions(self.request, milestone)
-
+        contest, milestone, task = self.check_existance(contest_id, milestone_id, task_id)
         maker = trial_maker.TrialMaker(request, contest_id, milestone_id, task_id)
         trial, errors = maker.make_trial()
         if trial is None:
@@ -125,13 +92,7 @@ class TaskAPIView(GenericAPIView):
         return Response(data={'detail': 'ok'}, status=status.HTTP_200_OK)
 
     def put(self, request, contest_id, milestone_id, task_id):
-        contest = get_object_or_404(contest_models.Contest, id=contest_id)
-        milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
-        if milestone.contest != contest:
-            return Response(data={'detail': 'milestone is unrelated to contest'},
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
-        self.check_object_permissions(self.request, contest)
-        self.check_object_permissions(self.request, milestone)
+        contest, milestone, task = self.check_existance(contest_id, milestone_id, task_id)
         team = request.user.participant.teams.get(contest=contest)
         team_task = team.tasks.get(task_id=task_id)
         team_task.content_finished = True
@@ -140,19 +101,25 @@ class TaskAPIView(GenericAPIView):
 
 
 class TrialAPIView(GenericAPIView):
-    permission_classes = [IsAuthenticated, UserHasParticipant, UserHasTeamInContest, UserHasTeamTasks]
+    permission_classes = [IsAuthenticated, UserHasTeam, UserHasTeamTasks, ProfileCompleted, TeamFinalized]
     parser_classes = (MyMultiPartParser,)
     serializer_class = serializers.TrialPostSerializer
 
-    def get(self, request, contest_id, milestone_id, task_id, trial_id):
+    def check_existance(self, contest_id, milestone_id, task_id, trial_id):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
         milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
-        if milestone.contest != contest:
-            return Response(data={'detail': 'milestone is unrelated to contest'},
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
-        self.check_object_permissions(self.request, contest)
-        self.check_object_permissions(self.request, milestone)
+        task = get_object_or_404(contest_models.Task, id=task_id)
         trial = get_object_or_404(contest_models.Trial, id=trial_id)
+        if milestone.contest != contest:
+            raise NotFound(data={'detail': 'milestone is unrelated to contest'})
+        if task.milestone != milestone:
+            raise NotFound(data={'detail': 'task is unrelated to milestone'})
+        if trial.task != task:
+            raise NotFound(data={'detail': 'trial is unrelated to task'})
+        return contest, milestone, task, trial
+
+    def get(self, request, contest_id, milestone_id, task_id, trial_id):
+        contest, milestone, task, trial = self.check_existence(contest_id, milestone_id, task_id, trial_id)
         team = request.user.participant.teams.get(contest=contest)
         team_task = team.tasks.get(task_id=task_id)
         if trial not in team_task.trials.all():
@@ -162,14 +129,7 @@ class TrialAPIView(GenericAPIView):
         return Response(data=data, status=200)
 
     def post(self, request, contest_id, milestone_id, task_id, trial_id):
-        contest = get_object_or_404(contest_models.Contest, id=contest_id)
-        milestone = get_object_or_404(contest_models.Milestone, pk=milestone_id)
-        if milestone.contest != contest:
-            return Response(data={'detail': 'milestone is unrelated to contest'},
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
-        self.check_object_permissions(self.request, contest)
-        self.check_object_permissions(self.request, milestone)
-        trial = get_object_or_404(contest_models.Trial, id=trial_id)
+        contest, milestone, task, trial = self.check_existence(contest_id, milestone_id, task_id, trial_id)
         team = request.user.participant.teams.get(contest=contest)
         team_task = team.tasks.get(task_id=task_id)
         if trial not in team_task.trials.all():

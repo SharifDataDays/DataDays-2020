@@ -17,7 +17,7 @@ class Team(models.Model):
     @staticmethod
     def get_team(participant, contest):
         if contest not in [team.contest for team in participant.teams.all()]:
-            new_team = Team.objects.create(contest=contest, name=participant.user.username)
+            new_team = Team.objects.create(contest=contest, name=participant.user.username + '_' + str(contest.id))
             participant.teams.add(new_team)
         return participant.teams.get(contest=contest)
 

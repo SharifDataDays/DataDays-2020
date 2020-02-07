@@ -18,7 +18,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from apps.accounts.serializer import *
-from apps.accounts.models import ResetPasswordToken, ActivateUserToken
+from apps.accounts.models import ResetPasswordToken, ActivateUserToken, University
 
 
 class SignUpView(GenericAPIView):
@@ -175,3 +175,15 @@ class ChangePasswordAPIView(GenericAPIView):
         return Response({'detail': 'password changed successfully'}, status=200)
 
 
+class UniversityAPIView(GenericAPIView):
+    serializer_Class = UniversitySerializer
+    queryset = University.objects.all()
+
+    def get(request):
+        return Response(self.get_serializer(self.get_queryset(), many=True, read_only=True).data)
+
+    def post(request):
+        serializer = self.get_serializer(request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data)

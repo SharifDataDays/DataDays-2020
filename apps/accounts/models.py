@@ -2,6 +2,13 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+class University(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User,
                                 on_delete=models.CASCADE,
@@ -13,6 +20,20 @@ class Profile(models.Model):
     lastname_en = models.TextField(max_length=30)
     birth_date = models.DateField()
     university = models.CharField(max_length=50)
+
+    uni = models.ForeignKey(University, on_delete=models.CASCADE, null=True)
+    bmp = models.CharField(
+            max_length=50,
+            choices=(
+                ('BAC', 'Bacholar'),
+                ('MAS', 'Master'),
+                ('PHD', 'Ph.D'),
+            ),
+            null=True
+        )
+
+    def completed(self):
+        return self.uni is not None and self.bmp is not None
 
     def __str__(self):
         return f'username: {self.user.username},' \
