@@ -10,7 +10,11 @@ class UserHasTeam(permissions.BasePermission):
         if not hasattr(request.user, 'participant'):
             Participant.objects.create(user=request.user)
 
-        contest = Contest.objects.filter(id=view.kwargs['contest_id'])
+        try:
+            contest = Contest.objects.filter(id=view.kwargs['contest_id'])
+        except KeyError as e:
+            return True
+
         if contest.count() == 0:
             return False
         contest = contest.get()
