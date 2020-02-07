@@ -43,11 +43,11 @@ class TrialSubmitValidation:
                 return Trial.objects.get(id=self.trial_id)
             else:
                 self._valid = False
-                self._errors = [trial.errors[e][0] for e in trial.errors]
+                self._errors = {'trial': [trial.errors[e][0] for e in trial.errors]}
                 return None
         except Trial.DoesNotExist as e:
             self._valid = False
-            self._errors += trial_submit_exception.ErrorMessages.TRIAL_NOT_FOUNT
+            self._errors = {'trial': trial_submit_exception.ErrorMessages.TRIAL_NOT_FOUNT}
             return None
 
     def _check_different_question_types(self):
