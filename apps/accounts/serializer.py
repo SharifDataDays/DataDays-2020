@@ -64,11 +64,12 @@ class UserViewSerializer(serializers.ModelSerializer):
         profile.lastname_en = validated_data.get('lastname_en', profile.lastname_en)
         profile.birth_date = validated_data.get('birth_date', profile.birth_date)
         profile.university = validated_data.get('university', profile.university)
-        uni = University.objects.filter(name=validated_data.get('uni', profile.uni))
-        if uni.count() == 0:
+        uni = University.objects.filter(name=validated_data.get('uni'))
+        if uni.count() == 0 and profile.uni is None:
             raise serializers.ValidationError('University with given name not found')
-        uni = uni.get()
-        profile.uni = uni
+        else:
+            uni = uni.get()
+            profile.uni = uni
         profile.bmp = validated_data.get('bmp', profile.bmp)
         profile.major = validated_data.get('major', profile.major)
         profile.save()
