@@ -26,15 +26,21 @@ class TaskSerializer(ModelSerializer):
     content = DocumentSerializer()
 
     trials = serializers.SerializerMethodField('get_trials')
+    content_finished = serializers.SerializerMethodField('get_content_finished')
 
     class Meta:
         model = contest_models.Task
         fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type', 'trials']
 
     def get_trials(self, obj):
-        if 'trials' not in self.context:
+        if 'team_task' not in self.context:
             return []
-        return [TrialListSerializer(trial, read_only=True).data for trial in self.context.get('trials')]
+        return [TrialListSerializer(trial, read_only=True).data for trial in self.context.get('team_task').trials.all()]
+
+    def get_content_finished(self, obj):
+        if 'team_task' not in self.context:
+            return False
+        return self.context.get('team_task').content_finished
 
 
 class MilestoneSerializer(ModelSerializer):
@@ -49,12 +55,13 @@ class MilestoneSerializer(ModelSerializer):
         tasks = []
         for task in obj.tasks.all().order_by('order'):
             trials = []
+            team_task = None
             if 'team' in self.context:
-                trials = self.context.get('team').tasks.get(task=task).trials.all()
+                team_task = self.context.get('team').tasks.get(task=task)
             tasks.append(
                     TaskSerializer(
                         task,
-                        context={'trials': trials},
+                        context={'team_task': team_task},
                         read_only=True
                     ).data
                 )

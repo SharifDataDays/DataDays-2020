@@ -63,7 +63,9 @@ class TaskAPIView(GenericAPIView):
     serializer_class = serializers.TaskSerializer
 
     def get_serializer_context(self):
-        return {'trials': self.trials}
+        return {
+            'team_task': self.team_task,
+        }
 
     def check_existance(self, contest_id, milestone_id, task_id):
         contest = get_object_or_404(contest_models.Contest, id=contest_id)
@@ -78,9 +80,9 @@ class TaskAPIView(GenericAPIView):
     def get(self, request, contest_id, milestone_id, task_id):
         contest, milestone, task = self.check_existance(contest_id, milestone_id, task_id)
         team = request.user.participant.teams.get(contest=contest)
-        team_task = team.tasks.get(task_id=task_id)
+        self.team_task = team.tasks.get(task_id=task_id)
         self.trials = list(team_task.trials.all())
-        data = self.get_serializer(team_task.task).data
+        data = self.get_serializer(self.team_task.task).data
         return Response(data=data, status=status.HTTP_200_OK)
 
     def post(self, request, contest_id, milestone_id, task_id):
