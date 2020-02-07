@@ -10,7 +10,7 @@ class UserHasTeam(permissions.BasePermission):
         if not hasattr(request.user, 'participant'):
             Participant.objects.create(user=request.user)
 
-        contest = Contest.objcets.filter(id=view.kwargs['contest_id'])
+        contest = Contest.objects.filter(id=view.kwargs['contest_id'])
         if contest.count() == 0:
             return False
         contest = contest.get()
@@ -63,7 +63,7 @@ class TeamFinalized(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        contest = Contest.objcets.filter(id=view.kwargs['contest_id'])
+        contest = Contest.objects.filter(id=view.kwargs['contest_id'])
         if contest.count() == 0:
             return False
         contest = contest.get()
