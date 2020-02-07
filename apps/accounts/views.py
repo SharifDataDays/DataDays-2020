@@ -152,9 +152,10 @@ class ProfileView(GenericAPIView):
 
     def put(self, request):
         user = request.user
-        user_serializer = UserViewSerializer(user)
-        user_serializer.update(user, request.data)
-        return Response(user_serializer.data)
+        serializer = self.get_serializer(instance=user, data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+        return Response(serializer.data)
 
 
 class ChangePasswordAPIView(GenericAPIView):
