@@ -29,7 +29,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if 'uni' not in data:
             return data
-        check_uni(data['uni'])
+        self.check_uni(data['uni'])
         return data
 
     def create(self, validated_data):
