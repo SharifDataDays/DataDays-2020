@@ -35,6 +35,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         uni = self.check_uni(validated_data.pop('uni'))
         validated_data['uni'] = uni
+        validated_data['user'] = self.user
         return Profile.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
