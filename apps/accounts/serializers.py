@@ -26,6 +26,12 @@ class ProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('University with given name not found.')
         return uni.get()
 
+    def validate(self, data):
+        if 'uni' not in data:
+            return data
+        check_uni(data['uni'])
+        return data
+
     def create(self, validated_data):
         uni = self.check_uni(validated_data.pop('uni'))
         validated_data['uni'] = uni
@@ -68,12 +74,14 @@ class UserSignUpSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
 
-        validated_data.pop('password_1')
-        validated_data['password'] = make_password(validated_data.pop('password_2'))
-        user = User.objects.create(**validated_data)
-
         profile_serializer = ProfileSerializer(data=profile_data)
         if profile_serializer.is_valid(raise_exception=True):
+
+            validated_data.pop('password_1')
+            validated_data['password'] = make_password(validated_data.pop('password_2'))
+
+            user = User.objects.create(**validated_data)
+            profile_serializer.user = user
             profile_serializer.save()
         return user
 
