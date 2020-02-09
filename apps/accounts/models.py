@@ -34,7 +34,7 @@ class Profile(models.Model):
             null=True
         )
     student_id = models.IntegerField(null=True)
-    phone_regex = RegexValidator(regex=r'^0?\d{11}$', message="Phone number must be entered in the format: '09001234567'. Up to 15 digits allowed.")
+    phone_regex = RegexValidator(regex=r'^0\d{10}$', message="Phone number must be entered in the format: '09001234567'. Up to 15 digits allowed.")
     phone_number = models.CharField(validators=[phone_regex], max_length=15, null=True)
 
     def completed(self):
