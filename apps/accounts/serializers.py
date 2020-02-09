@@ -48,6 +48,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         profile.university = validated_data.get('university', profile.university)
         profile.bmp = validated_data.get('bmp', profile.bmp)
         profile.major = validated_data.get('major', profile.major)
+        profile.student_id = validated_data.get('student_id', profile.student_id)
+        profile.phone_number = validated_data.get('phone_number', profile.phone_number)
         if 'uni' in validated_data:
             print(validated_data['uni'])
             profile.uni = self.check_uni(validated_data.get('uni'))
