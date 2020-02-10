@@ -1,15 +1,14 @@
-from typing import List, Tuple
-
 from django.utils import timezone
-from celery import task, shared_task
 
 from apps.contest.services.scoreboard import Scoreboard
-from apps.contest.services.trial_services.scoring_service import JudgeTrial, JudgeQuestionSubmission, set_task_score
+from apps.contest.services.trial_services.scoring_service import \
+    JudgeTrial, JudgeQuestionSubmission, set_task_score
 from thebackend.celery import app
 
 
 @app.task(name='judge_submissions')
-def judge_submissions(question_submission_pk: int, rejudge_model_pk: int = None) -> None:
+def judge_submissions(question_submission_pk: int,
+                      rejudge_model_pk: int = None) -> None:
     from apps.contest.models import Score, QuestionSubmission, Rejudge
     """ This task Judges a single QuestionSubmission and set it's score
         and save it in database.
@@ -22,12 +21,14 @@ def judge_submissions(question_submission_pk: int, rejudge_model_pk: int = None)
     :param question_submission: QuestionSubmission
     :return: None
     """
-    question_submission = QuestionSubmission.objects.get(pk=question_submission_pk)
+    question_submission = QuestionSubmission.objects.get(
+        pk=question_submission_pk)
     if not hasattr(question_submission, 'score'):
         score = Score()
     else:
         score = question_submission.score
-    judge_submission = JudgeQuestionSubmission(question_submission=question_submission, score=score)
+    judge_submission = JudgeQuestionSubmission(
+        question_submission=question_submission, score=score)
     judge_submission.judge()
     if rejudge_model_pk:
         rejudge_model = Rejudge.objects.get(pk=rejudge_model_pk)

@@ -1,14 +1,16 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_decode
 
-from apps.accounts.models import *
+from apps.accounts.models import \
+    University, Profile, ResetPasswordToken, ActivateUserToken
 
 
 @admin.register(University)
 class UniversityAdmin(admin.ModelAdmin):
     list_display = ['name']
     search_fields = ['name']
+
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
@@ -42,7 +44,7 @@ class ResetPasswordTokenAdmin(admin.ModelAdmin):
             qs = User.objects.filter(id=uid)
             if qs.count() == 1:
                 return qs.get().username
-        except:
+        except Exception:
             pass
         return "SHIT REPORT THIS TO TECH-ADMIN"
 
@@ -57,9 +59,8 @@ class ActivateUserTokenAdmin(admin.ModelAdmin):
             qs = User.objects.filter(email=email)
             if qs.count() == 1:
                 return qs.get().username
-        except:
+        except Exception:
             pass
         return "SHIT REPORT THIS TO TECH-ADMIN"
 
     list_display = ['username']
-

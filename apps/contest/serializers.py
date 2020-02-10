@@ -26,16 +26,18 @@ class TaskSerializer(ModelSerializer):
     content = DocumentSerializer()
 
     trials = serializers.SerializerMethodField('get_trials')
-    content_finished = serializers.SerializerMethodField('get_content_finished')
+    content_finished = serializers.SerializerMethodField()
 
     class Meta:
         model = contest_models.Task
-        fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type', 'trials', 'content_finished']
+        fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type',
+                  'trials', 'content_finished']
 
     def get_trials(self, obj):
         if 'team_task' not in self.context:
             return []
-        return [TrialListSerializer(trial, read_only=True).data for trial in self.context.get('team_task').trials.all()]
+        return [TrialListSerializer(trial, read_only=True).data
+                for trial in self.context.get('team_task').trials.all()]
 
     def get_content_finished(self, obj):
         if 'team_task' not in self.context:
@@ -49,12 +51,12 @@ class MilestoneSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.Milestone
-        fields = ['id', 'title', 'start_time', 'end_time', 'tasks', 'description', 'image']
+        fields = ['id', 'title', 'start_time', 'end_time', 'tasks',
+                  'description', 'image']
 
     def get_tasks(self, obj):
         tasks = []
         for task in obj.tasks.all().order_by('order'):
-            trials = []
             team_task = None
             if 'team' in self.context:
                 team_task = self.context.get('team').tasks.get(task=task)
@@ -73,7 +75,8 @@ class ContestSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.Contest
-        fields = ['id', 'title', 'team_size', 'start_time', 'end_time', 'milestones']
+        fields = ['id', 'title', 'team_size', 'start_time', 'end_time',
+                  'milestones']
 
 
 class ContestAsAListItemSerializer(ModelSerializer):
@@ -93,13 +96,15 @@ class QuestionSubmissionSerializer(ModelSerializer):
         fields = ['id', 'question', 'answer', 'score']
 
     def get_answer(self, obj):
-        if obj.question.type == QuestionTypes.FILE_UPLOAD and len(eval(obj.answer)) == 1:
-                return ['/media/' + eval(obj.answer)[0]]
+        if obj.question.type == QuestionTypes.FILE_UPLOAD \
+                and len(eval(obj.answer)) == 1:
+            return ['/media/' + eval(obj.answer)[0]]
         return obj.answer
 
 
 class QuestionSubmissionPostSerializer(ModelSerializer):
-    id = serializers.ModelField(model_field=contest_models.QuestionSubmission()._meta.get_field('id'))
+    id = serializers.ModelField(
+        model_field=contest_models.QuestionSubmission()._meta.get_field('id'))
 
     class Meta:
         model = contest_models.QuestionSubmission
@@ -107,15 +112,18 @@ class QuestionSubmissionPostSerializer(ModelSerializer):
 
 
 class TrialSerializer(ModelSerializer):
-    question_submissions = QuestionSubmissionSerializer(many=True, read_only=True)
+    question_submissions = QuestionSubmissionSerializer(
+        many=True, read_only=True)
 
     class Meta:
         model = contest_models.Trial
-        fields = ['id', 'score', 'question_submissions', 'due_time', 'start_time', 'submit_time']
+        fields = ['id', 'score', 'question_submissions', 'due_time',
+                  'start_time', 'submit_time']
 
 
 class TrialPostSerializer(ModelSerializer):
-    id = serializers.ModelField(model_field=contest_models.Trial()._meta.get_field('id'))
+    id = serializers.ModelField(
+        model_field=contest_models.Trial()._meta.get_field('id'))
     question_submissions = QuestionSubmissionPostSerializer(many=True)
     final_submit = serializers.BooleanField(default=False)
 
@@ -132,7 +140,8 @@ class TrialPostSerializer(ModelSerializer):
         for qs in data['question_submissions']:
             qsf = qss.filter(id=qs['id'])
             if qsf.count() != 1:
-                raise serializers.ValidationError('QuestionSubmission doest not exists')
+                raise serializers.ValidationError(
+                    'QuestionSubmission doest not exists')
         return data
 
     def save(self):
@@ -150,4 +159,5 @@ class TeamTaskSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.TeamTask
-        fields = ['id', 'contest_finished', 'max_trials_count', 'last_trial_time', 'team', 'task']
+        fields = ['id', 'contest_finished', 'max_trials_count',
+                  'last_trial_time', 'team', 'task']

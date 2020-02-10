@@ -1,7 +1,8 @@
 import json
 
 from django.conf import settings
-from django.http.multipartparser import MultiPartParser as DjangoMultiPartParser
+from django.http.multipartparser import \
+    MultiPartParser as DjangoMultiPartParser
 from rest_framework.parsers import BaseParser, DataAndFiles
 from rest_framework.exceptions import ParseError
 

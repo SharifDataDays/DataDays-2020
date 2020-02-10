@@ -12,7 +12,7 @@ class UserHasTeam(permissions.BasePermission):
 
         try:
             contest = Contest.objects.filter(id=view.kwargs['contest_id'])
-        except KeyError as e:
+        except KeyError:
             return True
 
         if contest.count() == 0:
@@ -29,12 +29,14 @@ class UserHasTeam(permissions.BasePermission):
 
         return True
 
+
 class UserHasTeamTasks(permissions.BasePermission):
 
     def has_permission(self, request, view):
         try:
-            milestone = Milestone.objects.filter(id=view.kwargs['milestone_id'])
-        except KeyError as e:
+            milestone = Milestone.objects.filter(
+                id=view.kwargs['milestone_id'])
+        except KeyError:
             return True
 
         if milestone.count() == 0:
@@ -50,15 +52,14 @@ class UserHasTeamTasks(permissions.BasePermission):
         team_tasks = team.tasks.all()
         for task in milestone.tasks.all():
             if task not in [tt.task for tt in team_tasks]:
-                TeamTask.objects.create(team=team, task=task, content_finished=False)
+                TeamTask.objects.create(
+                    team=team, task=task, content_finished=False)
         return True
 
 
 class ProfileCompleted(permissions.BasePermission):
 
-    message = """
-        complete your profile first
-    """
+    message = "complete your profile first"
 
     def has_permission(self, request, view):
         return hasattr(request.user, 'profile') and \
@@ -68,14 +69,12 @@ class ProfileCompleted(permissions.BasePermission):
 
 class TeamFinalized(permissions.BasePermission):
 
-    message = """
-        complete your team for this contest first
-    """
+    message = "complete your team for this contest first"
 
     def has_permission(self, request, view):
         try:
             contest = Contest.objects.filter(id=view.kwargs['contest_id'])
-        except KeyError as e:
+        except KeyError:
             return True
 
         if contest.count() == 0:
@@ -87,4 +86,3 @@ class TeamFinalized(permissions.BasePermission):
 
         team = request.user.participant.teams.get(contest=contest)
         return team.finalized()
-
