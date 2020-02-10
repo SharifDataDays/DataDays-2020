@@ -46,7 +46,7 @@ class ProfileAdmin(admin.ModelAdmin, ExportCsvMixin):
         'lastname_en',
         'birth_date',
         'university',
-        'uni',
+        'uni__name',
         'major',
         'bmp',
     ]
