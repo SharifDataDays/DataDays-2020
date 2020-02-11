@@ -33,7 +33,7 @@ class Profile(models.Model):
             ),
             null=True
         )
-    student_id = models.IntegerField(null=True)
+    student_id = models.CharField(null=True, max_length=12)
     phone_regex = RegexValidator(regex=r'^0\d{10}$', message=(
         "Phone number must be entered in the format: '09001234567'."
         " Up to 15 digits allowed."
