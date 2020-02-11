@@ -82,7 +82,7 @@ class TaskAPIView(GenericAPIView):
             raise NotFound(data={'detail':
                                  'milestone is unrelated to contest'})
         if task.milestone != milestone:
-            raise Response(data={'detail': 'task is unrelated to milestone'})
+            raise NotFound(data={'detail': 'task is unrelated to milestone'})
         return contest, milestone, task
 
     def get(self, request, contest_id, milestone_id, task_id):
