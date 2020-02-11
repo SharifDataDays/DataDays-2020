@@ -40,10 +40,10 @@ class ParticipantAdmin(admin.ModelAdmin):
 
 @admin.register(participation_models.Team)
 class TeamAdmin(admin.ModelAdmin):
-    list_display = ['name', 'team_participants', 'team_badges', 'finalized',
-                    'contest']
-    search_fields = ['name', 'finalized']
-    sortable_by = ['name', 'contest', 'finalized']
+    list_display = ['name', 'team_participants', 'team_badges',
+                    'team_finalized', 'contest']
+    search_fields = ['name', 'team_finalized']
+    sortable_by = ['name', 'contest', 'team_finalized']
     inlines = [TeamTaskInline]
 
     def team_participants(self, obj):
@@ -51,6 +51,9 @@ class TeamAdmin(admin.ModelAdmin):
 
     def team_badges(self, obj):
         return ', '.join((b.text for b in obj.badges.all()))
+
+    def team_finalized(self, obj):
+        return obj.finalized()
 
 
 @admin.register(participation_models.Invitation)
