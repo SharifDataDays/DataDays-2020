@@ -6,6 +6,8 @@ from apps.contest.models import Contest, Milestone, TeamTask
 
 class UserHasTeam(permissions.BasePermission):
 
+    message = "User has no team in requested contest"
+
     def has_permission(self, request, view):
         if not hasattr(request.user, 'participant'):
             Participant.objects.create(user=request.user)
@@ -31,6 +33,8 @@ class UserHasTeam(permissions.BasePermission):
 
 
 class UserHasTeamTasks(permissions.BasePermission):
+
+    message = "user cannot participate in this milestone"
 
     def has_permission(self, request, view):
         try:
