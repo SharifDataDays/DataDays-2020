@@ -40,7 +40,14 @@ class ParticipantAdmin(admin.ModelAdmin):
 
 @admin.register(participation_models.Team)
 class TeamAdmin(admin.ModelAdmin):
+    list_display = ['name', 'team_participants', 'team_badges', 'finalized']
     inlines = [TeamTaskInline]
+
+    def team_participants(self, obj):
+        return ', '.join((p.user.username for p in obj.participants.all()))
+
+    def team_badges(self, obj):
+        return ', '.join((b.text for b in obj.badges.all()))
 
 
 @admin.register(participation_models.Invitation)
