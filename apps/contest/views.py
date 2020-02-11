@@ -18,6 +18,17 @@ from . import models as contest_models, serializers
 from apps.contest.services.trial_services import trial_maker
 
 
+class ContestListAPIView(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.ContestSerializer
+    queryset = contest_models.Contest.objects.filter(
+        start_time__lt=timezone.now()).order_by('order')
+
+    def get(self, request):
+        data = self.get_serializer(self.get_queryset(), many=True).data
+        return Response(data={'contests': data})
+
+
 class ContestAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasTeam, ProfileCompleted,
                           TeamFinalized]
@@ -25,11 +36,7 @@ class ContestAPIView(GenericAPIView):
     queryset = contest_models.Contest.objects.filter(
         start_time__lt=timezone.now()).order_by('order')
 
-    def get(self, request, contest_id=None):
-        if contest_id is None:
-            data = self.get_serializer(self.get_queryset(), many=True).data
-            return Response(data={'contests': data}, status=status.HTTP_200_OK)
-
+    def get(self, request, contest_id):
         contest = get_object_or_404(self.get_queryset(), id=contest_id)
         data = self.get_serializer(contest).data
         return Response(data={'contest': data})
