@@ -42,6 +42,9 @@ class Contest(models.Model):
 
     released = models.BooleanField(default=False)
 
+    rules = models.TextField(null=True)
+    description = models.TextField(null=True)
+
     def __str__(self):
         return f'id:{self.id} title:{self.title}'
 

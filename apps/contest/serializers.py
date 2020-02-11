@@ -76,13 +76,14 @@ class ContestSerializer(ModelSerializer):
     class Meta:
         model = contest_models.Contest
         fields = ['id', 'title', 'team_size', 'start_time', 'end_time',
-                  'milestones']
+                  'milestones', 'rules', 'description']
 
 
 class ContestAsAListItemSerializer(ModelSerializer):
     class Meta:
         model = contest_models.Contest
-        fields = ['id', 'title', 'start_time', 'end_time']
+        fields = ['id', 'title', 'start_time', 'end_time', 'rules',
+                  'description']
 
 
 class QuestionSubmissionSerializer(ModelSerializer):
