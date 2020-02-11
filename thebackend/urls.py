@@ -28,11 +28,12 @@ urlpatterns = [
     path('api/resources/', include('apps.resources.urls')),
     path('api/blog/', include('apps.blog.urls')),
     path('api/subscribe/', include('apps.notification.urls')),
-    path('api/go/', include('apps.go.urls')),
     path('api/contest/', include('apps.contest.urls')),
     path('api/question/', include('apps.question.urls')),
     path('api/participation/', include('apps.participation.urls')),
     path('api/private_files/', include('private_files.urls')),
+    path('go/', include('apps.go.urls')),
+
 ]
 
 if settings.DEBUG:

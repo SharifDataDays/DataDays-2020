@@ -9,11 +9,9 @@ from apps.blog.serializers import *
 from apps.blog import paginations
 
 
-# Create your views here.
-
 class BlogView(GenericAPIView):
     serializer_class = PostDescriptionSerializer
-    queryset = Post.objects.all().order_by('-date')
+    queryset = Post.objects.filter(shown=True).order_by('-date')
 
     def get(self, request):
         descriptions = PostDescriptionSerializer(self.get_queryset(), many=True)
@@ -22,7 +20,7 @@ class BlogView(GenericAPIView):
 
 class PostView(GenericAPIView):
     serializer_class = PostSerializer
-    queryset = Post.objects.all()
+    queryset = Post.objects.filter(shown=True)
 
     def get(self, request, post_id):
         try:
