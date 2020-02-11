@@ -43,6 +43,7 @@ class TeamAdmin(admin.ModelAdmin):
     list_display = ['name', 'team_participants', 'team_badges', 'finalized',
                     'contest']
     search_fields = ['name', 'finalized']
+    sortable_by = ['name', 'contest', 'finalized']
     inlines = [TeamTaskInline]
 
     def team_participants(self, obj):
