@@ -37,7 +37,7 @@ class StatAdmin(ModelAdmin):
 
 @admin.register(Count)
 class CountAdmin(ModelAdmin):
-    list_display = ['title', 'app_name', 'model_name', 'show']
+    list_display = ['title', 'app_name', 'model_name', 'get_count', 'show']
     list_editable = ['show']
     formfield_overrides = {
         models.TextField: {'widget': AdminMartorWidget},

@@ -43,8 +43,6 @@ class CountSerializer(serializers.ModelSerializer):
 
     def get_count(self, obj):
         try:
-            exec(f'from apps.{obj.app_name} import models as m')
-            return eval(f'm.{obj.model_name}.objects.count()')
-        except Exception as e:
-            print(e)
+            return obj.get_count()
+        except Exception:
             return random.randint(200, 500)

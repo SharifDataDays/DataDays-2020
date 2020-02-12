@@ -53,12 +53,15 @@ class Count(models.Model):
     model_name = models.CharField(max_length=200)
     show = models.BooleanField(default=True)
 
-    def save(self, *args, **kwargs):
+    def get_count(self):
         try:
             exec(f'from apps.{self.app_name} import models as m')
-            eval(f'm.{self.model_name}.objects.count()')
+            return eval(f'm.{self.model_name}.objects.count()')
         except Exception as e:
             raise ValidationError(str(e))
+
+    def save(self, *args, **kwargs):
+        self.get_count()
         super().save(*args, **kwargs)
 
     def __str__(self):
