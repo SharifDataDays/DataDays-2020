@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class Intro(models.Model):
@@ -45,3 +46,20 @@ class Stat(models.Model):
     def __str__(self):
         return self.title_en
 
+
+class Count(models.Model):
+    title = models.CharField(max_length=200)
+    app_name = models.CharField(max_length=200)
+    model_name = models.CharField(max_length=200)
+    show = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        try:
+            exec(f'from apps.{self.app_name} import models as m')
+            eval(f'm.{self.model_name}.objects.count()')
+        except Exception as e:
+            raise ValidationError(str(e))
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.app_name}.{self.model_name}'

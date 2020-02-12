@@ -4,7 +4,7 @@ from django.db import models
 
 from martor.widgets import AdminMartorWidget
 
-from .models import Intro, TimelineEvent, Prize, Stat
+from .models import Intro, TimelineEvent, Prize, Stat, Count
 
 
 @admin.register(Intro)
@@ -34,3 +34,11 @@ class StatAdmin(ModelAdmin):
         models.TextField: {'widget': AdminMartorWidget},
     }
 
+
+@admin.register(Count)
+class CountAdmin(ModelAdmin):
+    list_display = ['title', 'app_name', 'model_name', 'show']
+    list_editable = ['show']
+    formfield_overrides = {
+        models.TextField: {'widget': AdminMartorWidget},
+    }
