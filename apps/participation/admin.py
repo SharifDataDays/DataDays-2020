@@ -42,7 +42,7 @@ class ParticipantAdmin(admin.ModelAdmin):
 class TeamAdmin(admin.ModelAdmin):
     list_display = ['name', 'team_participants', 'team_badges',
                     'team_finalized', 'contest']
-    search_fields = ['name', 'team_finalized']
+    search_fields = ['name', 'contest', 'finalized']
     sortable_by = ['name', 'contest', 'team_finalized']
     inlines = [TeamTaskInline]
 

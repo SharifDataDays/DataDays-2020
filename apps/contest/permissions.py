@@ -66,9 +66,21 @@ class ProfileCompleted(permissions.BasePermission):
     message = "complete your profile first"
 
     def has_permission(self, request, view):
+        try:
+            contest = Contest.objects.filter(id=view.kwargs['contest_id'])
+        except KeyError:
+            return True
+
+        if contest.count() == 0:
+            return False
+        contest = contest.get()
+
+        if contest.team_size == 1:
+            return True
+
         return hasattr(request.user, 'profile') and \
-                request.user.profile is not None and \
-                request.user.profile.completed()
+            request.user.profile is not None and \
+            request.user.profile.completed()
 
 
 class TeamFinalized(permissions.BasePermission):
