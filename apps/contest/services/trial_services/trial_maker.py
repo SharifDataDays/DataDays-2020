@@ -45,7 +45,7 @@ class TrialMaker:
         valid, errors = validator.validate()
         if not valid:
             return None, errors
-        if not self._has_uncompleted_trial():
+        if self.team_task.trials.filter(submit_time=None).count() == 0:
             try:
                 self.task = self.team_task.task
                 self.trial_recipe = self.task.trial_recipe
@@ -68,7 +68,9 @@ class TrialMaker:
                     self.trial.delete()
                 if self.question_submissions is not None:
                     [qs.delete() for qs in self.question_submissions]
-                self.errors.append('exception')
+                self.errors.append(str(e))
+        else:
+            self.errors.append('The user already has an unsubmitted trial')
         return self.trial, self.errors
 
     def _set_team_task(self):
@@ -80,15 +82,6 @@ class TrialMaker:
             self.errors.append(str(e))
             return
         self.team_task = team_task
-
-    def _has_uncompleted_trial(self):
-        try:
-            existing_trial = self.team_task.trials.get(submit_time=None)
-            self.trial = existing_trial
-            return True
-        except (Trial.DoesNotExist, Trial.MultipleObjectsReturned):
-            self.errors.append('has open trial')
-            return False
 
     def _set_before_selected_questions_ids(self):
         questions = []
