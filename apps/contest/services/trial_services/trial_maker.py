@@ -68,7 +68,8 @@ class TrialMaker:
                     self.trial.delete()
                 if self.question_submissions is not None:
                     [qs.delete() for qs in self.question_submissions]
-        return self.trial, errors
+                self.errors.append('exception')
+        return self.trial, self.errors
 
     def _set_team_task(self):
         team = self.request.user.participant.teams.get(
@@ -86,6 +87,7 @@ class TrialMaker:
             self.trial = existing_trial
             return True
         except (Trial.DoesNotExist, Trial.MultipleObjectsReturned):
+            self.errors.append('has open trial')
             return False
 
     def _set_before_selected_questions_ids(self):
@@ -161,6 +163,13 @@ class TrialValidation:
                                  CONTENT_NOT_FINISHED))
             self.valid = False
 
+    def _unsubmitted_trial_check(self):
+        for ut in self.team_task.trials.filter(submit_time=None,
+                                               due_time__lt=timezone.now()):
+            ut.submit_time = timezone.now()
+            ut.save()
+            judge_trials.delay(ut.pk)
+
     def _trial_cooldown_check(self):
         trials_count = self.team_task.trials.count()
         if trials_count != 0:
@@ -177,13 +186,6 @@ class TrialValidation:
                     _(trial_validation_exception.ErrorMessages.COOLING_DOWN))
                 self.valid = False
 
-    def _unsubmitted_trial_check(self):
-        for ut in self.team_task.trials.filter(submit_time=None,
-                                               due_time__lt=timezone.now()):
-            ut.submit_time = timezone.now()
-            ut.save()
-            judge_trials.delay(ut.pk)
-
     def _trial_count_limit_check(self):
         trials_count = self.team_task.trials.count()
         if trials_count >= self.task.max_trials_count:
@@ -197,3 +199,4 @@ class TrialValidation:
         if now < milestone_start:
             self.errors.append(_(trial_validation_exception.ErrorMessages.
                                  OUT_OF_DATE_RANGE))
+            self.valid = False
