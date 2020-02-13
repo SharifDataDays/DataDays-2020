@@ -57,8 +57,7 @@ class MilestoneAPIView(GenericAPIView):
         milestone = get_object_or_404(contest_models.Milestone,
                                       pk=milestone_id)
         if milestone.contest != contest:
-            raise NotFound(data={'detail':
-                                 'milestone is unrelated to contest'})
+            raise NotFound('milestone is unrelated to contest')
         return contest, milestone
 
     def get(self, request, contest_id, milestone_id):
@@ -86,10 +85,9 @@ class TaskAPIView(GenericAPIView):
                                       pk=milestone_id)
         task = get_object_or_404(contest_models.Task, id=task_id)
         if milestone.contest != contest:
-            raise NotFound(data={'detail':
-                                 'milestone is unrelated to contest'})
+            raise NotFound('milestone is unrelated to contest')
         if task.milestone != milestone:
-            raise NotFound(data={'detail': 'task is unrelated to milestone'})
+            raise NotFound('task is unrelated to milestone')
         return contest, milestone, task
 
     def get(self, request, contest_id, milestone_id, task_id):
@@ -135,12 +133,11 @@ class TrialAPIView(GenericAPIView):
         task = get_object_or_404(contest_models.Task, id=task_id)
         trial = get_object_or_404(contest_models.Trial, id=trial_id)
         if milestone.contest != contest:
-            raise NotFound(data={'detail':
-                                 'milestone is unrelated to contest'})
+            raise NotFound('milestone is unrelated to contest')
         if task.milestone != milestone:
-            raise NotFound(data={'detail': 'task is unrelated to milestone'})
+            raise NotFound('task is unrelated to milestone')
         if trial.team_task.task != task:
-            raise NotFound(data={'detail': 'trial is unrelated to task'})
+            raise NotFound('trial is unrelated to task')
         return contest, milestone, task, trial
 
     def get(self, request, contest_id, milestone_id, task_id, trial_id):
