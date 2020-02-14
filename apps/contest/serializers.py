@@ -1,3 +1,6 @@
+import datetime
+
+from django.utils import timezone
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
@@ -25,8 +28,9 @@ class TrialListSerializer(ModelSerializer):
 class TaskSerializer(ModelSerializer):
     content = DocumentSerializer()
 
-    trials = serializers.SerializerMethodField('get_trials')
+    trials = serializers.SerializerMethodField()
     content_finished = serializers.SerializerMethodField()
+    can_create_trial = serializers.SerializerMethodField()
 
     class Meta:
         model = contest_models.Task
@@ -43,6 +47,23 @@ class TaskSerializer(ModelSerializer):
         if 'team_task' not in self.context:
             return False
         return self.context.get('team_task').content_finished
+
+    def get_can_create_trial(self, obj):
+        if 'team_task' not in self.context:
+            return False
+
+        team_task = self.context.get('team_task')
+        return (
+            team_task.content_finished
+            and
+            team_task.trials.count() < team_task.task.max_trials_count
+            and
+            team_task.trials.filter(submit_time=None).count() == 0
+            and
+            team_task.trials.order_by('submit_time').last()
+            + datetime.timedelta(hours=team_task.task.trial_cooldown)
+            < timezone.now()
+        )
 
 
 class MilestoneSerializer(ModelSerializer):
