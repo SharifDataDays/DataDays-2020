@@ -88,6 +88,9 @@ class TeamFinalized(permissions.BasePermission):
     message = "complete your team for this contest first"
 
     def has_permission(self, request, view):
+        if request.method in ['GET', 'OPTIONS']:
+            return True
+
         try:
             contest = Contest.objects.filter(id=view.kwargs['contest_id'])
         except KeyError:
