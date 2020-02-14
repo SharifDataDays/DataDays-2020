@@ -53,7 +53,7 @@ class TeamAdmin(admin.ModelAdmin):
         return ', '.join((b.text for b in obj.badges.all()))
 
     def team_finalized(self, obj):
-        return '<img src="/static/admin/img/icon-yes.svg" alt="True">'
+        return obj.finalized()
 
 
 @admin.register(participation_models.Invitation)
