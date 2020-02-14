@@ -31,7 +31,7 @@ class TaskSerializer(ModelSerializer):
     class Meta:
         model = contest_models.Task
         fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type',
-                  'trials', 'content_finished']
+                  'trials', 'content_finished', 'max_trials_count']
 
     def get_trials(self, obj):
         if 'team_task' not in self.context:
@@ -160,5 +160,4 @@ class TeamTaskSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.TeamTask
-        fields = ['id', 'contest_finished', 'max_trials_count',
-                  'last_trial_time', 'team', 'task']
+        fields = ['id', 'contest_finished', 'last_trial_time', 'team', 'task']
