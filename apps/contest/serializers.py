@@ -7,6 +7,7 @@ from rest_framework import serializers
 from apps.participation.serializers import TeamSerializer
 from apps.question.serializers import QuestionPolymorphismSerializer
 from apps.question.models import QuestionTypes
+from apps.contest.models import Trial
 from apps.resources.serializers import DocumentSerializer
 
 from . import models as contest_models
@@ -61,8 +62,9 @@ class TaskSerializer(ModelSerializer):
             and
             team_task.trials.filter(submit_time=None).count() == 0
             and
-            (team_task.trials.order_by('submit_time').last().submit_time
-                or datetime.timedelta(hours=0))
+            (team_task.trials.order_by('submit_time').last()
+                or Trial(submit_time=timezone.now())
+             ).submit_time
             + datetime.timedelta(hours=team_task.task.trial_cooldown)
             < timezone.now()
         )
