@@ -73,20 +73,20 @@ class TrialSubmitValidation:
 
     def _common_validations(self, submission):
         if submission.answer and not isinstance(submission.answer, str):
-            self._errors[submission.question_id] = 'answer must be a string'
+            self._errors[submission.id] = 'answer must be a string'
             self._valid = False
 
     def _validate_single_answer(self, submission):
         try:
             answer = literal_eval(submission.answer)
         except ValueError:
-            self._errors[submission.question_id] = \
+            self._errors[submission.id] = \
                 trial_submit_exception.ErrorMessages.\
                 ANSWER_STRING_MUST_BE_A_LIST
             self._valid = False
             return
         if len(answer) >= 2:
-            self._errors[submission.question_id] = \
+            self._errors[submission.id] = \
                 trial_submit_exception.ErrorMessages.SINGLE_ANSWER_ERROR
             self._valid = False
             return
@@ -95,7 +95,7 @@ class TrialSubmitValidation:
             try:
                 int(answer[0])
             except ValueError:
-                self._errors[submission.question_id] = \
+                self._errors[submission.id] = \
                     trial_submit_exception.ErrorMessages.\
                     ANSWER_TYPE_ERROR.format(
                         answer_type)
@@ -104,7 +104,7 @@ class TrialSubmitValidation:
             try:
                 float(answer[0])
             except ValueError:
-                self._errors[submission.question_id] = \
+                self._errors[submission.id] = \
                     trial_submit_exception.ErrorMessages.\
                     ANSWER_TYPE_ERROR.format(
                         answer_type)
@@ -114,7 +114,7 @@ class TrialSubmitValidation:
         try:
             answers = literal_eval(submission.answer)
         except ValueError:
-            self._errors[submission.question_id] = \
+            self._errors[submission.id] = \
                 trial_submit_exception.ErrorMessages.\
                 ANSWER_STRING_MUST_BE_A_LIST
             self._valid = False
@@ -123,7 +123,7 @@ class TrialSubmitValidation:
         answer_count = submission.question.answer_count_limit
         if len(answers) > answer_count:
             self._errors[
-                submission.question_id] = \
+                submission.id] = \
                 trial_submit_exception.ErrorMessages.\
                 MULTI_ANSWER_LIMIT_REACHED_ERROR.format(
                     answer_count)
@@ -134,7 +134,7 @@ class TrialSubmitValidation:
                 try:
                     int(answer)
                 except ValueError:
-                    self._errors[submission.question_id] = \
+                    self._errors[submission.id] = \
                         trial_submit_exception.ErrorMessages.\
                         ANSWER_TYPE_ERROR.format(
                             answer_type)
@@ -144,7 +144,7 @@ class TrialSubmitValidation:
                 try:
                     float(answer)
                 except ValueError:
-                    self._errors[submission.question_id] = \
+                    self._errors[submission.id] = \
                         trial_submit_exception.ErrorMessages.\
                         ANSWER_TYPE_ERROR.format(
                             answer_type)
@@ -155,13 +155,13 @@ class TrialSubmitValidation:
         try:
             label = literal_eval(submission.answer)
         except ValueError:
-            self._errors[submission.question_id] = \
+            self._errors[submission.id] = \
                 trial_submit_exception.ErrorMessages.\
                 ANSWER_STRING_MUST_BE_A_LIST
             self._valid = False
             return
         if len(label) >= 2:
-            self._errors[submission.question_id] = trial_submit_exception.\
+            self._errors[submission.id] = trial_submit_exception.\
                 ErrorMessages.SINGLE_SELECT_ERROR
             self._valid = False
             return
@@ -170,7 +170,7 @@ class TrialSubmitValidation:
         try:
             labels = literal_eval(submission.answer)
         except ValueError:
-            self._errors[submission.question_id] = \
+            self._errors[submission.id] = \
                 trial_submit_exception.ErrorMessages.\
                 ANSWER_STRING_MUST_BE_A_LIST
             self._valid = False
@@ -178,8 +178,7 @@ class TrialSubmitValidation:
         answer_count = submission.question.answer_count_limit
 
         if len(labels) > answer_count:
-            self._errors[
-                submission.question_id] = \
+            self._errors[submission.id] = \
                 trial_submit_exception.ErrorMessages.\
                 MULTI_SELECT_LIMIT_REACHED_ERROR.format(
                 answer_count)
@@ -194,7 +193,7 @@ class TrialSubmitValidation:
             answer_file = self._request._files[str(submission.id)]
         except Exception:
             self._valid = False
-            self._errors[submission.question_id] = \
+            self._errors[submission.id] = \
                 f'file with name {submission.id} does not exists'
             return
         file_format = submission.question.file_format
@@ -203,14 +202,14 @@ class TrialSubmitValidation:
         answer_file_format = os.path.splitext(answer_file.name)[1][1:]
 
         if file_format != answer_file_format:
-            self._errors[submission.question_id] = \
+            self._errors[submission.id] = \
                 trial_submit_exception.ErrorMessages.\
                 INVALID_FILE_FORMAT.format(
                     file_format)
             self._valid = False
             return
         if answer_file.size > file_size_limit * 1024 * 1024:
-            self._errors[submission.question_id] = \
+            self._errors[submission.id] = \
                 trial_submit_exception.ErrorMessages.\
                 FILE_SIZE_LIMIT_EXCEEDED.format(
                     file_size_limit)
@@ -231,13 +230,13 @@ class TrialSubmitValidation:
             answer = eval(submission.answer)
         except ValueError:
             self._errors[
-                submission.question_id] = \
+                submission.id] = \
                 trial_submit_exception.ErrorMessages.\
                 INVALID_LITERALS_FOR_NUMERIC_RANGE
             self._valid = False
             return
         if answer[0] > answer[1]:
-            self._errors[submission.question_id] = \
+            self._errors[submission.id] = \
                 trial_submit_exception.ErrorMessages.INVALID_NUMERIC_RANGE
             self._valid = False
             return
