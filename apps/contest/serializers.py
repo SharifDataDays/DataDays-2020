@@ -62,11 +62,12 @@ class TaskSerializer(ModelSerializer):
             and
             team_task.trials.filter(submit_time=None).count() == 0
             and
-            (team_task.trials.order_by('submit_time').last()
-                or Trial(submit_time=timezone.now())
-             ).submit_time
-            + datetime.timedelta(hours=team_task.task.trial_cooldown)
-            < timezone.now()
+            True
+#            (team_task.trials.order_by('submit_time').last()
+#                or Trial(submit_time=timezone.now())
+#             ).submit_time
+#            + datetime.timedelta(hours=team_task.task.trial_cooldown)
+#            < timezone.now()
         )
 
 
@@ -131,6 +132,7 @@ class QuestionSubmissionSerializer(ModelSerializer):
 class QuestionSubmissionPostSerializer(ModelSerializer):
     id = serializers.ModelField(
         model_field=contest_models.QuestionSubmission()._meta.get_field('id'))
+    answer = serializers.ListField(child=serializers.CharField())
 
     class Meta:
         model = contest_models.QuestionSubmission
@@ -175,7 +177,7 @@ class TrialPostSerializer(ModelSerializer):
         qss = trial.question_submissions.all()
         for qs in self.validated_data['question_submissions']:
             q = qss.get(id=qs['id'])
-            q.answer = qs['answer']
+            q.answer = str(qs['answer'])
             q.save()
 
 

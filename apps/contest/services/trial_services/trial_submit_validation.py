@@ -72,10 +72,9 @@ class TrialSubmitValidation:
                 self._validate_numeric_range(submission)
 
     def _common_validations(self, submission):
-        if submission.answer and not isinstance(submission.answer, list):
-            self._errors[submission.question_id] = 'answer must be a list'
+        if submission.answer and not isinstance(submission.answer, str):
+            self._errors[submission.question_id] = 'answer must be a string'
             self._valid = False
-        submission.answer = str(submission.answer)
 
     def _validate_single_answer(self, submission):
         try:
