@@ -33,7 +33,7 @@ class MyMultiPartParser(BaseParser):
             if 'json' not in data:
                 raise ParseError('Multipart form parse error: json missing!')
             try:
-                data = json.loads(data['json'].replace('null', 'None'))
+                data = json.loads(data['json'])
             except ValueError:
                 raise ParseError('Malformed Json')
             return DataAndFiles(data, files)
