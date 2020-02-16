@@ -62,11 +62,14 @@ class TaskSerializer(ModelSerializer):
             and
             team_task.trials.filter(submit_time=None).count() == 0
             and
-            True
             (team_task.trials.order_by('submit_time').last()
                 or Trial(
-                    submit_time=timezone.now()
-                    - datetime.timedelta(hours=team_task.task.trial_cooldown+1)
+                    submit_time=(
+                        timezone.now()
+                        - datetime.timedelta(
+                            hours=team_task.task.trial_cooldown+1
+                        )
+                    )
                 )
              ).submit_time
             + datetime.timedelta(hours=team_task.task.trial_cooldown)
