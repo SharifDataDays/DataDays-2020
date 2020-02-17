@@ -6,7 +6,7 @@ from typing import Union, List, Tuple
 
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django.core import settings
+from django.conf import settings
 
 from apps.contest.Exceptions import trial_validation_exception
 from apps.contest.models import Trial, TeamTask, QuestionSubmission, Task, \
