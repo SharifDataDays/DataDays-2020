@@ -6,6 +6,7 @@ from typing import Union, List, Tuple
 
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.core import settings
 
 from apps.contest.Exceptions import trial_validation_exception
 from apps.contest.models import Trial, TeamTask, QuestionSubmission, Task, \
@@ -57,10 +58,13 @@ class TrialMaker:
                 self.question_submissions = \
                     self._create_trial_question_submissions()
 
-#                judge_trials.apply_async(
-#                    [self.trial.pk],
-#                    countdown=int(60*60*self.trial.team_task.task.trial_time)
-#                )
+                if not settings.DEBUG:
+                    judge_trials.apply_async(
+                        [self.trial.pk],
+                        countdown=int(
+                            60*60*self.trial.team_task.task.trial_time
+                        )
+                    )
 
             except Exception as e:
                 logging.debug(e)
