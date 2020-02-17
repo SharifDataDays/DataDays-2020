@@ -5,14 +5,21 @@ from django.conf import settings
 
 from rest_framework import status
 
+from apps.contest.models import Contest, Milestone
+
 
 class Scoreboard:
 
     @staticmethod
     def add_milestone(milestone) -> requests.Response:
+        if isinstance(milestone, Contest):
+            m_id = milestone.id
+        elif isinstance(milestone, Milestone):
+            m_id = milestone.contest.id * 1000 + milestone.id
+
         add_milestone_response = requests.post(os.path.join(settings.SCOREBOARD_HOST, 'add_ms'),
                                                json={
-                                                   "ms_id": milestone.id,
+                                                   "ms_id": m_id,
                                                    "ms_name": milestone.title
                                                })
 

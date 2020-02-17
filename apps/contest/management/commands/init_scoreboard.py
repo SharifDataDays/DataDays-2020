@@ -58,12 +58,15 @@ class Command(BaseCommand):
             self._handle_add_milestone(options)
 
     def _handle_init_all(self):
-        milestones = contest_models.Milestone.objects.all()
-        for milestone in milestones:
-            self._add_milestone(milestone)
-            for task in milestone.tasks.all():
-                self._add_task(task)
-                self._add_task_to_milestone(task, milestone)
+        contests = contest_models.Contest.objects.all()
+        for contest in contests:
+            self._add_milestone(contest)
+            milestones = contest_models.Milestone.objects.all()
+            for milestone in milestones:
+                self._add_milestone(milestone)
+                for task in milestone.tasks.all():
+                    self._add_task(task)
+                    self._add_task_to_milestone(task, milestone)
 
     def _handle_add_task_to_milestone(self, options):
         if not options.get('ids') or len(options.get('ids')) != 2:
