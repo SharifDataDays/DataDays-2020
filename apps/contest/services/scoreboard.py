@@ -5,13 +5,13 @@ from django.conf import settings
 
 from rest_framework import status
 
-from apps.contest.models import Contest, Milestone
-
 
 class Scoreboard:
 
     @staticmethod
     def add_milestone(milestone) -> requests.Response:
+
+        from apps.contest.models import Contest, Milestone
         if isinstance(milestone, Contest):
             m_id = milestone.id
         elif isinstance(milestone, Milestone):
@@ -59,6 +59,7 @@ class Scoreboard:
 
     @staticmethod
     def add_task_to_milestone(task, milestone) -> requests.Response:
+        from apps.contest.models import Contest, Milestone
         if isinstance(milestone, Contest):
             m_id = milestone.id
         elif isinstance(milestone, Milestone):
