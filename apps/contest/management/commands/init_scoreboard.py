@@ -67,6 +67,7 @@ class Command(BaseCommand):
                 for task in milestone.tasks.all():
                     self._add_task(task)
                     self._add_task_to_milestone(task, milestone)
+                    self._add_task_to_milestone(task, contest)
 
     def _handle_add_task_to_milestone(self, options):
         if not options.get('ids') or len(options.get('ids')) != 2:

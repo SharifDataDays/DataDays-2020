@@ -21,10 +21,11 @@ class Scoreboard:
                                                json={
                                                    "ms_id": m_id,
                                                    "ms_name": milestone.title
-                                               })
+        })
 
         if add_milestone_response.status_code == status.HTTP_200_OK:
-            print(f'milestone with id {milestone.id} and title {milestone.title} added to Scoreboard')
+            print(
+                f'milestone with id {milestone.id} and title {milestone.title} added to Scoreboard')
         else:
             print(
                 f'Error: Milestone with id {milestone.id} and title {milestone.title} not added to Scoreboard',
@@ -39,9 +40,10 @@ class Scoreboard:
                                           json={
                                               "task_id": task.id,
                                               "task_name": task.topic
-                                          })
+        })
         if add_task_response.status_code == status.HTTP_200_OK:
-            print(f'Task with id "{task.id}" and topic "{task.topic}" added to Scoreboard')
+            print(
+                f'Task with id "{task.id}" and topic "{task.topic}" added to Scoreboard')
         else:
             print(
                 f'Error: Task with id "{task.id}" and topic "{task.topic}" not added to Scoreboard',
@@ -51,18 +53,23 @@ class Scoreboard:
 
     @staticmethod
     def add_task_to_milestone(task, milestone) -> requests.Response:
+        if isinstance(milestone, Contest):
+            m_id = milestone.id
+        elif isinstance(milestone, Milestone):
+            m_id = milestone.contest.id * 1000 + milestone.id
+
         add_task_to_milestone_response = requests.post(os.path.join(settings.SCOREBOARD_HOST, 'add_task_to_milestone'),
                                                        json={
                                                            "task_id": task.id,
-                                                           "ms_id": milestone.id
-                                                       })
+                                                           "ms_id": m_id
+        })
 
         if add_task_to_milestone_response.status_code == status.HTTP_200_OK:
-            print(f'Task with id "{task.id}" attached to Milestone with id "{milestone.id}" in Scoreboard')
+            print(
+                f'Task with id "{task.id}" attached to Milestone with id "{milestone.id}" in Scoreboard')
         else:
             print(
-                f'Error: Task with id "{task.id}" did\'nt attached to Milestone with id "{milestone.id}" in Scoreboard'
-                , f'status code:{add_task_to_milestone_response.status_code}'
+                f'Error: Task with id "{task.id}" did\'nt attached to Milestone with id "{milestone.id}" in Scoreboard', f'status code:{add_task_to_milestone_response.status_code}'
             )
 
         return add_task_to_milestone_response
@@ -74,7 +81,7 @@ class Scoreboard:
                                                   "task_id": task.id,
                                                   "team_name": team.name,
                                                   "score": score
-                                              })
+        })
         if update_score_response.status_code == status.HTTP_200_OK:
             print(f'Team with name "{team.name}" score updated in scoreboard')
         else:
