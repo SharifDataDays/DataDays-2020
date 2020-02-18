@@ -57,7 +57,8 @@ class Command(BaseCommand):
         contests = contest_models.Contest.objects.all()
         for contest in contests:
             self._add_milestone(contest)
-            milestones = contest_models.Milestone.objects.all()
+            milestones = contest_models.Milestone.objects.filter(
+                contest=contest)
             for milestone in milestones:
                 self._add_milestone(milestone)
                 for task in milestone.tasks.all():
