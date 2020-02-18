@@ -82,7 +82,8 @@ class TaskSerializer(ModelSerializer):
             return False
 
         team_task = self.context.get('team_task')
-        return team_task.task.trial_recipe is not None
+        return hasattr(team_task.task, 'trial_recipe') \
+            and team_task.task.trial_recipe is not None
 
 
 class MilestoneSerializer(ModelSerializer):
