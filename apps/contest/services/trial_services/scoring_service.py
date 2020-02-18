@@ -1,6 +1,4 @@
 import ast
-import os
-from typing import List, Tuple
 
 from django.conf import settings
 
@@ -24,12 +22,15 @@ class JudgeTrial:
     def judge_trial(self):
         from apps.contest.models import Score
 
+        self.trial.score = 0
         for question_submission in self.trial.question_submissions.all():
             if not hasattr(question_submission, 'score'):
                 score = Score()
             else:
                 score = question_submission.score
-            JudgeQuestionSubmission(question_submission=question_submission, score=score).judge()
+            JudgeQuestionSubmission(
+                question_submission=question_submission,
+                score=score).judge()
             self.trial.score += score.number
         self.trial.save()
         set_task_score(self.trial)
@@ -37,7 +38,8 @@ class JudgeTrial:
         return self.trial.score
 
     def _update_scoreboard(self):
-        Scoreboard.update_score(task=self.trial.team_task.task, team=self.trial.team_task.team,
+        Scoreboard.update_score(task=self.trial.team_task.task,
+                                team=self.trial.team_task.team,
                                 score=self.trial.team_task.final_score)
 
 
@@ -62,7 +64,8 @@ class JudgeQuestionSubmission:
         from apps.contest.models import ScoreStatusTypes
 
         question = self.question_submission.question
-        answer = ast.literal_eval(self.question_submission.answer.replace("'", '"'))
+        answer = ast.literal_eval(
+            self.question_submission.answer.replace("'", '"'))
 
         def get_path(filename):
             return question.dir_path() + filename
@@ -80,9 +83,14 @@ class JudgeQuestionSubmission:
             print(answer_name, answer)
 
             if isinstance(answer, str):
-                call_function = f'{question.judge_function_name}({answer_name}=\'{answer}\')'
+                call_function = (
+                    f'{question.judge_function_name}({answer_name}'
+                    f'=\'{answer}\')'
+                )
             else:
-                call_function = f'{question.judge_function_name}({answer_name}={answer})'
+                call_function = (
+                    f'{question.judge_function_name}({answer_name}={answer})'
+                )
             score.number = eval(call_function) * question.max_score
             score.status = ScoreStatusTypes.SCORED
             score.info = "Judged Successfully"
@@ -95,9 +103,11 @@ class JudgeQuestionSubmission:
             score.info = 'Judge function runtime error'
 
     def get_parameters(self, question_type, answer):
-        if question_type in [QuestionTypes.SINGLE_ANSWER, QuestionTypes.SINGLE_SELECT]:
+        if question_type in [QuestionTypes.SINGLE_ANSWER,
+                             QuestionTypes.SINGLE_SELECT]:
             return 'answer', answer[0]
-        elif question_type in [QuestionTypes.MULTI_ANSWER, QuestionTypes.MULTI_SELECT]:
+        elif question_type in [QuestionTypes.MULTI_ANSWER,
+                               QuestionTypes.MULTI_SELECT]:
             return 'answers', answer
         elif question_type == QuestionTypes.NUMERIC_RANGE:
             return 'range', answer
