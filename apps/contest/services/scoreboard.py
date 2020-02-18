@@ -16,6 +16,7 @@ class Scoreboard:
             m_id = milestone.id
         elif isinstance(milestone, Milestone):
             m_id = milestone.contest.id * 1000 + milestone.id
+        print(m_id)
 
         add_milestone_response = requests.post(os.path.join(
             settings.SCOREBOARD_HOST, 'add_ms'),
@@ -64,6 +65,7 @@ class Scoreboard:
             m_id = milestone.id
         elif isinstance(milestone, Milestone):
             m_id = milestone.contest.id * 1000 + milestone.id
+        print(m_id)
 
         add_task_to_milestone_response = requests.post(os.path.join(
             settings.SCOREBOARD_HOST, 'add_task_to_milestone'),
