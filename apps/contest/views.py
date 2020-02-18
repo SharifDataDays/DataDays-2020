@@ -108,7 +108,9 @@ class TaskAPIView(GenericAPIView):
         if trial is None:
             return Response(data={'detail': errors},
                             status=status.HTTP_406_NOT_ACCEPTABLE)
-        return Response(data={'detail': 'ok'}, status=status.HTTP_200_OK)
+        return Response(data={'detail': 'ok',
+                              'trial_id': trial.id},
+                        status=status.HTTP_200_OK)
 
     def put(self, request, contest_id, milestone_id, task_id):
         contest, milestone, task = self.check_existance(
