@@ -32,12 +32,13 @@ class TaskSerializer(ModelSerializer):
     trials = serializers.SerializerMethodField()
     content_finished = serializers.SerializerMethodField()
     can_create_trial = serializers.SerializerMethodField()
+    trial_available = serializers.SerializerMethodField()
 
     class Meta:
         model = contest_models.Task
         fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type',
                   'trials', 'content_finished', 'max_trials_count',
-                  'can_create_trial']
+                  'can_create_trial', 'trial_available']
 
     def get_trials(self, obj):
         if 'team_task' not in self.context:
@@ -75,6 +76,13 @@ class TaskSerializer(ModelSerializer):
             + datetime.timedelta(hours=team_task.task.trial_cooldown)
             < timezone.now()
         )
+
+    def get_trial_available(self, obj):
+        if 'team_task' not in self.context:
+            return False
+
+        team_task = self.context.get('team_task')
+        return team_task.task.trial_recipe is not None
 
 
 class MilestoneSerializer(ModelSerializer):
