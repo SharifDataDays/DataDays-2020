@@ -5,7 +5,7 @@ from django.conf import settings
 
 from rest_framework import status
 
-from apps.contest.models import Contest, Milestone
+from apps.contest.models import *
 
 
 class Scoreboard:
