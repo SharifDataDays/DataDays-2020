@@ -122,7 +122,10 @@ def set_task_score(trial) -> None:
     if task.scoring_type == TaskScoringType.FINAL_TRIAL:
         if trial.team_task.final_trial is not None:
             trial.team_task.final_score = trial.score
-            trial.team_task.save()
+        else:
+            trial.team_task.final_score = \
+                max([t.score for t in trial.team_task.trials.all()])
+        trial.team_task.save()
     else:
         trials = list(trial.team_task.trials.all())
         if len(trials) == 0:
