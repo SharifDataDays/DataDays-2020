@@ -69,7 +69,7 @@ class InvitationSerializer(serializers.ModelSerializer):
         current_team_size = team.participants.all().count()
         num_invites = team.invitations.count()
         team_size = team.contest.team_size
-        if not current_team_size + num_invites < team_size:
+        if not current_team_size + num_invites not in [team_size, team_size - 1]:
             raise serializers.ValidationError(
                     'number of team members and open invitations exeeds team size'
                 )
@@ -164,7 +164,8 @@ class TeamSerializer(serializers.ModelSerializer):
         if instance.name_finalized:
             raise serializers.ValidationError('Team info finalized')
         if validated_data.pop('finalize'):
-            if instance.participants.count() != instance.contest.team_size:
+            team_size = instance.contest.team_size
+            if instance.participants.count() not in [team_size, team_size - 1]:
                 raise serializers.ValidationError('can\'t finalize uncompleted team')
             instance.invitations.all().delete()
             Invitation.objects.filter(participant__in=instance.participants.all()).delete()
