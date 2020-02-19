@@ -2,9 +2,11 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
 
-from apps.homepage.models import Intro, TimelineEvent, Prize, Count
-from apps.homepage.serializers import \
-    IntroSerializer, TimelineEventSerializer, PrizeSerializer, CountSerializer
+from apps.homepage.models import Intro, TimelineEvent, Prize, Count, Timer
+from apps.homepage.serializers import (
+    IntroSerializer, TimelineEventSerializer, PrizeSerializer, CountSerializer,
+    TimerSerializer
+)
 
 
 class HomepageView(GenericAPIView):
@@ -20,6 +22,8 @@ class HomepageView(GenericAPIView):
                 'counts': list(CountSerializer(
                     Count.objects.filter(show=True)
                     .order_by('id'), many=True).data)[0:3],
+                'timer': TimerSerializer(
+                    Timer.objects.first()).data
         }
         return Response(data)
 

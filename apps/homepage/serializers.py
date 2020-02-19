@@ -2,7 +2,7 @@ import random
 
 from rest_framework import serializers
 
-from .models import Intro, TimelineEvent, Prize, Stat, Count
+from .models import Intro, TimelineEvent, Prize, Stat, Count, Timer
 
 
 class IntroSerializer(serializers.ModelSerializer):
@@ -46,3 +46,11 @@ class CountSerializer(serializers.ModelSerializer):
             return obj.get_count()
         except Exception:
             return random.randint(200, 500)
+
+
+class TimerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Timer
+        fields = '__all__'
+

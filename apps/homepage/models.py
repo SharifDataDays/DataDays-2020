@@ -66,3 +66,11 @@ class Count(models.Model):
 
     def __str__(self):
         return f'{self.app_name}.{self.model_name}'
+
+
+class Timer(models.Model):
+    title = models.CharField(max_length=200)
+    time = models.DateTimeField()
+
+    def __str__(self):
+        return f'{self.title} {self.time}'
