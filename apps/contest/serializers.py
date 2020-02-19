@@ -44,7 +44,8 @@ class TaskSerializer(ModelSerializer):
         if 'team_task' not in self.context:
             return []
         return [TrialListSerializer(trial, read_only=True).data
-                for trial in self.context.get('team_task').trials.all()]
+                for trial in
+                self.context.get('team_task').trials.all().order_by('id')]
 
     def get_content_finished(self, obj):
         if 'team_task' not in self.context:
