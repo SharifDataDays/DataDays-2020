@@ -50,6 +50,7 @@ class TimerAdmin(ModelAdmin):
     list_display = ['title', 'time']
 
     def save_model(self, request, obj, form, change):
-        if Timer.objects.count() > 0:
+        timer = Timer.objects.all()
+        if (timer.count() == 1 and timer.get() != obj) or timer.count() > 1:
             raise ValidationError('There must be only one timer')
         super(TimerAdmin, self).save_model(request, obj, form, change)
