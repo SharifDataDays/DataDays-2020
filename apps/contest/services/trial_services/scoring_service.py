@@ -23,6 +23,7 @@ class JudgeTrial:
         from apps.contest.models import Score
 
         self.trial.score = 0
+        self.trial.score.save()
         for question_submission in self.trial.question_submissions.all():
             if not hasattr(question_submission, 'score'):
                 score = Score()
