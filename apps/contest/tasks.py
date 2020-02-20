@@ -48,6 +48,8 @@ def judge_trials(trial_pk: int) -> None:
     if trial.submit_time is None:
         trial.submit_time = timezone.now()
         trial.save()
+    trial.score = 0
+    trial.save()
     judge_trial = JudgeTrial(trial=trial)
     judge_trial.judge_trial()
 

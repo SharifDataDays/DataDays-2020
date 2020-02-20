@@ -31,7 +31,7 @@ class ContestListAPIView(GenericAPIView):
 
 class ContestAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasTeam, ProfileCompleted,
-                          ] #TeamFinalized]
+                          ]  # TeamFinalized]
     serializer_class = serializers.ContestSerializer
     queryset = contest_models.Contest.objects.filter(
         start_time__lt=timezone.now()).order_by('order')
@@ -44,7 +44,7 @@ class ContestAPIView(GenericAPIView):
 
 class MilestoneAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasTeam, UserHasTeamTasks,
-                          ProfileCompleted, ] #TeamFinalized]
+                          ProfileCompleted, ]  # TeamFinalized]
     queryset = contest_models.Milestone.objects.filter(
         start_time__lt=timezone.now()).order_by('order')
     serializer_class = serializers.MilestoneSerializer
