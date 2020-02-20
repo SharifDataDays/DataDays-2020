@@ -38,7 +38,7 @@ class StatAdmin(ModelAdmin):
 
 @admin.register(Count)
 class CountAdmin(ModelAdmin):
-    list_display = ['title', 'app_name', 'model_name', 'query', 'get_count',
+    list_display = ['title', 'app_name', 'model_name', 'evall', 'get_count',
                     'show']
     list_editable = ['show']
     formfield_overrides = {
