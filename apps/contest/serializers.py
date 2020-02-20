@@ -38,7 +38,7 @@ class TaskSerializer(ModelSerializer):
         model = contest_models.Task
         fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type',
                   'trials', 'content_finished', 'max_trials_count',
-                  'can_create_trial', 'trial_available']
+                  'can_create_trial', 'trial_available', 'trial_time']
 
     def get_trials(self, obj):
         if 'team_task' not in self.context:
