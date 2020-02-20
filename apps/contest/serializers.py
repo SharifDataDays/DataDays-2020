@@ -23,7 +23,8 @@ class TrialListSerializer(ModelSerializer):
 
     class Meta:
         model = contest_models.Trial
-        fields = ['id', 'score', 'due_time', 'start_time', 'submit_time']
+        fields = ['id', 'score', 'due_time', 'start_time', 'submit_time',
+                  'question_submissions']
 
 
 class TaskSerializer(ModelSerializer):
