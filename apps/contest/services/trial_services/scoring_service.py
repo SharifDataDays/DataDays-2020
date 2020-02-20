@@ -7,7 +7,7 @@ from apps.question.models import QuestionTypes
 
 
 class JudgeException(Exception):
-    ERROR_MESSAGE = 'failed judge, format is wrong'
+    ERROR_MESSAGE = 'Judge Exception'
 
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args)
@@ -97,7 +97,7 @@ class JudgeQuestionSubmission:
             score.info = "Judged Successfully"
         except JudgeException as e:
             score.status = ScoreStatusTypes.FAILED
-            score.info = str(e.ERROR_MESSAGE)
+            score.info = str(e)
         except Exception as e:
             print(e)
             score.status = ScoreStatusTypes.ERROR
