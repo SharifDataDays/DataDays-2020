@@ -19,7 +19,37 @@ class ScoreSerializer(ModelSerializer):
         fields = ['question_submission_id', 'number', 'status', 'info']
 
 
+class QuestionSubmissionSerializer(ModelSerializer):
+    question = QuestionPolymorphismSerializer()
+    score = ScoreSerializer()
+
+    answer = serializers.SerializerMethodField()
+
+    class Meta:
+        model = contest_models.QuestionSubmission
+        fields = ['id', 'question', 'answer', 'score']
+
+    def get_answer(self, obj):
+        if obj.question.type == QuestionTypes.FILE_UPLOAD \
+                and len(eval(obj.answer)) == 1:
+            return ['/media/' + eval(obj.answer)[0]]
+        return obj.answer
+
+
+class QuestionSubmissionPostSerializer(ModelSerializer):
+    id = serializers.ModelField(
+        model_field=contest_models.QuestionSubmission()._meta.get_field('id'))
+    answer = serializers.ListField(child=serializers.CharField())
+
+    class Meta:
+        model = contest_models.QuestionSubmission
+        fields = ['id', 'answer', 'has_file']
+
+
 class TrialListSerializer(ModelSerializer):
+
+    question_submissions = QuestionSubmissionSerializer(read_only=True,
+                                                        many=True)
 
     class Meta:
         model = contest_models.Trial
@@ -127,33 +157,6 @@ class ContestAsAListItemSerializer(ModelSerializer):
         model = contest_models.Contest
         fields = ['id', 'title', 'start_time', 'end_time', 'rules',
                   'description']
-
-
-class QuestionSubmissionSerializer(ModelSerializer):
-    question = QuestionPolymorphismSerializer()
-    score = ScoreSerializer()
-
-    answer = serializers.SerializerMethodField()
-
-    class Meta:
-        model = contest_models.QuestionSubmission
-        fields = ['id', 'question', 'answer', 'score']
-
-    def get_answer(self, obj):
-        if obj.question.type == QuestionTypes.FILE_UPLOAD \
-                and len(eval(obj.answer)) == 1:
-            return ['/media/' + eval(obj.answer)[0]]
-        return obj.answer
-
-
-class QuestionSubmissionPostSerializer(ModelSerializer):
-    id = serializers.ModelField(
-        model_field=contest_models.QuestionSubmission()._meta.get_field('id'))
-    answer = serializers.ListField(child=serializers.CharField())
-
-    class Meta:
-        model = contest_models.QuestionSubmission
-        fields = ['id', 'answer', 'has_file']
 
 
 class TrialSerializer(ModelSerializer):
