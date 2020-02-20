@@ -69,7 +69,7 @@ class InvitationSerializer(serializers.ModelSerializer):
         current_team_size = team.participants.all().count()
         num_invites = team.invitations.count()
         team_size = team.contest.team_size
-        if not current_team_size + num_invites not in [team_size, team_size - 1]:
+        if not current_team_size + num_invites not in [team_size]:
             raise serializers.ValidationError(
                     'number of team members and open invitations exeeds team size'
                 )
