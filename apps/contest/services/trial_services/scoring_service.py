@@ -17,7 +17,6 @@ class JudgeTrial:
 
     def __init__(self, trial):
         self.trial = trial
-        pass
 
     def judge_trial(self):
         from apps.contest.models import Score
