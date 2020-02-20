@@ -51,12 +51,14 @@ class Count(models.Model):
     title = models.CharField(max_length=200)
     app_name = models.CharField(max_length=200)
     model_name = models.CharField(max_length=200)
+    query = models.CharField(max_length=400)
     show = models.BooleanField(default=True)
 
     def get_count(self):
         try:
             exec(f'from apps.{self.app_name} import models as m')
-            return eval(f'm.{self.model_name}.objects.count()')
+            return eval(f'm.{self.model_name}.objects'
+                        f'.filter({self.query}).count()')
         except Exception as e:
             raise ValidationError(str(e))
 
