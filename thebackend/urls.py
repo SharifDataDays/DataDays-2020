@@ -33,6 +33,8 @@ urlpatterns = [
     path('api/participation/', include('apps.participation.urls')),
     path('api/private_files/', include('private_files.urls')),
     path('go/', include('apps.go.urls')),
+    path('api/staff/', include('apps.staff.urls')),
+
 
 ]
 
