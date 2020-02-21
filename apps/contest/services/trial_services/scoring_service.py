@@ -1,4 +1,5 @@
 import ast
+import os
 
 from django.conf import settings
 
@@ -98,9 +99,12 @@ class JudgeQuestionSubmission:
             score.status = ScoreStatusTypes.FAILED
             score.info = f'JudgeExecption: {str(e)}'
         except Exception as e:
-            print(e)
             score.status = ScoreStatusTypes.ERROR
-            score.info = f'RuntimeError: {str(e)}'
+            if question.type == QuestionTypes.FILE_UPLOAD \
+                    and not os.path.exists(answer):
+                score.info = f'RuntimeError: No file\'s been submitted.'
+            else:
+                score.info = f'RuntimeError: {str(e)}'
 
     def get_parameters(self, question_type, answer):
         if question_type in [QuestionTypes.SINGLE_ANSWER,
