@@ -18,11 +18,22 @@ class TeamView(GenericAPIView):
 
 class StaffView(GenericAPIView):
     serializer_class = StaffSerializer
-    queryset = Staff.objects.all()
+    queryset = Staff.objects.all().order_by('order')
 
     def get(self, request):
         try:
             data = StaffSerializer(self.get_queryset(), many=True).data
+            return Response(data)
+        except Staff.DoesNotExist:
+            raise Http404
+
+class SubteamView(GenericAPIView):
+    serializer_class = SubteamSerializer
+    queryset = Subteam.objects.all()
+
+    def get(self, request):
+        try:
+            data = SubteamSerializer(self.get_queryset(), many=True).data
             return Response(data)
         except Staff.DoesNotExist:
             raise Http404

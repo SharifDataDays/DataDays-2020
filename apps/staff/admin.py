@@ -8,9 +8,6 @@ from apps.staff.models import *
 @admin.register(Team)
 class TeamAdmin(ModelAdmin):
     list_display = ['title_fa']
-    formfield_overrides = {
-        models.TextField: {'widget': AdminMartorWidget},
-    }
     pass
 
 
@@ -18,7 +15,9 @@ class TeamAdmin(ModelAdmin):
 class StaffAdmin(ModelAdmin):
     list_display = ['name_fa']
 
-    formfield_overrides = {
-        models.TextField: {'widget': AdminMartorWidget},
-    }
 
+
+@admin.register(Subteam)
+class SubteamAdmin(ModelAdmin):
+    list_display = ['title_fa']
+    pass
