@@ -17,7 +17,6 @@ class JudgeTrial:
 
     def __init__(self, trial):
         self.trial = trial
-        pass
 
     def judge_trial(self):
         from apps.contest.models import Score
@@ -97,11 +96,11 @@ class JudgeQuestionSubmission:
             score.info = "Judged Successfully"
         except JudgeException as e:
             score.status = ScoreStatusTypes.FAILED
-            score.info = str(e)
+            score.info = f'JudgeExecption: {str(e)}'
         except Exception as e:
             print(e)
             score.status = ScoreStatusTypes.ERROR
-            score.info = 'Judge function runtime error'
+            score.info = f'RuntimeError: {str(e)}'
 
     def get_parameters(self, question_type, answer):
         if question_type in [QuestionTypes.SINGLE_ANSWER,
