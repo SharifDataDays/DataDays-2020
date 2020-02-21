@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
-from django.db import models
 from martor.widgets import AdminMartorWidget
 
 from apps.staff.models import *
@@ -8,7 +7,7 @@ from apps.staff.models import *
 
 @admin.register(Team)
 class TeamAdmin(ModelAdmin):
-    list_display = ['title_fa', 'shown']
+    list_display = ['title_fa']
     formfield_overrides = {
         models.TextField: {'widget': AdminMartorWidget},
     }
@@ -17,6 +16,8 @@ class TeamAdmin(ModelAdmin):
 
 @admin.register(Staff)
 class StaffAdmin(ModelAdmin):
+    list_display = ['name_fa']
+
     formfield_overrides = {
         models.TextField: {'widget': AdminMartorWidget},
     }
