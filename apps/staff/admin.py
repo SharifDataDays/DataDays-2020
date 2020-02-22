@@ -1,8 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
-from martor.widgets import AdminMartorWidget
 
-from apps.staff.models import *
+from apps.staff.models import Team, SubTeam, Staff
 
 
 @admin.register(Team)
@@ -16,8 +15,7 @@ class StaffAdmin(ModelAdmin):
     list_display = ['name_fa']
 
 
-
-@admin.register(Subteam)
-class SubteamAdmin(ModelAdmin):
+@admin.register(SubTeam)
+class SubTeamAdmin(ModelAdmin):
     list_display = ['title_fa']
     pass
