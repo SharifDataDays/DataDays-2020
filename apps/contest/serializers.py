@@ -50,12 +50,15 @@ class TrialListSerializer(ModelSerializer):
 
     question_submissions = QuestionSubmissionSerializer(read_only=True,
                                                         many=True)
+    scored = SerializerMethodField()
 
     class Meta:
         model = contest_models.Trial
         fields = ['id', 'score', 'due_time', 'start_time', 'submit_time',
-                  'question_submissions']
+                  'question_submissions', 'scored']
 
+    def get_scored(self, obj):
+        return None in [qs.score for qs in obj.question_submissions.all()]
 
 class TaskSerializer(ModelSerializer):
     content = DocumentSerializer()
