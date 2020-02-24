@@ -30,8 +30,8 @@ class Staff(models.Model):
     title_fa = models.CharField(max_length=50)
     name_en = models.CharField(max_length=50, blank=True)
     name_fa = models.CharField(max_length=50)
-    link = models.URLField(max_length=400)
-    description = models.TextField(max_length=400)
+    link = models.URLField(max_length=400, null=True)
+    description = models.TextField(max_length=400, null=True)
     order = models.IntegerField(default=1, blank=True)
 
     def __str__(self):

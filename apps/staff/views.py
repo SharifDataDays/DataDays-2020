@@ -11,7 +11,7 @@ from apps.staff.serializers import (
 
 class TeamView(GenericAPIView):
     serializer_class = TeamSerializer
-    queryset = Team.objects.all().order_by('order')
+    queryset = Team.objects.all().order_by('id').order_by('order')
 
     def get(self, request):
         try:
