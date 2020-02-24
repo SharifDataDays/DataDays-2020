@@ -27,7 +27,7 @@ class Staff(models.Model):
 
     image = models.ImageField()
     title_en = models.CharField(max_length=50, blank=True)
-    title_fa = models.CharField(max_length=50)
+    title_fa = models.CharField(max_length=50, blank=True)
     name_en = models.CharField(max_length=50, blank=True)
     name_fa = models.CharField(max_length=50)
     link = models.URLField(max_length=400, null=True, blank=True)
