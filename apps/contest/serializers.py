@@ -58,7 +58,9 @@ class TrialListSerializer(ModelSerializer):
                   'question_submissions', 'scored']
 
     def get_scored(self, obj):
-        return None in [qs.score for qs in obj.question_submissions.all()]
+        return False not in \
+            [hasattr(qs, 'score') for qs in obj.question_submissions.all()]
+
 
 class TaskSerializer(ModelSerializer):
     content = DocumentSerializer()
@@ -173,7 +175,8 @@ class TrialSerializer(ModelSerializer):
                   'start_time', 'submit_time', 'scored']
 
     def get_scored(self, obj):
-        return None in [qs.score for qs in obj.question_submissions.all()]
+        return False not in \
+            [hasattr(qs, 'score') for qs in obj.question_submissions.all()]
 
 
 class TrialPostSerializer(ModelSerializer):
