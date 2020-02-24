@@ -14,7 +14,7 @@ class SubTeam(models.Model):
     title_en = models.CharField(max_length=50, blank=True)
     title_fa = models.CharField(max_length=50)
     team = models.ForeignKey(
-        Team, on_delete=models.CASCADE, related_name='subteams',null=True)
+        Team, on_delete=models.CASCADE, related_name='subteams', null=True)
     order = models.IntegerField(default=0)
 
     def __str__(self):
@@ -30,6 +30,8 @@ class Staff(models.Model):
     title_fa = models.CharField(max_length=50)
     name_en = models.CharField(max_length=50, blank=True)
     name_fa = models.CharField(max_length=50)
+    link = models.URLField(max_length=400)
+    description = models.TextField(max_length=400)
     order = models.IntegerField(default=1, blank=True)
 
     def __str__(self):
