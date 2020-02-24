@@ -14,7 +14,7 @@ class SubTeam(models.Model):
     title_en = models.CharField(max_length=50, blank=True)
     title_fa = models.CharField(max_length=50)
     team = models.ForeignKey(
-        Team, on_delete=models.CASCADE, related_name='subteams')
+        Team, on_delete=models.CASCADE, related_name='subteams',null=True)
 
     def __str__(self):
         return '%s' % (self.title_fa)
