@@ -7,7 +7,8 @@ class StaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = Staff
         fields = ['image', 'title_en', 'title_fa',
-                  'name_en', 'name_fa', 'order']
+                  'name_en', 'name_fa', 'order',
+                  'link', 'description']
 
 
 class SubTeamSerializer(serializers.ModelSerializer):
