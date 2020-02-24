@@ -10,19 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='subsection',
-            name='post',
-        ),
         migrations.AddField(
             model_name='subteam',
             name='order',
             field=models.IntegerField(default=0),
-        ),
-        migrations.DeleteModel(
-            name='Section',
-        ),
-        migrations.DeleteModel(
-            name='Subsection',
         ),
     ]
