@@ -22,7 +22,7 @@ class Team(models.Model):
         return participant.teams.get(contest=contest)
 
     def finalized(self):
-        return self.name_finalized and self.participants.count() == self.contest.team_size
+        return self.name_finalized and self.participants.count() in [self.contest.team_size, self.contest.team_size -1]
 
     def __str__(self):
         return self.name
