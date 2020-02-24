@@ -1,7 +1,7 @@
 import datetime
 
 from django.utils import timezone
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from rest_framework import serializers
 
 from apps.participation.serializers import TeamSerializer
@@ -162,11 +162,15 @@ class ContestAsAListItemSerializer(ModelSerializer):
 class TrialSerializer(ModelSerializer):
     question_submissions = QuestionSubmissionSerializer(
         many=True, read_only=True)
+    scored = SerializerMethodField()
 
     class Meta:
         model = contest_models.Trial
         fields = ['id', 'score', 'question_submissions', 'due_time',
-                  'start_time', 'submit_time']
+                  'start_time', 'submit_time', 'scored']
+
+    def get_scored(self, obj):
+        return None in [qs.score for qs in obj.question_submissions.all()]
 
 
 class TrialPostSerializer(ModelSerializer):
