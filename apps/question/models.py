@@ -54,7 +54,7 @@ class QuestionTag(models.Model):
 
 
 class Question(PolymorphicModel):
-    task = models.ForeignKey('contest.Task', related_name='questions', on_delete=None)
+    task = models.ForeignKey('contest.Task', related_name='questions', on_delete=models.DO_NOTHING)
 
     judge_function = models.CharField(max_length=8000)
     judge_function_name = models.CharField(max_length=150, default='function')

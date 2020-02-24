@@ -5,11 +5,11 @@ from django.contrib.auth.models import User
 class Post(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     image = models.ImageField()
-    title_en = models.CharField(max_length=50)
+    title_en = models.CharField(max_length=50,blank=True)
     title_fa = models.CharField(max_length=50)
-    text_en = models.TextField(max_length=10000)
+    text_en = models.TextField(max_length=10000,blank=True)
     text_fa = models.TextField(max_length=10000)
-    description_en = models.TextField(max_length=300)
+    description_en = models.TextField(max_length=300,blank=True)
     description_fa = models.TextField(max_length=300)
     shown = models.BooleanField(default=True)
     def __str__(self):
@@ -34,7 +34,7 @@ class Comment(models.Model):
 class Tag(models.Model):
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name='tags')
-    name_en = models.CharField(max_length=50)
+    name_en = models.CharField(max_length=50,blank=True)
     name_fa = models.CharField(max_length=50)
     color = models.CharField(max_length=20)
 

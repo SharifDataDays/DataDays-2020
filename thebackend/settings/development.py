@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'apps.blog',
     'apps.contest',
     'apps.go',
+    'apps.staff',
     'apps.homepage',
     'apps.notification',
     'apps.participation',
