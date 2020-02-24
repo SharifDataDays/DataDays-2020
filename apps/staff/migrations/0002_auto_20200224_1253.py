@@ -40,16 +40,6 @@ class Migration(migrations.Migration):
                 ('order', models.IntegerField(default=0)),
             ],
         ),
-        migrations.RemoveField(
-            model_name='subsection',
-            name='post',
-        ),
-        migrations.DeleteModel(
-            name='Section',
-        ),
-        migrations.DeleteModel(
-            name='Subsection',
-        ),
         migrations.AddField(
             model_name='subteam',
             name='team',
