@@ -135,4 +135,4 @@ class Command(BaseCommand):
     def _update_all(self):
         for tt in contest_models.TeamTask.objects.all():
             if tt.trials.exclude(submit_time=None).count() > 0:
-                Scoreboard.update_score(tt.task, tt.team, tt.score)
+                Scoreboard.update_score(tt.task, tt.team, tt.final_score)
