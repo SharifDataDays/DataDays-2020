@@ -35,7 +35,11 @@ class Command(BaseCommand):
             action='store_true',
             help='add given milestone to scoreboard'
         )
-
+        parser.add_argument(
+            '--updateall',
+            action='store_true',
+            help='update all teamtasks scores'
+        )
         parser.add_argument(
             'ids',
             nargs='*',
@@ -52,6 +56,8 @@ class Command(BaseCommand):
             self._handle_add_task(options)
         elif options.get('add_milestone'):
             self._handle_add_milestone(options)
+        elif options.get('updateall'):
+            self._update_all()
 
     def _handle_init_all(self):
         contests = contest_models.Contest.objects.all()
@@ -125,3 +131,8 @@ class Command(BaseCommand):
     def _add_task_to_milestone(self, task: contest_models.Task,
                                milestone: contest_models.Milestone) -> None:
         Scoreboard.add_task_to_milestone(task, milestone)
+
+    def _update_all(self):
+        for tt in contest_models.TeamTask.objects.all():
+            if tt.trials.exclude(submit_time=None).count() > 0:
+                Scoreboard.update_score(tt.task, tt.team, tt.score)
