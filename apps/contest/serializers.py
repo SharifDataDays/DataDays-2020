@@ -7,7 +7,7 @@ from rest_framework import serializers
 from apps.participation.serializers import TeamSerializer
 from apps.question.serializers import QuestionPolymorphismSerializer
 from apps.question.models import QuestionTypes
-from apps.contest.models import Trial
+from apps.contest.models import Trial, TeamTask
 from apps.resources.serializers import DocumentSerializer
 
 from . import models as contest_models
@@ -70,11 +70,14 @@ class TaskSerializer(ModelSerializer):
     can_create_trial = serializers.SerializerMethodField()
     trial_available = serializers.SerializerMethodField()
 
+    # Absolute TOF
+    rank = serializers.SerializerMethodField()
+
     class Meta:
         model = contest_models.Task
         fields = ['id', 'topic', 'trial_cooldown', 'content', 'scoring_type',
                   'trials', 'content_finished', 'max_trials_count',
-                  'can_create_trial', 'trial_available', 'trial_time']
+                  'can_create_trial', 'trial_available', 'trial_time', 'rank']
 
     def get_trials(self, obj):
         if 'team_task' not in self.context:
@@ -121,6 +124,19 @@ class TaskSerializer(ModelSerializer):
         team_task = self.context.get('team_task')
         return hasattr(team_task.task, 'trial_recipe') \
             and team_task.task.trial_recipe is not None
+
+    def get_rank(self, obj):
+        if 'team_task' not in self.context:
+            return 'NaN'
+
+        team_task = self.context.get('team_task')
+        try:
+            return sorted([t.final_score for t in
+                           TeamTask.objects.filter(task=team_task.task)
+                           if t.final_score is not None],
+                          reverse=True).index(team_task.final_score) + 1
+        except Exception:
+            return 'NaN'
 
 
 class MilestoneSerializer(ModelSerializer):
