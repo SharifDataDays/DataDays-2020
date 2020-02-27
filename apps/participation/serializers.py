@@ -56,12 +56,15 @@ class InvitationSerializer(serializers.ModelSerializer):
             Participant.objects.create(user=participant_user)
         participant = filtered_users.get().participant
         team = self.context.get('view').request.user.participant.teams.get(contest=contest)
-        if team.finalized():
+        if team.name_finalized and \
+                team.participants.count() == contest.team_size:
             raise serializers.ValidationError(f'your team is finalized')
         participant_team = participant.teams.filter(contest=contest)
         if team in participant.teams.all():
             raise serializers.ValidationError(f'requested user\'s already in team')
-        if participant_team.count() == 1 and participant_team.get().finalized():
+        if participant_team.count() == 1 and \
+                participant_team.get().finalized() and \
+                participant_team.get().participants.count() == contest.team_size:
             raise serializers.ValidationError(f'requested user\'s team is finalized')
         elif participant_team.count() == 0:
             Team.get_team(participant, contest)
