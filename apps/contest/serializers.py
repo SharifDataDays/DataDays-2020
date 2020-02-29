@@ -69,6 +69,7 @@ class TaskSerializer(ModelSerializer):
     content_finished = serializers.SerializerMethodField()
     can_create_trial = serializers.SerializerMethodField()
     trial_available = serializers.SerializerMethodField()
+    trial_released = serializers.SerializerMethodField()
 
     # Absolute TOF
     rank = serializers.SerializerMethodField()
@@ -129,6 +130,18 @@ class TaskSerializer(ModelSerializer):
         team_task = self.context.get('team_task')
         return hasattr(team_task.task, 'trial_recipe') \
             and team_task.task.trial_recipe is not None
+
+    def get_trial_released(self, obj):
+        if 'team_task' not in self.context:
+            return False
+
+        team_task = self.context.get('team_task')
+        return (
+            obj.trial_released
+            or
+            (True in [p.user.is_staff for p in
+                      team_task.team.participants.all()])
+        )
 
     def get_rank(self, obj):
         if 'team_task' not in self.context:
