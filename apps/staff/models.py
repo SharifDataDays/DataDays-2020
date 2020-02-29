@@ -39,14 +39,17 @@ class Staff(models.Model):
     order = models.IntegerField(default=1, blank=True)
     
     def compress_image(self, staff_pic):
-        imageTemproary = Image.open(staff_pic)
-        outputIoStream = BytesIO()
+        tmp_image = Image.open(staff_pic)
+
+        tmp_image = tmp_image.convert('RGB')
         new_width = 300
-        new_height = new_width * imageTemproary.height // imageTemproary.width
-        imageTemproaryResized = imageTemproary.resize((new_width, new_height))
-        imageTemproaryResized.save(outputIoStream, format='JPEG', quality=300)
-        outputIoStream.seek(0)
-        staff_pic = InMemoryUploadedFile(outputIoStream, 'ImageField', "{}.jpg".format(staff_pic.name.split('.')[0]), 'image/jpeg', sys.getsizeof(outputIoStream), None)
+        new_height = new_width * tmp_image.height // tmp_image.width
+        tmp_image = tmp_image.resize((new_width, new_height))
+
+        output_stream = BytesIO()
+        tmp_image.save(output_stream, format='JPEG', quality=300)
+        output_stream.seek(0)
+        staff_pic = InMemoryUploadedFile(output_stream, 'ImageField', "{}.jpg".format(staff_pic.name.split('.')[0]), 'image/jpeg', sys.getsizeof(output_stream), None)
         return staff_pic
 
     def save(self, *args, **kwargs):
