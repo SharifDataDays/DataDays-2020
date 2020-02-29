@@ -50,8 +50,8 @@ class Staff(models.Model):
         return staff_pic
 
     def save(self, *args, **kwargs):
-		if not self.id:
-			self.image = self.compress_image(self.image)
+        if not self.id:
+            self.image = self.compress_image(self.image)
         super(Staff, self).save(*args, **kwargs)
 
     def __str__(self):
