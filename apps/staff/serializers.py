@@ -12,11 +12,17 @@ class StaffSerializer(serializers.ModelSerializer):
 
 
 class SubTeamSerializer(serializers.ModelSerializer):
-    staffs = StaffSerializer(many=True)
+    staffs = serializers.SerializerMethodField()
 
     class Meta:
         model = SubTeam
         fields = ['staffs', 'title_en', 'title_fa', 'order']
+
+    def get_staffs(self, obj):
+        return [
+            StaffSerializer(staff).data
+            for staff in obj.staffs.all().order_by('order')
+        ]
 
 
 class TeamSerializer(serializers.ModelSerializer):
