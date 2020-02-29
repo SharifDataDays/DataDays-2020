@@ -100,8 +100,8 @@ class TaskSerializer(ModelSerializer):
             (
                 team_task.task.trial_released
                 or
-                True in [p.user.is_staff for p in
-                         team_task.team.participants.all()]
+                (True in [p.user.is_staff for p in
+                         team_task.team.participants.all()])
             )
             and
             team_task.content_finished
