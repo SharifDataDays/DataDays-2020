@@ -92,6 +92,8 @@ class Task(models.Model):
 
     order = models.IntegerField(default=0)
 
+    trial_released = models.BooleanField(default=True)
+
     def __str__(self):
         return (
             f'id:{self.id} topic:{self.topic} '

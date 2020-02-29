@@ -127,7 +127,13 @@ class TaskSerializer(ModelSerializer):
 
         team_task = self.context.get('team_task')
         return hasattr(team_task.task, 'trial_recipe') \
-            and team_task.task.trial_recipe is not None
+            and team_task.task.trial_recipe is not None \
+            and (
+                team_task.task.trial_released
+                or
+                True in [p.user.is_staff for p in
+                         team_task.team.participants.all()]
+            )
 
     def get_rank(self, obj):
         if 'team_task' not in self.context:
