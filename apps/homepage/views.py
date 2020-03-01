@@ -21,7 +21,7 @@ class HomepageView(GenericAPIView):
                     Prize.objects.all().order_by('id'), many=True).data,
                 'counts': list(CountSerializer(
                     Count.objects.filter(show=True)
-                    .order_by('id'), many=True).data)[0:3],
+                    .order_by('id'), many=True).data),
                 'timer': TimerSerializer(
                     Timer.objects.first()).data
         }
