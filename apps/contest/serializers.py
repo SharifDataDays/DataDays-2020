@@ -104,7 +104,7 @@ class TaskSerializer(ModelSerializer):
             (
                 team_task.trials.count() < team_task.task.max_trials_count
                 or
-                team_task.tax.max_trials_count == 0
+                team_task.task.max_trials_count == 0
             )
             and
             team_task.trials.filter(submit_time=None).count() == 0
