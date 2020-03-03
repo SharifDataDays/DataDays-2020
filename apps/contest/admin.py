@@ -58,7 +58,7 @@ class MilestoneAdmin(admin.ModelAdmin):
 @admin.register(contest_models.Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = ['id', 'topic', 'trial_cooldown', 'max_trials_count',
-                    'scoring_type']
+                    'scoring_type', 'trial_recipe_id']
     list_editable = ['topic', 'trial_cooldown', 'max_trials_count',
                      'scoring_type']
     sortable_by = ['topic', 'trial_cooldown', 'max_trials_count']
@@ -85,6 +85,7 @@ class TrialAdmin(admin.ModelAdmin):
 
 @admin.register(contest_models.TrialRecipe)
 class TrialRecipeAdmin(admin.ModelAdmin):
+    list_display = ['id', 'task__name']
     inlines = [QuestionRecipeInline]
 
 
