@@ -45,6 +45,8 @@ class Contest(models.Model):
     rules = models.TextField(null=True)
     description = models.TextField(null=True)
 
+    signup_open = models.BooleanField(default=True)
+
     def __str__(self):
         return f'id:{self.id} title:{self.title}'
 

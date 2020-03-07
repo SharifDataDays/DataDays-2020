@@ -24,9 +24,31 @@ class UserHasTeamInContest(permissions.BasePermission):
                 return True
             return False
 
-        has_team = obj in [team.contest for team in request.user.participant.teams.all()]
+        has_team = obj in [team.contest for team in
+                           request.user.participant.teams.all()]
         if not has_team:
-            team = Team.objects.create(contest=obj, name=f'{request.user.username}_{obj.id}')
+            team = Team.objects.create(
+                contest=obj,
+                name=f'{request.user.username}_{obj.id}')
             request.user.participant.teams.add(team)
         return True
 
+
+class SignupOpen(permissions.BasePermission):
+
+    message = "signup closed"
+
+    def has_permission(self, request, view):
+        if request.method in ['GET', 'OPTIONS']:
+            return True
+
+        try:
+            contest = Contest.objects.filter(id=view.kwargs['contest_id'])
+        except KeyError:
+            return True
+
+        if contest.count() == 0:
+            return False
+        contest = contest.get()
+
+        return contest.signup_open

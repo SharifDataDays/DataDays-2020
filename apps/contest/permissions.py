@@ -105,3 +105,23 @@ class TeamFinalized(permissions.BasePermission):
 
         team = request.user.participant.teams.get(contest=contest)
         return team.finalized()
+
+
+class SignupOpen(permissions.BasePermission):
+
+    message = "signup closed"
+
+    def has_permission(self, request, view):
+        if request.method in ['GET', 'OPTIONS']:
+            return True
+
+        try:
+            contest = Contest.objects.filter(id=view.kwargs['contest_id'])
+        except KeyError:
+            return True
+
+        if contest.count() == 0:
+            return False
+        contest = contest.get()
+
+        return contest.signup_open
