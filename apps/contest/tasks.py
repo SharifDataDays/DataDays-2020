@@ -6,7 +6,7 @@ from apps.contest.services.trial_services.scoring_service import \
 from thebackend.celery import app
 
 
-@app.task(name='judge_submissions')
+@app.task(name='judge_submissions', ignore_results=True)
 def judge_submissions(question_submission_pk: int,
                       rejudge_model_pk: int = None) -> None:
     from apps.contest.models import Score, QuestionSubmission, Rejudge
@@ -36,7 +36,7 @@ def judge_submissions(question_submission_pk: int,
         rejudge_model.finished = True
 
 
-@app.task(name='judge_trials')
+@app.task(name='judge_trials', ignore_results=True)
 def judge_trials(trial_pk: int) -> None:
     """ This task judges a single trial
     :param trial_pk:
@@ -54,7 +54,7 @@ def judge_trials(trial_pk: int) -> None:
     judge_trial.judge_trial()
 
 
-@app.task(name='rejudge_trials')
+@app.task(name='rejudge_trials', ignore_results=True)
 def recalculate_trials_scores():
     """ This Task recalculate the score of a
         trial after Updating it's QuestionSubmissions
