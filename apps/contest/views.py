@@ -7,8 +7,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from rest_framework import status
 
-from apps.contest.permissions import \
-    UserHasTeam, UserHasTeamTasks, ProfileCompleted, TeamFinalized
+from apps.contest.permissions import (
+    UserHasTeam, UserHasTeamTasks, ProfileCompleted, TeamFinalized,
+    TrialSubmissionOpen
+)
 from apps.contest.services.trial_services.trial_submit_validation import \
     TrialSubmitValidation
 from apps.contest.tasks import judge_trials
@@ -69,7 +71,7 @@ class MilestoneAPIView(GenericAPIView):
 
 class TaskAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasTeam, UserHasTeamTasks,
-                          ProfileCompleted, TeamFinalized]
+                          ProfileCompleted, TeamFinalized, TrialSubmissionOpen]
     queryset = contest_models.Task.objects.filter(
         milestone__start_time__lt=timezone.now()).order_by('order')
     serializer_class = serializers.TaskSerializer
@@ -124,7 +126,7 @@ class TaskAPIView(GenericAPIView):
 
 class TrialAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, UserHasTeam, UserHasTeamTasks,
-                          ProfileCompleted, TeamFinalized]
+                          ProfileCompleted, TeamFinalized, TrialSubmissionOpen]
     parser_classes = (MyMultiPartParser,)
     serializer_class = serializers.TrialPostSerializer
 

@@ -1,7 +1,7 @@
 from rest_framework import permissions
 
 from apps.participation.models import Team, Participant
-from apps.contest.models import Contest, Milestone, TeamTask
+from apps.contest.models import Contest, Milestone, Task, TeamTask
 
 
 class UserHasTeam(permissions.BasePermission):
@@ -125,3 +125,23 @@ class SignupOpen(permissions.BasePermission):
         contest = contest.get()
 
         return contest.signup_open
+
+
+class TrialSubmissionOpen(permissions.BasePermission):
+
+    message = "submission closed"
+
+    def has_permission(self, request, view):
+        if request.method in ['GET', 'OPTIONS']:
+            return True
+
+        try:
+            task = Task.objects.filter(id=view.kwargs['task_id'])
+        except KeyError:
+            return True
+
+        if task.count() == 0:
+            return False
+        task = task.get()
+
+        return task.submit_open
