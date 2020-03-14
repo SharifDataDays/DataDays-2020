@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'apps.participation',
     'apps.question',
     'apps.resources.apps.ResourcesConfig',
+    'apps.rrank',
     'apps.uploads',
 ]
 
