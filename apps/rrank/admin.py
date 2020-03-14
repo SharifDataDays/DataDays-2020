@@ -6,6 +6,6 @@ from apps.rrank.models import TeamNum
 
 @admin.register(TeamNum)
 class TeamNumAdmin(ModelAdmin):
-    list_display = ['team', 'num']
-    sortable_by = ['team', 'num']
-    readonly_fields = ['team', 'num']
+    list_display = ['team', 'number']
+    sortable_by = ['team', 'number']
+    readonly_fields = ['team', 'number']
