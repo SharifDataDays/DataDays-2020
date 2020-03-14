@@ -1,11 +1,14 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from apps.rrank.models import TeamNum
 from apps.rrank.serializers import TeamNumSerializer
+from apps.rrank.permissions import TeamBelongsToUser
 
 
 class TeamNumView(GenericAPIView):
+    permission_classes = [IsAuthenticated, TeamBelongsToUser]
     queryset = TeamNum.objects.all()
     serializer_class = TeamNumSerializer
 
