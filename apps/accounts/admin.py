@@ -49,6 +49,7 @@ class ProfileAdmin(admin.ModelAdmin, ExportCsvMixin):
         'uni__name',
         'major',
         'bmp',
+        'user__username',
     ]
     list_display = [
         'firstname_en',
