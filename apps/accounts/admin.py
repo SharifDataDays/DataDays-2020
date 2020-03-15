@@ -59,6 +59,7 @@ class ProfileAdmin(admin.ModelAdmin, ExportCsvMixin):
         'uni',
         'major',
         'bmp',
+        'phone_number',
     ]
 
     actions = ['export_as_csv']
