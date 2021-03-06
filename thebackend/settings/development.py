@@ -38,8 +38,6 @@ INSTALLED_APPS = [
     'django_ace',
     'django_extensions',
     'django_rest_passwordreset',
-    'djcelery',
-    'djcelery_email',
     'martor',
     'private_files',
     'request',
