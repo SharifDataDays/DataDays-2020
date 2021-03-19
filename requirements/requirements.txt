@@ -28,7 +28,7 @@ kiwisolver==1.1.0
 kombu==5.0.2
 Markdown==3.1.1
 martor==1.4.4
-Pillow==7.1.0
+Pillow==8.1.1
 PyJWT==1.7.1
 pyparsing==2.4.6
 python-dateutil==2.8.1
@@ -40,4 +40,4 @@ sqlparse==0.3.0
 tornado==5.1.1
 urllib3==1.25.7
 vine==5.0.0
-Pillow==7.1.0
+Pillow==8.1.1
