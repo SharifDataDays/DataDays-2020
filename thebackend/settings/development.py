@@ -46,16 +46,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
 
     'apps.accounts',
-    'apps.blog',
-    'apps.contest',
-    'apps.go',
-    'apps.staff',
     'apps.homepage',
-    'apps.notification',
-    'apps.participation',
-    'apps.question',
-    'apps.resources.apps.ResourcesConfig',
-    'apps.rrank',
     'apps.uploads',
 ]
 
