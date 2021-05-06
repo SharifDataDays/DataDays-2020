@@ -32,7 +32,6 @@ class SignUpView(GenericAPIView):
                     eid=urlsafe_base64_encode(force_bytes(serializer.validated_data['email'])),
                     )
             activate_user_token.save()
-
             context = {
                 'domain': 'datadays.sharif.edu',
                 'eid': activate_user_token.eid,
