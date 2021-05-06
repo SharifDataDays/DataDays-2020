@@ -39,3 +39,4 @@ sqlparse==0.3.0
 tornado==5.1.1
 urllib3==1.25.7
 vine==5.0.0
+psycopg2
