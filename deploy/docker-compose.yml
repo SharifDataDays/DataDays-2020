@@ -1,38 +1,89 @@
-version: '3.3'
+version: '3'
 
 services:
-  thebackend_nginx:
-    image: nginx:latest
-    container_name: thebackend_nginx
+  backend_nginx:
+    image: nginx
+    container_name: nginx
+    network_mode: host
+    volumes:
+      - ./nginx/datadays.conf:/etc/nginx/conf.d/default.conf
+      - ../static/static/:/files/datadays/static/
+      - ../static/media/:/files/datadays/media/
+        # - ./nginx/datadays.conf:/etc/nginx/conf.d/default.conf
+        # - ./nginx/datadays.conf:/etc/nginx/sites-available/datadays
+        #- ./nginx/datadays.conf:/etc/nginx/sites-enabled/datadays
+        #- ./nginx/nginx.conf:/etc/nginx/nginx.conf
+        #- ./nginx/index.html:/usr/share/nginx/html/index.html
+      - /etc/letsencrypt:/etc/letsencrypt
+    depends_on: 
+      - backend_web
+
+  backend_web:
+    build:
+      dockerfile: ./deploy/Dockerfile
+      context: ../
+    container_name: web
+    volumes: 
+      - ../static/static/:/files/datadays/static/
+      - ../static/media/:/files/datadays/media/
+    ports:
+      - 8000:8000
+    command: >
+      bash -c "
+        export DJANGO_SETTINGS_MODULE=thebackend.settings.production;
+        python manage.py collectstatic --noinput;
+        python manage.py makemigrations;                                    
+        python manage.py migrate;
+        gunicorn --workers=4 --bind 0.0.0.0:8000 thebackend.wsgi:application --log-level DEBUG;" 
+    depends_on:
+      - postgres
+
+  rabbit:
+    image: rabbitmq
+    container_name: rabbit
+    hostname: rabbit
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+      - RABBITMQ_DEFAULT_VHOST=/
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rmqdata:/var/lib/rabbitmq
+
+  celery_worker:
+    build: 
+        dockerfile: ./deploy/Dockerfile
+        context: ../  
+    container_name: worker
+    command: sh -c "celery -A thebackend worker -l info -E"
+    depends_on: 
+      - rabbit
+        
+  celery_beat:
+    build: 
+        dockerfile: ./deploy/Dockerfile
+        context: ../  
+    container_name: beat
+    command: sh -c "celery -A thebackend beat -l info"
+    depends_on: 
+      - rabbit
+      - celery_worker
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
     restart: always
     ports:
-      - 80:80
-      - 443:443
+      - 5432:5432
     volumes:
-      - ./static/:/static/
-      - ./media/:/media/
-      - /var/log/thebackend:/var/log/thebackend
-      - /var/log/thebackend/nginx/:/var/log/nginx/
-      - ./deploy/config/nginx/sites-enabled:/etc/nginx/sites-enabled
-      - ./deploy/config/nginx/sites-available:/etc/nginx/sites-available
-      - ./deploy/config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=datadays
+      - POSTGRES_USER=datadaysuser
+      - POSTGRES_PASSWORD=datadayspassword
 
-    depends_on:
-      - thebackend_web
-  thebackend_web:
-    build: .
-    container_name: thebackend_web
-    restart: always
-    command: bash -c "python3 manage.py migrate && python3 manage.py compilemessages && python3 manage.py collectstatic <<< yes && gunicorn -b 0.0.0.0:8000 --workers=4 thebackend.wsgi"
-    volumes:
-      - ./static/:/root/thebackend/static/
-      - ./media/:/root/thebackend/media/
-      - /var/log/thebackend:/var/log/thebackend
-    depends_on:
-      - thebackend_db
-    expose:
-      - 8000
-  thebackend_db:
-    image: postgres:latest
-    container_name: thebackend_db
-    restart: always
+volumes:
+  pgdata:
+  rmqdata:
