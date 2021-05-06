@@ -19,6 +19,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
 
 urlpatterns = [
     path('api/admin/', admin.site.urls),
@@ -36,6 +38,8 @@ urlpatterns = [
     # path('api/staff/', include('apps.staff.urls')),
     # path('api/rrank/', include('apps.rrank.urls')),
 ]
+
+urlpatterns += staticfiles_urlpatterns()
 
 if settings.DEBUG:
     urlpatterns += \
