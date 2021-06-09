@@ -6,7 +6,7 @@ celery==5.0.5
 certifi==2019.11.28
 chardet==3.0.4
 cycler==0.10.0
-Django==2.2.13
+Django==2.2.22
 django-ace==1.0.6
 django-appconf==1.0.3
 django-cors-headers==3.2.0
