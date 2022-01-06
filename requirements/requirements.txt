@@ -2,7 +2,7 @@ amqp==5.0.5
 anyjson==0.3.3
 Babel==2.8.0
 billiard==3.6.3.0
-celery==5.0.5
+celery==5.2.2
 certifi==2019.11.28
 chardet==3.0.4
 cycler==0.10.0
