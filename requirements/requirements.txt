@@ -20,7 +20,7 @@ django-request==1.5.5
 django-reverse-admin==2.7.3
 djangorestframework==3.10.3
 djangorestframework-simplejwt==4.6.0
-flower==0.9.3
+flower==1.2.0
 gunicorn==20.0.4
 idna==2.8
 joblib==0.14.1
